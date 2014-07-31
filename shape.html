@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
         body {
-            font-family: Monospace;
+            font-family: Yahei Consolas;
             background-color: #f0f0f0;
             margin: 0px;
             overflow: hidden;
@@ -127,20 +127,20 @@ function d3threeD(exports) {
                         case 'L':
                         case 'H':
                         case 'V':
-                            nx = (activeCmd === 'V') ? x : eatNum();
-                            ny = (activeCmd === 'H') ? y : eatNum();
-                            path.lineTo(nx, ny);
-                            x = nx;
-                            y = ny;
+                                nx = (activeCmd === 'V') ? x : eatNum();
+                                ny = (activeCmd === 'H') ? y : eatNum();
+                                path.lineTo(nx, ny);
+                                x = nx;
+                                y = ny;
                             break;
                         case 'l':
                         case 'h':
                         case 'v':
-                            nx = (activeCmd === 'v') ? x : (x + eatNum());
-                            ny = (activeCmd === 'h') ? y : (y + eatNum());
-                            path.lineTo(nx, ny);
-                            x = nx;
-                            y = ny;
+                                nx = (activeCmd === 'v') ? x : (x + eatNum());
+                                ny = (activeCmd === 'h') ? y : (y + eatNum());
+                                path.lineTo(nx, ny);
+                                x = nx;
+                                y = ny;
                             break;
                         // - cubic bezier
                         case 'C':
