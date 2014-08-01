@@ -28,13 +28,11 @@
                 scene = new THREE.Scene();
 
                 camera = new THREE.PerspectiveCamera(50,window.innerWidth / window.innerHeight,near,far);
-                camera.position.set(0,0,200);
+                camera.position.set(0,-1200,1200);
+                camera.lookAt( {x:0, y:0, z:0 } );
 
-                group = new THREE.Object3D();
-                group.position.x = 0;
-                group.position.y = 0;
-                group.position.z = 0;
-                scene.add(group);
+                main3dContainer = new THREE.Object3D();
+                scene.add(main3dContainer);
 
                 var light = new THREE.DirectionalLight(0x444444);
                 light.position.set(0.75,0.75,1).normalize();
@@ -44,13 +42,13 @@
                 scene.add(ambientLight);
 
                 var plane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(160,160,10,10),
-                        new THREE.MeshBasicMaterial({color:0x777777,wireframe:true}));
-                plane.rotation.x = Math.PI;
-                group.add(plane);
+                        new THREE.PlaneGeometry(5000,5000,10,10),
+                        new THREE.MeshBasicMaterial({color:0xEEEEEE,wireframe:true}));
+                //plane.rotation.x = Math.PI;
+                main3dContainer.add(plane);
 
                 var svgObject = GimSVGParser.getSVGObject();
-                addGeoObject(group,svgObject);
+                addGeoObject(main3dContainer,svgObject);
             }
 
             var addGeoObject = function (group,svgObject)
@@ -72,10 +70,10 @@
                         simpleShape = simpleShapes[j];
                         shape3d = simpleShape.extrude({amount:amount,bevelEnabled:false});
                         mesh = new THREE.Mesh(shape3d,material);
-                        mesh.rotation.x = Math.PI;
+//                        mesh.rotation.x = Math.PI;
 //                        mesh.translateZ(-amount - 1);
-                        mesh.translateX(-svgObject.center.x);
-                        mesh.translateY(-svgObject.center.y);
+//                        mesh.translateX(-svgObject.center.x);
+//                        mesh.translateY(-svgObject.center.y);
                         group.add(mesh);
                     }
                 }
@@ -107,7 +105,8 @@
             {
                 requestAnimationFrame(animate);
 
-                group.rotation.y += (targetRotation - group.rotation.y) * 0.05;
+//                main3dContainer.rotation.y += (targetRotation - main3dContainer.rotation.y) * 0.05;
+                main3dContainer.rotation.z += (targetRotation - main3dContainer.rotation.z) * 0.05;
                 renderer.render(scene,camera);
                 stats.update();
             }
@@ -116,7 +115,7 @@
             //MAIN///////////////////////////////////////////////////////////////////
 
             var renderer, stats;
-            var scene, camera, group;
+            var scene, camera, main3dContainer;
             var targetRotation = 0;
             var targetRotationOnMouseDown = 0;
             var mouseX = 0;
