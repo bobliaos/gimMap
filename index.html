@@ -42,13 +42,25 @@
                 scene.add(ambientLight);
 
                 var plane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(5000,5000,10,10),
+                        new THREE.PlaneGeometry(2000,2000,20,20),
                         new THREE.MeshBasicMaterial({color:0xEEEEEE,wireframe:true}));
                 //plane.rotation.x = Math.PI;
                 main3dContainer.add(plane);
 
-                var svgObject = GimSVGParser.getSVGObject();
-                addGeoObject(main3dContainer,svgObject);
+                var svgLoader = new XMLHttpRequest();
+                svgLoader.onreadystatechange = function()
+                {
+                    if (svgLoader.readyState==4) {
+                        if (svgLoader.status == 200) {
+                            var svgString = svgLoader.responseText;
+
+                            var svgObject = GimSVGParser.getSVGObject(svgString);
+                            addGeoObject(main3dContainer,svgObject);
+                        }
+                    }
+                }
+                svgLoader.open("GET","assets/SVGTest.svg",false);
+                svgLoader.send(null);
             }
 
             var addGeoObject = function (group,svgObject)
@@ -107,6 +119,7 @@
 
 //                main3dContainer.rotation.y += (targetRotation - main3dContainer.rotation.y) * 0.05;
                 main3dContainer.rotation.z += (targetRotation - main3dContainer.rotation.z) * 0.05;
+//                camera.position.x += (targetRotation) * 5;
                 renderer.render(scene,camera);
                 stats.update();
             }
