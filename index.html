@@ -1,163 +1,28 @@
 <html>
-    <head>
-        <title>HELLO three.js</title>
-        <meta charset="utf-8">
+<head>
+    <title>HELLO three.js</title>
+    <meta charset="utf-8">
 
-        <style type="text/css">
-            canvas {
-                width: 100%;
-                height: 100%
-            }
-        </style>
+    <style type="text/css">
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
 
-        <script type="text/javascript" src="js/three.min.js"></script>
-        <script type="text/javascript" src="js/stats.min.js"></script>
-        <script type="text/javascript" src="js/tween.min.js"></script>
-        <script type="text/javascript" src="js/gim/core/GimSVGParser.js"></script>
-        <script type="text/javascript">
-
-            function init3d()
-            {
-                var near = 1;
-                var far = 10000;
-
-                renderer = new THREE.WebGLRenderer({antialias: true});
-                renderer.setClearColor(0xBBBBBB);
-                renderer.setSize(window.innerWidth, window.innerHeight);
-
-                scene = new THREE.Scene();
-
-                camera = new THREE.PerspectiveCamera(50,window.innerWidth / window.innerHeight,near,far);
-                camera.position.set(0,-1200,1200);
-                camera.lookAt( {x:0, y:0, z:0 } );
-
-                main3dContainer = new THREE.Object3D();
-                scene.add(main3dContainer);
-
-                var light = new THREE.DirectionalLight(0x444444);
-                light.position.set(0.75,0.75,1).normalize();
-                scene.add(light);
-
-                var ambientLight = new THREE.AmbientLight(0x444444);
-                scene.add(ambientLight);
-
-                var plane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(2000,2000,20,20),
-                        new THREE.MeshBasicMaterial({color:0xEEEEEE,wireframe:true}));
-                //plane.rotation.x = Math.PI;
-                main3dContainer.add(plane);
-
-                var svgLoader = new XMLHttpRequest();
-                svgLoader.onreadystatechange = function()
-                {
-                    if (svgLoader.readyState==4) {
-                        if (svgLoader.status == 200) {
-                            var svgString = svgLoader.responseText;
-
-                            var svgObject = GimSVGParser.getSVGObject(svgString);
-                            addGeoObject(main3dContainer,svgObject);
-                        }
-                    }
-                }
-                svgLoader.open("GET","assets/SVGTest.svg",false);
-                svgLoader.send(null);
-            }
-
-            var addGeoObject = function (group,svgObject)
-            {
-                var i, j,len,len1;
-                var path,mesh,color,material,amount,simpleShapes,simpleShape,shape3d, x,toAdd,results=[];
-
-                len = svgObject.pathes.length;
-                for(var i=0;i<len;++i)
-                {
-                    path = GimSVGParser.parse(svgObject.pathes[i]);
-                    color = new THREE.Color(svgObject.colors[i]);
-                    material = new THREE.MeshLambertMaterial({color:color,ambient:color,emissive:color});
-                    amount = svgObject.amounts[i];
-                    simpleShapes = path.toShapes(true);
-                    len1 = simpleShapes.length;
-                    for(var j=0;j<len1;++j)
-                    {
-                        simpleShape = simpleShapes[j];
-                        shape3d = simpleShape.extrude({amount:amount,bevelEnabled:false});
-                        mesh = new THREE.Mesh(shape3d,material);
-//                        mesh.rotation.x = Math.PI;
-//                        mesh.translateZ(-amount - 1);
-//                        mesh.translateX(-svgObject.center.x);
-//                        mesh.translateY(-svgObject.center.y);
-                        group.add(mesh);
-                    }
-                }
-            }
-
-            function onDocumentMouseDown(event)
-            {
-                event.preventDefault();
-
-                document.addEventListener('mousemove',onDocumentMouseMove,false);
-                document.addEventListener('mouseup',onDocumentMouseOut,false);
-                document.addEventListener('mouseout',onDocumentMouseOut,false);
-            }
-
-            function onDocumentMouseMove(event)
-            {
-                mouseX = event.clientX - windowHalfX;
-                targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
-            }
-
-            function onDocumentMouseOut(event)
-            {
-                document.removeEventListener('mousemove',onDocumentMouseMove,false);
-                document.removeEventListener('mouseup',onDocumentMouseOut,false);
-                document.removeEventListener('mouseout',onDocumentMouseOut,false);
-            }
-
-            function animate()
-            {
-                requestAnimationFrame(animate);
-
-//                main3dContainer.rotation.y += (targetRotation - main3dContainer.rotation.y) * 0.05;
-                main3dContainer.rotation.z += (targetRotation - main3dContainer.rotation.z) * 0.05;
-//                camera.position.x += (targetRotation) * 5;
-                renderer.render(scene,camera);
-                stats.update();
-            }
-
-
-            //MAIN///////////////////////////////////////////////////////////////////
-
-            var renderer, stats;
-            var scene, camera, main3dContainer;
-            var targetRotation = 0;
-            var targetRotationOnMouseDown = 0;
-            var mouseX = 0;
-            var mouseXOnMouseDown = 0;
-            var windowHalfX = window.innerWidth * 0.5;
-            var windowHalfY = window.innerHeight * 0.5;
-
-            function init()
-            {
-                var container = document.createElement('div');
-                document.body.appendChild(container);
-
-                init3d();
-
-                container.appendChild(renderer.domElement);
-
-                stats = new Stats();
-                stats.domElement.style.cssText += 'position:absolute;top:0px';
-                container.appendChild(stats.domElement);
-
-                document.addEventListener('mousedown',onDocumentMouseDown,false);
-
-                animate();
-            }
-
-            window.onload = init;
-        </script>
-    </head>
-    <body style="padding: 0;margin: 0">
-        <canvas id="myCanvas" width="500" height="500" style="display: none;position: absolute;top: 120px;left: 20px;background: #105cb6;width: 500px;height: 500px;">不支持CANVAS</canvas>
-    </body>
+    <script type="text/javascript" src="js/three.min.js"></script>
+    <script type="text/javascript" src="js/stats.min.js"></script>
+    <script type="text/javascript" src="js/tween.min.js"></script>
+    <script type="text/javascript" src="js/gim/core/GimSVGParser.js"></script>
+    <script type="text/javascript" src="js/gim/GimMap.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var map = new GimMap(mapContainer);
+        };
+    </script>
+</head>
+<body style="padding: 0;margin: 0">
+    <div id="mapContainer" style="width: 800px;height: 800px;background: #F03;">
+</div>
+</body>
 </html>
