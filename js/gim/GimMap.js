@@ -23,7 +23,7 @@ GimMap = function (domElementContainer) {
         renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setClearColor(0xBBBBBB);
         renderer.setSize(containerWidth, containerHeight);
-        container.appendChild(renderer.domElement);
+        domElementContainer.appendChild(renderer.domElement);
 
         scene = new THREE.Scene();
 
@@ -84,11 +84,21 @@ GimMap = function (domElementContainer) {
 //        document.addEventListener('mousemove',onDocumentMouseMove,false);
 //        document.addEventListener('mouseup',onDocumentMouseOut,false);
 //        document.addEventListener('mouseout',onDocumentMouseOut,false);
-
-        selectUnit3DByPosition(event.clientX,event.clientY);
+        if(event.target.id === "pinCanvas" && event.offsetY < pin.width){
+            console.log("pinCanvas mousedown");
+        }else{
+            selectUnit3DByPosition(event.clientX,event.clientY);
+        }
     }
 
     function selectUnit3DByPosition(mouseX,mouseY){
+        hidePin();
+        if(curSelectedUnit3D){
+            var tweenPre = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1}, 500).easing(TWEEN.Easing.Elastic.Out);
+            tweenPre.start();
+            curSelectedUnit3D = null;
+        }
+
         mouseX = 2 * mouseX / containerWidth - 1;
         mouseY = 1 - 2 * mouseY / containerHeight;
         var vec = new THREE.Vector3(mouseX, mouseY, 0);
@@ -100,14 +110,13 @@ GimMap = function (domElementContainer) {
             for(var key in unit3Ds){
                 var unit3D = unit3Ds[key];
                 if(mesh === unit3D.mesh){
-                    console.log(key);
-                    if(curSelectedUnit3D){
-                        var tweenPre = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1}, 500).easing(TWEEN.Easing.Elastic.Out);
-                        tweenPre.start();
-                        curSelectedUnit3D = null;
-                    }
+                    console.log(key,unit3D.svgData.nodePosition);
                     if(unit3D.svgData.selectable === true){
                         curSelectedUnit3D = unit3D;
+                        var pX = parseFloat(unit3D.svgData.nodePosition.split(",")[0]);
+                        var pY = parseFloat(unit3D.svgData.nodePosition.split(",")[1]);
+                        var wordCoordinate = toScreenCoordinate(pX,- pY);
+                        showPin(wordCoordinate.x,wordCoordinate.y,key);
                         if(curSelectedUnit3D.mesh.scale.z < 1.2){
                             var tweenCur = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.2}, 500).easing(TWEEN.Easing.Elastic.Out);
                             tweenCur.start();
@@ -117,6 +126,16 @@ GimMap = function (domElementContainer) {
                 }
             }
         }
+    }
+
+    function toScreenCoordinate(worldX,worldY){
+        var projector = new THREE.Projector();
+        var worldVector = new THREE.Vector3(worldX + main3dContainer.position.x,worldY,0);
+        var vector = projector.projectVector(worldVector,camera);
+        return {
+            x : Math.round(vector.x * windowHalfX + windowHalfX),
+            y : Math.round(-vector.y * windowHalfY + windowHalfY)
+        };
     }
 
     function onDocumentMouseMove(event) {
@@ -139,20 +158,56 @@ GimMap = function (domElementContainer) {
 //                camera.position.x += (targetRotation) * 5;
         renderer.render(scene, camera);
         stats.update();
-        TWEEN.update()
+        TWEEN.update();
+    }
+
+    function showPin(pinX,pinY,text){
+        pin.style.display = "block";
+        pin.style.left = pinX - pin.width * 0.5 + "px";
+        pin.style.top = pinY - pin.height + "px";
+
+        if(text != undefined){
+            var ctx = pin.getContext("2d");
+            ctx.font="20px Microsoft Yahei";
+            ctx.strokeText(text,10,pin.width * 0.5);
+        }
+    }
+
+    function hidePin(){
+        pin.style.display = "none";
     }
 
     function addStats() {
         stats = new Stats();
         stats.domElement.style.cssText += 'position:absolute;top:0px';
-        container.appendChild(stats.domElement);
+        domElementContainer.appendChild(stats.domElement);
     }
 
-    var container = domElementContainer;
-    container.style.cssText += "overflow: hidden";
+    var pin;
+    function addPin(){
+        pin = document.createElement("canvas");
+        domElementContainer.appendChild(pin);
+        pin.id = "pinCanvas";
+        pin.width = 150;
+        pin.height = 200;
+        pin.style.cssText = "width: " + pin.width + "px;height: " + pin.height + "px;position: absolute;";
+        var pinContext = pin.getContext("2d");
+        pinContext.strokeStyle = "#FFFFFF";
+        pinContext.lineWidth = 3;
+        pinContext.lineJoin="round";
+        pinContext.fillStyle = "#99CC33";
+        pinContext.beginPath();
+        pinContext.arc(pin.width * 0.5,pin.width * 0.5,(pin.width - pinContext.lineWidth) * 0.5,Math.PI * 2 * (3.5 / 12),Math.PI * 2 * (2.5 / 12));
+        pinContext.lineTo(pin.width * 0.5,pin.height - pinContext.lineWidth);
+        pinContext.closePath();
+        pinContext.fill();
+        pinContext.stroke();
+    }
 
+    domElementContainer.style.cssText += "overflow: hidden";
     init3d();
     addStats();
+    addPin();
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     animate();
 }
