@@ -7,27 +7,16 @@ var GimSVGParser = {
     getSVGObject: function (svgString) {
         var p = new DOMParser();
         var xmlObj = p.parseFromString(svgString,"text/xml");
-        var pathes = xmlObj.getElementsByTagName("path");
+        var pathElements = xmlObj.getElementsByTagName("path");
 
-        var obj = {};
-        obj.pathes = [];
-        obj.amounts = [];
-        obj.colors = [];
-        obj.center = {x: 0, y: 0};
-
-        for(var i = 0;i < pathes.length;i ++)
+        var dataObj = {};
+        for(var i = 0;i < pathElements.length;i ++)
         {
-            var path = pathes[i];
-            var pathString = path.getAttribute("d");
-            var fillString = path.getAttribute("fill");
-            var heightString = path.getAttribute("height");
-
-            obj.pathes.push(pathString);
-            obj.amounts.push(heightString);
-            obj.colors.push(fillString);
+            var pathElement = pathElements[i];
+            var unit3D = new GimUnit3D(pathElement);
+            dataObj[unit3D.svgData.nodeId] = unit3D;
         }
-
-        return obj;
+        return dataObj;
     },
 
     parse: function (pathStr) {
@@ -69,8 +58,9 @@ var GimSVGParser = {
                 }
 
                 s = pathStr.substring(sidx, idx);
-                return isFloat ? parseFloat(s) : parseInt(s);
+                break;
             }
+            return isFloat ? parseFloat(s) : parseInt(s);
         }
 
         function nextIsNum() {
@@ -93,7 +83,7 @@ var GimSVGParser = {
                 case 'M':
                     x = eatNum();
                     y = eatNum();
-                    path.moveTo(x, y);
+                    path.moveTo(x, -y);
                     activeCmd = 'L';
                     firstX = x;
                     firstY = y;
@@ -101,7 +91,7 @@ var GimSVGParser = {
                 case 'm':
                     x += eatNum();
                     y += eatNum();
-                    path.moveTo(x, y);
+                    path.moveTo(x, -y);
                     activeCmd = 'L';
                     firstX = x;
                     firstY = y;
@@ -111,14 +101,14 @@ var GimSVGParser = {
                 case 'z':
                     canRepeat = false;
                     if (x !== firstX || y !== firstY)
-                        path.lineTo(firstX, firstY);
+                        path.lineTo(firstX, -firstY);
                     break;
                 case 'L':
                 case 'H':
                 case 'V':
                     nx = (activeCmd === 'V') ? x : eatNum();
                     ny = (activeCmd === 'H') ? y : eatNum();
-                    path.lineTo(nx, ny);
+                    path.lineTo(nx, -ny);
                     x = nx;
                     y = ny;
                     break;
@@ -127,7 +117,7 @@ var GimSVGParser = {
                 case 'v':
                     nx = (activeCmd === 'v') ? x : (x + eatNum());
                     ny = (activeCmd === 'h') ? y : (y + eatNum());
-                    path.lineTo(nx, ny);
+                    path.lineTo(nx, -ny);
                     x = nx;
                     y = ny;
                     break;
@@ -143,7 +133,7 @@ var GimSVGParser = {
                     y2 = eatNum();
                     nx = eatNum();
                     ny = eatNum();
-                    path.bezierCurveTo(x1, y1, x2, y2, nx, ny);
+                    path.bezierCurveTo(x1, -y1, x2, -y2, nx, -ny);
                     x = nx;
                     y = ny;
                     break;
@@ -159,7 +149,7 @@ var GimSVGParser = {
                     y2 = y + eatNum();
                     nx = x + eatNum();
                     ny = y + eatNum();
-                    path.bezierCurveTo(x1, y1, x2, y2, nx, ny);
+                    path.bezierCurveTo(x1, -y1, x2, -y2, nx, -ny);
                     x = nx;
                     y = ny;
                     break;
@@ -173,7 +163,7 @@ var GimSVGParser = {
                     }
                     nx = eatNum();
                     ny = eatNum();
-                    path.quadraticCurveTo(x1, y1, nx, ny);
+                    path.quadraticCurveTo(x1, -y1, nx, -ny);
                     x = nx;
                     y = ny;
                     break;
@@ -187,7 +177,7 @@ var GimSVGParser = {
                     }
                     nx = x + eatNum();
                     ny = y + eatNum();
-                    path.quadraticCurveTo(x1, y1, nx, ny);
+                    path.quadraticCurveTo(x1, -y1, nx, -ny);
                     x = nx;
                     y = ny;
                     break;
@@ -199,9 +189,6 @@ var GimSVGParser = {
                     sf = eatNum();
                     nx = eatNum();
                     ny = eatNum();
-                    if (rx !== ry) {
-                        console.warn("HAHAHA...", rx, ry);
-                    }
                     x1 = Math.cos(xar) * (x - nx) / 2 + Math.sin(xar) * (y - ny) / 2;
                     y1 = -Math.sin(xar) * (x - nx) / 2 + Math.cos(xar) * (y - ny) / 2;
 
@@ -228,7 +215,7 @@ var GimSVGParser = {
                     if (!sf && deltaAng > 0) deltaAng -= Math.PI * 2;
                     if (sf && deltaAng < 0) deltaAng += Math.PI * 2;
 
-                    path.absarc(cx, cy, rx, startAng, startAng + deltaAng, sf);
+                    path.absarc(cx, -cy, rx, startAng, startAng + deltaAng, sf);
                     x = nx;
                     y = ny;
                     break;
