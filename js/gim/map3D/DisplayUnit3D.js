@@ -2,13 +2,13 @@
  * @author bob / http://bobliaos.diandian.com
  * */
 
-var GimUnit3D = function(pathElement){
-    this.svgData = new GimSVGData(pathElement);
+GIM.DisplayUnit3D = function(unitData){
+    this.data = unitData;
 
-    var path = GimSVGParser.parse(this.svgData.d);
-    var color = new THREE.Color(this.svgData.fill);
+    var path = GIM.SVGParser.parse(this.data.d);
+    var color = new THREE.Color(this.data.fill);
     var material = new THREE.MeshLambertMaterial({color:color,ambient:color,emissive:color/*,wireframe:true*/});
-    var height = this.svgData.deep;
+    var height = this.data.deep;
     var simpleShapes = path.toShapes(true);
     var length = simpleShapes.length;
 

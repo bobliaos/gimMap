@@ -2,21 +2,11 @@
  * @author bob / http://bobliaos.diandian.com
  * */
 
-var GimSVGParser = {
+GIM.SVGParser = {
 
-    getSVGObject: function (svgString) {
+    getSVGObject: function (svgString,tagName) {
         var p = new DOMParser();
-        var xmlObj = p.parseFromString(svgString,"text/xml");
-        var pathElements = xmlObj.getElementsByTagName("path");
-
-        var dataObj = {};
-        for(var i = 0;i < pathElements.length;i ++)
-        {
-            var pathElement = pathElements[i];
-            var unit3D = new GimUnit3D(pathElement);
-            dataObj[unit3D.svgData.nodeId] = unit3D;
-        }
-        return dataObj;
+        return p.parseFromString(svgString,"text/xml");
     },
 
     parse: function (pathStr) {

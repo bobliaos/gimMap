@@ -1,6 +1,0 @@
-<placeTypes>
-	<placeType id="1" name="ground" logo=""/>
-	<placeType id="2" name="toilet" logo="xxx.png"/>
-	<placeType id="3" name="shop" logo=""/>
-	<placeType id="4" name="lift" logo="xxx.png"/>
-</placeTypes>
