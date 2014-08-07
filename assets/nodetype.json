@@ -1,0 +1,27 @@
+{
+    "3":{
+	"nodeTypeName":"MACHINE",
+        "nodeTypeId":"3",
+        "nodeTypeLogo":"img/nodetypelogo/machine.png"
+    },
+    "4":{
+	"nodeTypeName":"ESCALATOR",
+        "nodeTypeId":"4",
+        "nodeTypeLogo":"img/nodetypelogo/escalator.png"
+    },
+    "5":{
+	"nodeTypeName":"LIFT",
+        "nodeTypeId":"5",
+        "nodeTypeLogo":"img/nodetypelogo/lift.png"
+    },
+    "6":{
+	"nodeTypeName":"TOILET",
+        "nodeTypeId":"6",
+        "nodeTypeLogo":"img/nodetypelogo/toilet.png"
+    },
+    "7":{
+	"nodeTypeName":"SERVICE",
+        "nodeTypeId":"7",
+        "nodeTypeLogo":"img/nodetypelogo/service.png"
+    }
+}

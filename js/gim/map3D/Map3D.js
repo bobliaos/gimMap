@@ -24,6 +24,7 @@ GIM.Map3D = function (domElementContainer) {
     var floor3Ds = {};
     var curSelectedUnit3D;
 
+    var pathMesh;
     var pathColor = 0xFF0033;
     var machineNodeId = "node_2014_8_5_05:39:48_1798";
     var astarNodes = [];
@@ -42,6 +43,7 @@ GIM.Map3D = function (domElementContainer) {
         camera = new THREE.PerspectiveCamera(60, containerWidth / containerHeight, near, far);
         camera.position.set(500, -1300, 980);
         camera.rotation.x = Math.PI * 0.35;
+//        camera.position.set(0,0,980);
 //        camera.lookAt({x: 0, y: 0, z: 0 });
 
         main3dContainer = new THREE.Object3D();
@@ -98,8 +100,6 @@ GIM.Map3D = function (domElementContainer) {
                         astarNode.bindNodes.push(bindNode);
                 }
             }
-
-            console.log("ALL ASTAR NODES BOUND");
         });
     }
 
@@ -107,7 +107,6 @@ GIM.Map3D = function (domElementContainer) {
 
     }
 
-    var pathMesh;
     function drawPath(vector3Ds){
         var positions = new Float32Array(vector3Ds.length * 3);
         for(var i = 0;i < vector3Ds.length;i ++){
@@ -124,7 +123,7 @@ GIM.Map3D = function (domElementContainer) {
         pathGeometry.computeBoundingSphere();
         var material = new THREE.LineBasicMaterial({color:pathColor});
         pathMesh = new THREE.Line(pathGeometry,material);
-        scene.add(pathMesh);
+        main3dContainer.add(pathMesh);
     }
 
     function onDocumentMouseDown(event) {
@@ -135,7 +134,7 @@ GIM.Map3D = function (domElementContainer) {
         document.addEventListener('mouseout',onDocumentMouseOut,false);
 
         if(pathMesh) {
-            scene.remove(pathMesh);
+            pathMesh.parent.remove(pathMesh);
             pathMesh = null;
         }
 

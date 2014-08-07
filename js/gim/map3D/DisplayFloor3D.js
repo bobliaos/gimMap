@@ -38,6 +38,19 @@ GIM.DisplayUnit3D = function(unitData){
         this.mesh = new THREE.Mesh(shape3d,material);
         this.mesh.displayUnit3D = this;
     }
+    var logoGeometry = new THREE.PlaneGeometry(60,60,1,1);
+
+    if(this.data.nodeTypeId === GIM.NODE_TYPE_SHOP && this.data.bindShopId){
+        var logoTexture = THREE.ImageUtils.loadTexture("assets/img/shoplogo/" + this.data.bindShopId + ".png");
+        var logoMaterial = new THREE.MeshBasicMaterial({map:logoTexture,transparent: true,overdraw:true,antialias:true});
+        var logoMesh = new THREE.Mesh (logoGeometry,logoMaterial);
+//    logoMesh.lookAt(camera.position);
+        this.mesh.add(logoMesh);
+        logoMesh.position.x = this.data.nodePosition.x;
+        logoMesh.position.y = - this.data.nodePosition.y;
+        logoMesh.position.z = parseInt(this.data.deep) + 2;
+    }
+//    else if(this.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR) ...
 
     return this;
 }
