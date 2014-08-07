@@ -5,7 +5,6 @@
 GIM.Map3D = function (domElementContainer) {
     var isDebug = false;
 
-    var currentPositionNodeId = "node_2014_8_5_05:39:48_8279";
     var sourceURL = "assets/data.sgxml";
     var targetRotation = 0;
     var targetRotationOnMouseDown = 0;
@@ -13,8 +12,8 @@ GIM.Map3D = function (domElementContainer) {
     var mouseXOnMouseDown = 0;
     var containerWidth = domElementContainer.clientWidth;
     var containerHeight = domElementContainer.clientHeight;
-    var windowHalfX = window.innerWidth * 0.5;
-    var windowHalfY = window.innerHeight * 0.5;
+    var windowHalfX = containerWidth * 0.5;
+    var windowHalfY = containerHeight * 0.5;
 
     var renderer, stats;
     var scene, camera, main3dContainer;
@@ -22,9 +21,12 @@ GIM.Map3D = function (domElementContainer) {
 
     var meshes = [];
     var sourceSVG;
-    var displayFloors = {};
-    var displayUnit3Ds = {};
+    var floor3Ds = {};
     var curSelectedUnit3D;
+
+    var pathColor = 0xFF0033;
+    var machineNodeId = "node_2014_8_5_05:39:48_1798";
+    var astarNodes = [];
 
     function init3d() {
         var near = 1;
@@ -58,27 +60,51 @@ GIM.Map3D = function (domElementContainer) {
 
         projector = new THREE.Projector();
 
-        GIM.Tools.loadURL(sourceURL,function(sourceString){
+        //load data
+        GIM.SVGParser.loadURL(sourceURL,function(sourceString){
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
 
             var floorElements = sourceSVG.getElementsByTagName('g');
             for(var floorIndex = 0;floorIndex < floorElements.length;floorIndex ++){
                 var floorElement = floorElements[floorIndex];
-                var displayFloor = new GIM.DisplayFloor3D(floorElement);
-                addFloorToContainer(displayFloor);
+                var floor3D = new GIM.DisplayFloor3D(floorElement);
+
+                //add floor
+                floor3Ds[floor3D.data.floorId] = floor3D;
+                floor3D.mesh.position.z = parseInt(floor3D.data.floorId.split("_")[1]) * 500 - 250;
+                main3dContainer.add(floor3D.mesh);
+
+                //merge meshes
+                for (var key in floor3D.subUnit3Ds){
+                    meshes.push(floor3D.subUnit3Ds[key].mesh);
+                }
+
+                //mearge astarnodes
+                for (var key in floor3D.data.unitsData){
+                    var unitData = floor3D.data.unitsData[key];
+                    astarNodes[unitData.nodeId] = unitData.astarNode;
+                }
             }
+
+            //bind all astar nodes
+            for(var nodeId in astarNodes){
+                var astarNode = astarNodes[nodeId];
+                var bindNodeIdsString = astarNode.data.bindNodeIds;
+                var bindNodeIds = bindNodeIdsString.split(',');
+                for (var i in bindNodeIds){
+                    var bindNodeId = bindNodeIds[i];
+                    var bindNode = astarNodes[bindNodeId];
+                    if(bindNode)
+                        astarNode.bindNodes.push(bindNode);
+                }
+            }
+
+            console.log("ALL ASTAR NODES BOUND");
         });
     }
 
-    function addFloorToContainer(displayFloor3D){
-        displayFloors[displayFloor3D.data.floorId] = displayFloor3D;
-        displayFloor3D.unit3DsContainer.position.z = parseInt(displayFloor3D.data.floorId.split("_")[1]) * 500 - 250;
-        main3dContainer.add(displayFloor3D.unit3DsContainer);
-        for (var key in displayFloor3D.displayUnit3Ds){
-            var unit3D = displayFloor3D.displayUnit3Ds[key];
-            displayUnit3Ds[key] = unit3D;
-            meshes.push(unit3D.mesh);
-        }
+    function showFloor(floorId){
+
     }
 
     var pathMesh;
@@ -86,6 +112,8 @@ GIM.Map3D = function (domElementContainer) {
         var positions = new Float32Array(vector3Ds.length * 3);
         for(var i = 0;i < vector3Ds.length;i ++){
             var vector3D = vector3Ds[i];
+            if(!vector3D)
+                console.log("111");
             positions[i * 3] = vector3D.x;
             positions[i * 3 + 1] = - vector3D.y;
             positions[i * 3 + 2] = vector3D.z;
@@ -94,7 +122,7 @@ GIM.Map3D = function (domElementContainer) {
         var pathGeometry = new THREE.BufferGeometry();
         pathGeometry.addAttribute('position',new THREE.BufferAttribute(positions,3));
         pathGeometry.computeBoundingSphere();
-        var material = new THREE.LineBasicMaterial({color:0x0099CC});
+        var material = new THREE.LineBasicMaterial({color:pathColor});
         pathMesh = new THREE.Line(pathGeometry,material);
         scene.add(pathMesh);
     }
@@ -113,12 +141,18 @@ GIM.Map3D = function (domElementContainer) {
 
         if (event.target.id === "pinCanvas" && event.offsetY < pin.width) {
             console.log("pinCanvas mousedown");
+            //find path
             if(curSelectedUnit3D){
-                var vector3Ds = [new THREE.Vector3(0,0,10),new THREE.Vector3(curSelectedUnit3D.data.nodePosition.x,curSelectedUnit3D.data.nodePosition.y,curSelectedUnit3D.mesh.parent.position.z)];
-//                var r = Math.random() * 1000 + 500;
-//                for(var i = 0;i < 100;i ++){
-//                    vector3Ds.push(new THREE.Vector3(Math.random() * r,Math.random() * r,Math.random() * r));
-//                }
+//                var vector3Ds = [new THREE.Vector3(0,0,10),new THREE.Vector3(curSelectedUnit3D.data.nodePosition.x,curSelectedUnit3D.data.nodePosition.y,curSelectedUnit3D.mesh.parent.position.z)];
+                var vector3Ds = [];
+                var pathNodes = GIM.AStar.search(astarNodes,machineNodeId,curSelectedUnit3D.data.nodeId)
+                for (var key in pathNodes){
+                    var pathNode = pathNodes[key];
+                    var floorId = pathNode.data.floorId;
+                    var floor3D = floor3Ds[floorId];
+                    var vector3 = new THREE.Vector3(pathNode.x,pathNode.y,floor3D.mesh.position.z + 15);
+                    vector3Ds.push(vector3);
+                }
                 drawPath(vector3Ds);
             }
         } else {
@@ -142,21 +176,14 @@ GIM.Map3D = function (domElementContainer) {
         var intersects = raycaster.intersectObjects(meshes);
         if (intersects.length > 0) {
             var mesh = intersects[0].object;
-            for (var key in displayUnit3Ds) {
-                var unit3D = displayUnit3Ds[key];
-                if (mesh === unit3D.mesh) {
-                    console.log(key, unit3D.data.nodePosition);
-                    if (unit3D.data.selectable === true) {
-                        curSelectedUnit3D = unit3D;
-                        var wordCoordinate = toScreenCoordinate(unit3D.data.nodePosition.x, - unit3D.data.nodePosition.y,unit3D.mesh.parent.position.z + parseInt(unit3D.data.deep) + 20);
-                        showPin(wordCoordinate.x, wordCoordinate.y, key);
-                        if (curSelectedUnit3D.mesh.scale.z < 1.2) {
-                            var tweenCur = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.2}, 500).easing(TWEEN.Easing.Elastic.Out);
-                            tweenCur.start();
-                        }
-                    }
-                    break;
-                }
+            if(mesh.displayUnit3D && mesh.displayUnit3D.data.selectable){
+                console.log(mesh.displayUnit3D.data.nodeId, mesh.displayUnit3D.data.nodePosition);
+                curSelectedUnit3D = mesh.displayUnit3D;
+                var tweenCur = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.2}, 500).easing(TWEEN.Easing.Elastic.Out);
+                tweenCur.start();
+
+                var wordCoordinate = toScreenCoordinate(curSelectedUnit3D.data.nodePosition.x, - curSelectedUnit3D.data.nodePosition.y,curSelectedUnit3D.mesh.parent.position.z + parseInt(curSelectedUnit3D.data.deep) + 20);
+                showPin(wordCoordinate.x, wordCoordinate.y, curSelectedUnit3D.data.nodeId);
             }
         }
     }

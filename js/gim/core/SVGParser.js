@@ -4,6 +4,20 @@
 
 GIM.SVGParser = {
 
+    loadURL : function(sourceURL,callBackFunc){
+        var svgLoader = new XMLHttpRequest();
+        svgLoader.onreadystatechange = function () {
+            if (svgLoader.readyState == 4) {
+                if (svgLoader.status == 200) {
+                    var svgString = svgLoader.responseText;
+                    callBackFunc(svgString);
+                }
+            }
+        }
+        svgLoader.open("GET", sourceURL, false);
+        svgLoader.send(null);
+    },
+
     getSVGObject: function (svgString,tagName) {
         var p = new DOMParser();
         return p.parseFromString(svgString,"text/xml");
