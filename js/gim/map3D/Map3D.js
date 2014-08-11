@@ -32,6 +32,7 @@ GIM.Map3D = function (domElementContainer) {
     var floorGap = 500;
 
     var pin;
+    var mapPin;
     var floorSelector;
 
     var cameraPosition = {
@@ -168,21 +169,35 @@ GIM.Map3D = function (domElementContainer) {
     }
 
     function drawPath(vector3Ds) {
-        var positions = new Float32Array(vector3Ds.length * 3);
-        for (var i = 0; i < vector3Ds.length; i++) {
-            var vector3D = vector3Ds[i];
-            if (!vector3D)
-                console.log("111");
-            positions[i * 3] = vector3D.x;
-            positions[i * 3 + 1] = -vector3D.y;
-            positions[i * 3 + 2] = vector3D.z;
+        var pathGeometry = new THREE.Geometry();
+        var vector3D;
+        if(false){
+            var spline = new THREE.Spline(vector3Ds);
+            var sub = 12;
+            for (var i = 0;i < vector3Ds.length * sub;i ++){
+                vector3D = spline.getPoint(i / (vector3Ds.length * sub));
+                pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x,- vector3D.y,vector3D.z);
+            }
+        }else{
+            for(var i = 0;i < vector3Ds.length;i ++){
+                vector3D = vector3Ds[i];
+                pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x,- vector3D.y,vector3D.z);
+            }
         }
 
-        var pathGeometry = new THREE.BufferGeometry();
-        pathGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-        pathGeometry.computeBoundingSphere();
-        var material = new THREE.LineBasicMaterial({color: pathColor});
-        pathMesh = new THREE.Line(pathGeometry, material);
+//        for(var key in pathGeometry.vertices){
+//            var point = pathGeometry.vertices[key];
+//            var pointGeometry = new THREE.BoxGeometry(12,12,12);
+//            var pointMaterial = new THREE.MeshBasicMaterial({color:pathColor});
+//            var pointMesh = new THREE.Mesh(pointGeometry,pointMaterial);
+//            container3D.add(pointMesh);
+//            pointMesh.position.x = point.x;
+//            pointMesh.position.y = - point.y;
+//            pointMesh.position.z = point.z;
+//        }
+
+        var pathMaterial = new THREE.LineBasicMaterial({color:pathColor,opacity:0});
+        pathMesh = new THREE.Line(pathGeometry,pathMaterial);
         container3D.add(pathMesh);
     }
 
@@ -310,6 +325,8 @@ GIM.Map3D = function (domElementContainer) {
     }
 
     function addPin() {
+        mapPin = new GIM.MapPin(domElementContainer);
+
         pin = document.createElement("canvas");
         domElementContainer.appendChild(pin);
         pin.id = "pinCanvas";
