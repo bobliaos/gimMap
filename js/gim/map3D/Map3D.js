@@ -31,7 +31,6 @@ GIM.Map3D = function (domElementContainer) {
     var astarNodes = [];
     var floorGap = 500;
 
-    var pin;
     var mapPin;
     var floorSelector;
 
@@ -213,7 +212,7 @@ GIM.Map3D = function (domElementContainer) {
             pathMesh = null;
         }
 
-        if (event.target.id === "pinCanvas" && event.offsetY < pin.width) {
+        if (event.target.id === "pinCanvas" && event.offsetY < mapPin.width) {
             console.log("pinCanvas mousedown");
             //find path
             if (curSelectedUnit3D) {
@@ -234,7 +233,8 @@ GIM.Map3D = function (domElementContainer) {
     }
 
     function selectUnit3DByPosition(mouseX, mouseY) {
-        hidePin();
+//        hidePin();
+        mapPin.close();
 
         if (curSelectedUnit3D) {
             var tweenPre = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1,x: 1,y: 1}, 500).easing(TWEEN.Easing.Elastic.Out);
@@ -257,7 +257,8 @@ GIM.Map3D = function (domElementContainer) {
                 tweenCur.start();
 
                 var wordCoordinate = toScreenCoordinate(curSelectedUnit3D.data.nodePosition.x, -curSelectedUnit3D.data.nodePosition.y, curSelectedUnit3D.mesh.parent.position.z + parseInt(curSelectedUnit3D.data.deep) + 20);
-                showPin(wordCoordinate.x, wordCoordinate.y, curSelectedUnit3D.data.nodeId);
+//                showPin(wordCoordinate.x, wordCoordinate.y, curSelectedUnit3D.data.nodeId);
+                mapPin.open(wordCoordinate.x, wordCoordinate.y)
             }
         }
     }
@@ -302,21 +303,21 @@ GIM.Map3D = function (domElementContainer) {
         TWEEN.update();
     }
 
-    function showPin(pinX, pinY, text) {
-        pin.style.display = "block";
-        pin.style.left = pinX - pin.width * 0.5 + "px";
-        pin.style.top = pinY - pin.height + "px";
+//    function showPin(pinX, pinY, text) {
+//        pin.style.display = "block";
+//        pin.style.left = pinX - pin.width * 0.5 + "px";
+//        pin.style.top = pinY - pin.height + "px";
+//
+//        if (text != undefined) {
+//            var ctx = pin.getContext("2d");
+//            ctx.font = "20px Microsoft Yahei";
+//            ctx.strokeText(text, 10, pin.width * 0.5);
+//        }
+//    }
 
-        if (text != undefined) {
-            var ctx = pin.getContext("2d");
-            ctx.font = "20px Microsoft Yahei";
-            ctx.strokeText(text, 10, pin.width * 0.5);
-        }
-    }
-
-    function hidePin() {
-        pin.style.display = "none";
-    }
+//    function hidePin() {
+//        pin.style.display = "none";
+//    }
 
     function addStats() {
         stats = new Stats();
@@ -327,23 +328,23 @@ GIM.Map3D = function (domElementContainer) {
     function addPin() {
         mapPin = new GIM.MapPin(domElementContainer);
 
-        pin = document.createElement("canvas");
-        domElementContainer.appendChild(pin);
-        pin.id = "pinCanvas";
-        pin.width = 150;
-        pin.height = 200;
-        pin.style.cssText = "width: " + pin.width + "px;height: " + pin.height + "px;position: absolute;";
-        var pinContext = pin.getContext("2d");
-        pinContext.strokeStyle = "#FFFFFF";
-        pinContext.lineWidth = 3;
-        pinContext.lineJoin = "round";
-        pinContext.fillStyle = "#99CC33";
-        pinContext.beginPath();
-        pinContext.arc(pin.width * 0.5, pin.width * 0.5, (pin.width - pinContext.lineWidth) * 0.5, Math.PI * 2 * (3.5 / 12), Math.PI * 2 * (2.5 / 12));
-        pinContext.lineTo(pin.width * 0.5, pin.height - pinContext.lineWidth);
-        pinContext.closePath();
-        pinContext.fill();
-        pinContext.stroke();
+//        pin = document.createElement("canvas");
+//        domElementContainer.appendChild(pin);
+//        pin.id = "pinCanvas";
+//        pin.width = 150;
+//        pin.height = 200;
+//        pin.style.cssText = "width: " + pin.width + "px;height: " + pin.height + "px;position: absolute;";
+//        var pinContext = pin.getContext("2d");
+//        pinContext.strokeStyle = "#FFFFFF";
+//        pinContext.lineWidth = 3;
+//        pinContext.lineJoin = "round";
+//        pinContext.fillStyle = "#99CC33";
+//        pinContext.beginPath();
+//        pinContext.arc(pin.width * 0.5, pin.width * 0.5, (pin.width - pinContext.lineWidth) * 0.5, Math.PI * 2 * (3.5 / 12), Math.PI * 2 * (2.5 / 12));
+//        pinContext.lineTo(pin.width * 0.5, pin.height - pinContext.lineWidth);
+//        pinContext.closePath();
+//        pinContext.fill();
+//        pinContext.stroke();
     }
 
     function addFloorSelector() {
