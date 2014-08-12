@@ -1,3 +1,5 @@
+Size : 1040 * 1440
+
 ServiceLogos
 FindPathBetweenTwoFloors
 FloorSelector

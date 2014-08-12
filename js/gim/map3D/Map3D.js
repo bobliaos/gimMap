@@ -27,7 +27,7 @@ GIM.Map3D = function (domElementContainer) {
 
     var pathMesh;
     var pathColor = 0xFF0033;
-    var machineNodeId = "node_2014_8_7_12:17:01_1094";
+    var machineNodeId = "node_2014_8_12_02:55:12_2154";
     var astarNodes = [];
     var floorGap = 500;
 
@@ -75,7 +75,7 @@ GIM.Map3D = function (domElementContainer) {
         var far = 10000;
 
         renderer = new THREE.WebGLRenderer({antialias: true});
-        renderer.setClearColor(0xBBBBBB);
+        renderer.setClearColor(0xFFFFFF);
         renderer.setSize(containerWidth, containerHeight);
         domElementContainer.appendChild(renderer.domElement);
 
@@ -84,8 +84,8 @@ GIM.Map3D = function (domElementContainer) {
         container3D = new THREE.Object3D();
         scene.add(container3D);
 
-        var light = new THREE.DirectionalLight(0x222222);
-        light.position.set(0, 1, 1).normalize();
+        var light = new THREE.DirectionalLight(0x2B2B2B);
+        light.position.set(0, -0.5, 1).normalize();
         scene.add(light);
 
         if (isDebug) {
@@ -97,18 +97,21 @@ GIM.Map3D = function (domElementContainer) {
 
         projector = new THREE.Projector();
 
+        mapPin = new GIM.MapPin(domElementContainer);
+
         GIM.SVGParser.loadURL(sourceURL, function (sourceString) {
             addFloorSelector();
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
             var floorElements = sourceSVG.getElementsByTagName('g');
-            for (var floorIndex = 0; floorIndex < floorElements.length; floorIndex++) {
+            for (var floorIndex = floorElements.length - 1; floorIndex >= 0; floorIndex--) {
                 var floorElement = floorElements[floorIndex];
                 var floor3D = new GIM.DisplayFloor3D(floorElement);
 
                 floor3Ds[floor3D.data.floorId] = floor3D;
                 container3D.add(floor3D.mesh);
 
-                addFloorLogo(floor3D.data.floorId); //should be logo URL of floor
+//                addFloorLogo(floor3D.data.floorId); //should be logo URL of floor
+                addFloorLogo(floor3D.data.floorId,"assets/img/floorlogo/" + floor3D.data.floorId + ".png"); //should be logo URL of floor
 
                 for (var key in floor3D.subUnit3Ds) {
                     var pushMesh = floor3D.subUnit3Ds[key].mesh;
@@ -145,10 +148,22 @@ GIM.Map3D = function (domElementContainer) {
         });
     }
 
-    function showFloors(floorIds) {
+    function showFloors(floorIds,doAnimate) {
+        doAnimate = doAnimate === undefined ? true : doAnimate;
+
+        for(var key in floorLogoImages){
+            floorLogoImages[key].style.border = "0px solid #FF0000";
+            floorLogoImages[key].style.opacity = 0.4;
+            if(floorIds.indexOf(floorLogoImages[key].id) > -1){
+                floorLogoImages[key].style.opacity = 1;
+                floorLogoImages[key].style.border = "1px solid #FF0000";
+            }
+        }
+
         for (var key in floor3Ds) {
             var floor3D = floor3Ds[key];
             floor3D.mesh.visible = false;
+            floor3D.mesh.position.x = - 3000;
         }
 
         for (var key in floorIds) {
@@ -159,15 +174,22 @@ GIM.Map3D = function (domElementContainer) {
                 floor3D.mesh.position.z = parseInt(key) * floorGap + 200;
                 floor3D.mesh.position.x = 400;
                 floor3D.mesh.scale.x = floor3D.mesh.scale.y = floor3D.mesh.scale.z = 0.1;
-                var tween = new TWEEN.Tween(floor3D.mesh.scale).to({x: 1,y:1,z:1}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100);
-                tween.start();
-                var tween = new TWEEN.Tween(floor3D.mesh.position).to({x: 0,y:0,z:parseInt(key) * floorGap}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100);
-                tween.start();
+
+                if(doAnimate){
+                    new TWEEN.Tween(floor3D.mesh.scale).to({x: 1,y:1,z:1}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100).start();
+                    new TWEEN.Tween(floor3D.mesh.position).to({x: 0,y:0,z:parseInt(key) * floorGap}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100).start();
+                }else{
+                    floor3D.mesh.scale.x = floor3D.mesh.scale.y = floor3D.mesh.scale.z = 1;
+                    floor3D.mesh.position.x = floor3D.mesh.position.y = 0;
+                    floor3D.mesh.position.z = parseInt(key) * floorGap;
+                }
             }
         }
     }
 
     function drawPath(vector3Ds) {
+        showFloors(["floor3","floor2"],false);
+
         var pathGeometry = new THREE.Geometry();
         var vector3D;
         if(false){
@@ -212,10 +234,10 @@ GIM.Map3D = function (domElementContainer) {
             pathMesh = null;
         }
 
-        if (event.target.id === "pinCanvas" && event.offsetY < mapPin.width) {
-            console.log("pinCanvas mousedown");
+        if (event.target.id === "gotoImage" && event.offsetY < mapPin.width) {
             //find path
             if (curSelectedUnit3D) {
+                console.log("- [GimMap] findPath to Shop",curSelectedUnit3D.data.bindShopId);
                 var vector3Ds = [];
                 var pathNodes = GIM.AStar.search(astarNodes, machineNodeId, curSelectedUnit3D.data.nodeId)
                 for (var key in pathNodes) {
@@ -233,7 +255,6 @@ GIM.Map3D = function (domElementContainer) {
     }
 
     function selectUnit3DByPosition(mouseX, mouseY) {
-//        hidePin();
         mapPin.close();
 
         if (curSelectedUnit3D) {
@@ -251,9 +272,9 @@ GIM.Map3D = function (domElementContainer) {
         if (intersects.length > 0) {
             var mesh = intersects[0].object;
             if (mesh.displayUnit3D && mesh.displayUnit3D.data.selectable) {
-                console.log(mesh.displayUnit3D.data.nodeId, mesh.displayUnit3D.data.nodePosition);
+                console.log("- [GimMap] select node",mesh.displayUnit3D.data.nodeId);
                 curSelectedUnit3D = mesh.displayUnit3D;
-                var tweenCur = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.2,x:curSelectedUnit3D.mesh.isLogo ? 1.2:1,y:curSelectedUnit3D.mesh.isLogo ? 1.2:1}, 500).easing(TWEEN.Easing.Elastic.Out);
+                var tweenCur = new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.4,x:curSelectedUnit3D.mesh.isLogo ? 1.2:1,y:curSelectedUnit3D.mesh.isLogo ? 1.2:1}, 500).easing(TWEEN.Easing.Elastic.Out);
                 tweenCur.start();
 
                 var wordCoordinate = toScreenCoordinate(curSelectedUnit3D.data.nodePosition.x, -curSelectedUnit3D.data.nodePosition.y, curSelectedUnit3D.mesh.parent.position.z + parseInt(curSelectedUnit3D.data.deep) + 20);
@@ -290,7 +311,7 @@ GIM.Map3D = function (domElementContainer) {
         if (isDebug) {
 //            camera.rotation.x += (targetRotation - camera.rotation.x) * 0.05;
 //            container3D.rotation.z += (targetRotation - container3D.rotation.x) * 0.05;
-            cameraPosition.distance += (targetRotation);
+//            cameraPosition.distance += (targetRotation);
         }
 
         for (var key in logoOnlyMeshes){
@@ -303,73 +324,41 @@ GIM.Map3D = function (domElementContainer) {
         TWEEN.update();
     }
 
-//    function showPin(pinX, pinY, text) {
-//        pin.style.display = "block";
-//        pin.style.left = pinX - pin.width * 0.5 + "px";
-//        pin.style.top = pinY - pin.height + "px";
-//
-//        if (text != undefined) {
-//            var ctx = pin.getContext("2d");
-//            ctx.font = "20px Microsoft Yahei";
-//            ctx.strokeText(text, 10, pin.width * 0.5);
-//        }
-//    }
-
-//    function hidePin() {
-//        pin.style.display = "none";
-//    }
-
     function addStats() {
         stats = new Stats();
         stats.domElement.style.cssText += 'position:absolute;top:0px';
         domElementContainer.appendChild(stats.domElement);
     }
 
-    function addPin() {
-        mapPin = new GIM.MapPin(domElementContainer);
-
-//        pin = document.createElement("canvas");
-//        domElementContainer.appendChild(pin);
-//        pin.id = "pinCanvas";
-//        pin.width = 150;
-//        pin.height = 200;
-//        pin.style.cssText = "width: " + pin.width + "px;height: " + pin.height + "px;position: absolute;";
-//        var pinContext = pin.getContext("2d");
-//        pinContext.strokeStyle = "#FFFFFF";
-//        pinContext.lineWidth = 3;
-//        pinContext.lineJoin = "round";
-//        pinContext.fillStyle = "#99CC33";
-//        pinContext.beginPath();
-//        pinContext.arc(pin.width * 0.5, pin.width * 0.5, (pin.width - pinContext.lineWidth) * 0.5, Math.PI * 2 * (3.5 / 12), Math.PI * 2 * (2.5 / 12));
-//        pinContext.lineTo(pin.width * 0.5, pin.height - pinContext.lineWidth);
-//        pinContext.closePath();
-//        pinContext.fill();
-//        pinContext.stroke();
-    }
-
     function addFloorSelector() {
         floorSelector = document.createElement("div");
         domElementContainer.appendChild(floorSelector);
-        floorSelector.style.cssText = "width:120px;position:absolute;top:60px;left:0px";
+        floorSelector.style.cssText = "width:120px;position:absolute;top:120px;left:0px";
     }
 
-    function addFloorLogo(logoURL) {
-        var floorLogo = document.createElement("div");
-        floorSelector.appendChild(floorLogo);
-        floorLogo.style.cssText = "width:100%;height:20px;background:#DDD;cursor:pointer;margin-bottom:2px;";
-        floorLogo.innerHTML = logoURL;
-        floorLogo.id = logoURL;
-        floorLogo.addEventListener('mousedown', function (event) {
-            var floorId = event.currentTarget.id;
-            if (floorId == "floor_1") showFloors([floorId]);
-            else showFloors(["floor_1", "floor_2"]);
+    var floorLogoImages = [];
+    function addFloorLogo(floorId,logoURL) {
+        var floorLogoContainer = document.createElement("div");
+        floorSelector.appendChild(floorLogoContainer);
+        floorLogoContainer.style.cssText = "width:120px;height:80px;";
+
+        var floorLogoImage = new Image();
+        floorLogoImages.push(floorLogoImage);
+        floorLogoImage.src = logoURL;
+        floorLogoImage.width = 120;
+        floorLogoImage.id = floorId;
+        floorLogoImage.style.cssText = "margin-bottom:20px;opacity:0.3";
+        floorLogoContainer.appendChild(floorLogoImage);
+        floorLogoImage.addEventListener('mousedown', function (event) {
+            event.currentTarget.style.opacity = 1;
+            var targetfloorId = event.currentTarget.id;
+            showFloors([targetfloorId]);
         });
     }
 
     domElementContainer.style.cssText += "overflow: hidden";
     init3d();
     addStats();
-    addPin();
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     animate();
 }

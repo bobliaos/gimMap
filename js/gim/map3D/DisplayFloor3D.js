@@ -48,6 +48,41 @@ GIM.DisplayUnit3D = function (unitData) {
         if(isLogo) logoMesh.position.z = 30;
     }
 
+    function addText(text){
+        var textCanvas = document.createElement("canvas");
+        textCanvas.width = 70;
+        textCanvas.height = 22;
+        textCanvas.style.cssText = "width:"+textCanvas.width+"px;height:"+textCanvas.height+"px;background:#FF0000;margin:2px";
+
+        var textCTX = textCanvas.getContext("2d");
+        textCTX.font = "20px Microsoft Yahei";
+        textCTX.fillStyle = "#000";
+        textCTX.fillText(text,0,17);
+//        document.body.appendChild(textCanvas);
+
+        var textGeometry = new THREE.PlaneGeometry(textCanvas.width,textCanvas.height,1,1);
+        var textTexture = new THREE.Texture(textCanvas);
+        textTexture.needsUpdate = true;
+        var textMaterial = new THREE.MeshBasicMaterial({map:textTexture,transparent:true});
+        var textMesh = new THREE.Mesh(textGeometry,textMaterial);
+        textMesh.position.x = unitData.nodePosition.x;
+        textMesh.position.y = - unitData.nodePosition.y;
+        textMesh.position.z = parseInt(unitData.deep) + 2;
+        if(tmpMesh) tmpMesh.add(textMesh);
+        else tmpMesh = textMesh;
+
+//        pin.style.display = "block";
+//        pin.style.left = pinX - pin.width * 0.5 + "px";
+//        pin.style.top = pinY - pin.height + "px";
+//
+//        if (text != undefined) {
+//            var ctx = pin.getContext("2d");
+//            ctx.font = "20px Microsoft Yahei";
+//            ctx.strokeText(text, 10, pin.width * 0.5);
+//        }
+//    }
+    }
+
     switch (unitData.nodeTypeId) {
         case GIM.NODE_TYPE_ASTAR:
             break;
@@ -59,7 +94,9 @@ GIM.DisplayUnit3D = function (unitData) {
         case GIM.NODE_TYPE_SHOP:
             addMesh();
             if (unitData.bindShopId) {
-                addLogo("assets/img/shoplogo/" + unitData.bindShopId + ".png");
+//                addLogo("assets/img/shoplogo/" + unitData.bindShopId + ".png");
+//                addLogo("assets/img/shoplogo/9.png");
+                addText(unitData.bindShopId);
             }
             break;
         case GIM.NODE_TYPE_MACHINE:
