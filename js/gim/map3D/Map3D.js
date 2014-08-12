@@ -166,30 +166,37 @@ GIM.Map3D = function (domElementContainer) {
             floor3D.mesh.position.x = - 3000;
         }
 
+        var preFloorId = null;
+        var preFloor3D = null;
         for (var key in floorIds) {
             var floorId = floorIds[key];
             var floor3D = floor3Ds[floorId];
             if (floor3D) {
+                if(preFloorId === null){
+                    preFloorId = parseInt(floorId.substr(5,1));
+                    preFloor3D = floor3D;
+                    floor3D.mesh.position.z = 0;
+                }else{
+                    preFloor3D.mesh.position.z = floorGap * 0.5 * (preFloorId > parseInt(floorId.substr(5,1)) ? 1 : -1);
+                    floor3D.mesh.position.z = floorGap * 0.5 * (preFloorId > parseInt(floorId.substr(5,1)) ? -1 : 1);
+                }
+
                 floor3D.mesh.visible = true;
-                floor3D.mesh.position.z = parseInt(key) * floorGap + 200;
                 floor3D.mesh.position.x = 400;
                 floor3D.mesh.scale.x = floor3D.mesh.scale.y = floor3D.mesh.scale.z = 0.1;
 
                 if(doAnimate){
                     new TWEEN.Tween(floor3D.mesh.scale).to({x: 1,y:1,z:1}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100).start();
-                    new TWEEN.Tween(floor3D.mesh.position).to({x: 0,y:0,z:parseInt(key) * floorGap}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100).start();
+                    new TWEEN.Tween(floor3D.mesh.position).to({x: 0}, 800).easing(TWEEN.Easing.Elastic.Out).delay(parseInt(key) * 100).start();
                 }else{
                     floor3D.mesh.scale.x = floor3D.mesh.scale.y = floor3D.mesh.scale.z = 1;
                     floor3D.mesh.position.x = floor3D.mesh.position.y = 0;
-                    floor3D.mesh.position.z = parseInt(key) * floorGap;
                 }
             }
         }
     }
 
     function drawPath(vector3Ds) {
-        showFloors(["floor3","floor2"],false);
-
         var pathGeometry = new THREE.Geometry();
         var vector3D;
         if(false){
@@ -238,6 +245,12 @@ GIM.Map3D = function (domElementContainer) {
             //find path
             if (curSelectedUnit3D) {
                 console.log("- [GimMap] findPath to Shop",curSelectedUnit3D.data.bindShopId);
+
+                mapPin.close();
+                var startFloorId = astarNodes[machineNodeId].data.floorId;
+                var endFloorId = curSelectedUnit3D.data.floorId;
+                showFloors(startFloorId === endFloorId ? [startFloorId] : [startFloorId,endFloorId],false);
+
                 var vector3Ds = [];
                 var pathNodes = GIM.AStar.search(astarNodes, machineNodeId, curSelectedUnit3D.data.nodeId)
                 for (var key in pathNodes) {
