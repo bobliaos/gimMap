@@ -358,10 +358,9 @@ GIM.Map3D = function (domElementContainer) {
             if (mesh.displayUnit3D && mesh.displayUnit3D.data.selectable) {
                 console.log("- [GimMap] select node", mesh.displayUnit3D.data.nodeId);
                 curSelectedUnit3D = mesh.displayUnit3D;
-                new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.4, x: curSelectedUnit3D.mesh.isLogo ? 1.2 : 1, y: curSelectedUnit3D.mesh.isLogo ? 1.2 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
-
                 var wordCoordinate = toScreenCoordinate(curSelectedUnit3D.data.nodePosition.x, -curSelectedUnit3D.data.nodePosition.y, curSelectedUnit3D.mesh.parent.position.z + parseInt(curSelectedUnit3D.data.deep) + 20);
-                mapPin.open(wordCoordinate.x, wordCoordinate.y, findShopLogoURL(curSelectedUnit3D.data.bindShopId))
+                mapPin.open(wordCoordinate.x, wordCoordinate.y, findShopLogoURL(curSelectedUnit3D.data.bindShopId));
+                new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1.4, x: curSelectedUnit3D.mesh.isLogo ? 1.2 : 1, y: curSelectedUnit3D.mesh.isLogo ? 1.2 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
             }
         }
     }

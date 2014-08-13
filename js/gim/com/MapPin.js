@@ -72,10 +72,14 @@ GIM.MapPin = function (parentContainer) {
             this.radius = 10;
             this.alpha = 0.3;
             this.rotation = - Math.PI * 2;
-            TWEEN.removeAll();
+            TWEEN.remove(this);
+            TWEEN.remove(this.gotoImage.style);
+            TWEEN.remove(this.searchImage.style);
+            this.gotoImage.style.display = this.searchImage.style.display = "none";
+            this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
             new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 600).easing(TWEEN.Easing.Back.Out).onComplete(function(){
-                this.gotoImage.style.display = this.searchImage.style.display = "block";
                 this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
+                this.gotoImage.style.display = this.searchImage.style.display = "block";
                 new TWEEN.Tween(this.gotoImage.style).to({opacity:1},300).start();
                 new TWEEN.Tween(this.searchImage.style).to({opacity:1},300).start();
             }).start();
