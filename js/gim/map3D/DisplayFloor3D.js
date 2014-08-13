@@ -29,7 +29,7 @@ GIM.DisplayUnit3D = function (unitData) {
         var shape3d = path.toShapes(true)[0].extrude({amount: unitData.deep * 0.8, bevelEnabled: false});
 
         var color = new THREE.Color(unitData.fill);
-        var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color/*,wireframe:true*/});
+        var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color/*, opacity: 0.5, transparent: true,wireframe:true*/});
 
         tmpMesh = new THREE.Mesh(shape3d, material);
     }
@@ -114,6 +114,9 @@ GIM.DisplayUnit3D = function (unitData) {
         case GIM.NODE_TYPE_SERVICE:
             addLogo("assets/img/nodetypelogo/service.png",true);
             break;
+        case GIM.NODE_TYPE_ATM:
+            addLogo("assets/img/nodetypelogo/atm.png",true);
+            break;
         default :
             break;
     }
@@ -128,6 +131,18 @@ GIM.DisplayUnit3D = function (unitData) {
 }
 
 GIM.NodeTypes = {
+
+//    GIM.NODE_TYPE_ASTAR 		= "0";
+//    GIM.NODE_TYPE_GROUND 		= "1";
+//    GIM.NODE_TYPE_SHOP 		    = "2";
+//    GIM.NODE_TYPE_MACHINE		= "3";
+//    GIM.NODE_TYPE_ESCALATOR 	= "4";
+//    GIM.NODE_TYPE_LIFT 		    = "5";
+//    GIM.NODE_TYPE_STAIRS        = "6";
+//    GIM.NODE_TYPE_TOILET		= "7";
+//    GIM.NODE_TYPE_SERVICE		= "8";
+//    GIM.NODE_TYPE_ATM   		= "9";
+
     "3": {
         "nodeTypeName": "MACHINE",
         "nodeTypeId": "3",
@@ -144,13 +159,23 @@ GIM.NodeTypes = {
         "nodeTypeLogo": "img/nodetypelogo/lift.png"
     },
     "6": {
-        "nodeTypeName": "TOILET",
+        "nodeTypeName": "STAIRS",
         "nodeTypeId": "6",
-        "nodeTypeLogo": "img/nodetypelogo/toilet.png"
+        "nodeTypeLogo": ""
     },
     "7": {
+        "nodeTypeName": "TOILET",
+        "nodeTypeId": "7",
+        "nodeTypeLogo": "img/nodetypelogo/toilet.png"
+    },
+    "8": {
         "nodeTypeName": "SERVICE",
         "nodeTypeId": "7",
         "nodeTypeLogo": "img/nodetypelogo/service.png"
+    },
+    "9": {
+        "nodeTypeName": "ATM",
+        "nodeTypeId": "7",
+        "nodeTypeLogo": "img/nodetypelogo/atm.png"
     }
 }

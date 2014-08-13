@@ -32,8 +32,8 @@ GIM.AStar = {
                 if(curNode === endNode){
                     break;
                 }else{
-                    for (var key in curNode.bindNodes){
-                        var bindNode = curNode.bindNodes[key];
+                    for (var i = 0;i < curNode.bindNodes.length;i ++){
+                        var bindNode = curNode.bindNodes[i];
                         if(closeList.indexOf(bindNode) < 0){
                             bindNode.g = calculateDistance(startNode,endNode);
                             bindNode.h = calculateDistance(bindNode,endNode);

@@ -10,6 +10,8 @@ GIM.MapPin = function (parentContainer) {
     var pin = {
         width: 220,
         height: 180,
+        pinRadius: 57,
+        maxRadius: 98,
         container: document.createElement("div"),
         menuCanvas: document.createElement("canvas"),
         pinCanvas: document.createElement("canvas"),
@@ -44,7 +46,9 @@ GIM.MapPin = function (parentContainer) {
             this.logoImage.onload = function(event){
                 var left = (this.bindPin.width - event.currentTarget.naturalWidth) * 0.5;
                 var top = (this.bindPin.height - event.currentTarget.naturalHeight) * 0.5;
-                this.bindPin.logoCanvas.style.cssText = "position:absolute;top:" + top + "px;left:" + left + "px;";
+                this.bindPin.logoCanvas.style.cssText = "position:absolute;top:" + top + "px;left:" + left + "px;display:block";
+                this.bindPin.updateDisplay();
+                console.log(this.bindPin.logoCanvas.style.cssText);
             }
 
             this.gotoImage.src = "assets/img/mappin/goto.png";
@@ -53,25 +57,23 @@ GIM.MapPin = function (parentContainer) {
             this.searchImage.style.cssText = "top: 68px;position: absolute;left: 170px;";
         },
         _isOpenning: false,
-        open: function (x, y) {
+        open: function (x, y, shopLogoURL) {
             this._isOpenning = true;
 
-            this.logoImage.src = "";
-            this.logoImage.src = "assets/img/shoplogo/"+parseInt(Math.random() * 11)+".png";
-//            this.logoImage.src = "http://a3.att.hudong.com/37/20/01300000484892126216205973483.jpg";
+            if(shopLogoURL === "") shopLogoURL = GIM.DEFAULT_SHOP_LOGO_URL;
+            else shopLogoURL = "http://" + shopLogoURL;
+            this.logoImage.src = shopLogoURL;
+            console.log("- [GimMap]MapPin.open:",shopLogoURL,this.logoImage.src);
 
             this.container.style.display = "block";
-            this.container.style.left = x - this.width * 0.5;
-            this.container.style.top = y - this.height;
-            //tween radius (0->MaxRadius);visible = true;
+            this.container.style.left = (x - this.width * 0.5) + "px";
+            this.container.style.top = (y - this.height) + "px";
 
             this.radius = 10;
             this.alpha = 0.3;
-//            this.rotation = Math.PI * (Math.random() * 2 - 1);
             this.rotation = - Math.PI * 2;
-//            this.rotation = 0;
+            TWEEN.removeAll();
             new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 600).easing(TWEEN.Easing.Back.Out).onComplete(function(){
-//            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 600).easing(TWEEN.Easing.Elastic.InOut).onComplete(function(){
                 this.gotoImage.style.display = this.searchImage.style.display = "block";
                 this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
                 new TWEEN.Tween(this.gotoImage.style).to({opacity:1},300).start();
@@ -80,15 +82,14 @@ GIM.MapPin = function (parentContainer) {
         },
         close: function () {
             this._isOpenning = false;
-
+            this.logoImage.src = "";
+            this.logoCanvas.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
             new TWEEN.Tween(this).to({alpha: 0, rotation: Math.PI * 2, radius: 10}, 400).easing(TWEEN.Easing.Back.In).onComplete(function () {
                 if (!this._isOpenning)
                     this.container.style.display = "none";
             }).start();
         },
-        pinRadius: 57,
-        maxRadius: 98,
         _radius: 100,
         set radius(value) {
             this._radius = value > this.maxRadius ? this.maxRadius : value;
@@ -161,17 +162,17 @@ GIM.MapPin = function (parentContainer) {
             pinCanvasCTX.fill();
             pinCanvasCTX.closePath();
 
-            var t = 1;
+            var rate = 1;
             if(this.pinRadius > this._radius){
-                t = this._radius / this.pinRadius;
+                rate = this._radius / this.pinRadius;
             }
 
-            this.logoCanvas.style.top = (centerY - this.pinRadius * t + 3) + "px";
+            this.logoCanvas.style.top = (centerY - this.pinRadius * rate + this.pinRadius - this.logoImage.height * 0.5 + 1.5) + "px";
             var logoRadius = (tmpRadius > this.pinRadius ? this.pinRadius : tmpRadius) - 3;
             if(logoRadius < 0) logoRadius = 0;
             logoCanvasCTX.beginPath();
             logoCanvasCTX.arc(this.logoImage.width * 0.5, logoRadius , logoRadius, Math.PI * 0, Math.PI * 2);
-            var pat = logoCanvasCTX.createPattern(this.logoImage, "repeat-y");
+            var pat = logoCanvasCTX.createPattern(this.logoImage, "no-repeat");
             logoCanvasCTX.fillStyle = pat;
             logoCanvasCTX.fill();
             logoCanvasCTX.closePath();

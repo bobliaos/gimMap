@@ -6,6 +6,8 @@
     <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/stats.min.js"></script>
     <script type="text/javascript" src="js/tween.min.js"></script>
+    <script type="text/javascript" src="js/jquery.js"></script>
+
 
     <script type="text/javascript" src="js/gim/GIM.js"></script>
     <script type="text/javascript" src="js/gim/core/SVGParser.js"></script>
@@ -17,12 +19,14 @@
     <script type="text/javascript">
         window.onload = function () {
             var map = new GIM.Map3D(mapContainer);
+            GIM.navitateTo("607");
         };
     </script>
 </head>
 <body style="padding: 0;margin: 0">
     <!--<div id="mapContainer" style="width: 1040px;height: 1440px;background: #F03;">-->
-    <div id="mapContainer" style="width: 1040px;height: 720px;background: #F03;">
+    <div style="background: #0099CC;width: 1040px;height: 360px"></div>
+    <div id="mapContainer" style="width: 1040px;height: 1440px;">
     <!--<div id="mapContainer" style="width: 520px;height: 720px;background: #F03;">-->
     </div>
 </body>
