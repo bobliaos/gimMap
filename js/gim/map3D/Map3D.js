@@ -441,7 +441,7 @@ GIM.Map3D = function (domElementContainer) {
                 var unit3D = floor3D.subUnit3Ds[nodeId];
                 if (unit3D.data.nodeTypeId === nodeTypeId) {
                     unit3D.mesh.scale.x = unit3D.mesh.scale.y = unit3D.mesh.scale.z = 1.5;
-                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1, z: 1}, 800).easing(TWEEN.Easing.Elastic.Out).repeat(3).start();
+                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1, z: 1}, 600).easing(TWEEN.Easing.Elastic.Out).repeat(3).start();
                 }
             }
         }

@@ -1,3 +1,7 @@
+
+
+http://terms.rongyi.com/suning_legoushi/terminals/53e09e8721232f697d000002/activities
+
 //    GIM.NODE_TYPE_ASTAR 		= "0";
 //    GIM.NODE_TYPE_GROUND 	= "1";
 //    GIM.NODE_TYPE_SHOP 		= "2";
