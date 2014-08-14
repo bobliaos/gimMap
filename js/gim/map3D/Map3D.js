@@ -5,7 +5,6 @@
 GIM.Map3D = function (domElementContainer) {
     var isDebug = false;
 
-    var sourceURL = "assets/data.sgxml";
     var targetRotation = 0;
     var targetRotationOnMouseDown = 0;
     var mouseX = 0;
@@ -76,6 +75,7 @@ GIM.Map3D = function (domElementContainer) {
         var far = 10000;
 
         renderer = new THREE.WebGLRenderer({antialias: true});
+//        renderer = new THREE.CanvasRenderer({antialias: true});
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
         renderer.setSize(containerWidth, containerHeight);
         domElementContainer.appendChild(renderer.domElement);
@@ -85,7 +85,7 @@ GIM.Map3D = function (domElementContainer) {
         container3D = new THREE.Object3D();
         scene.add(container3D);
 
-        var light = new THREE.DirectionalLight(0x2B2B2B);
+        var light = new THREE.DirectionalLight(0x555555);
         light.position.set(0.5, -0.3, 0.8).normalize();
         scene.add(light);
 
@@ -100,7 +100,7 @@ GIM.Map3D = function (domElementContainer) {
 
         mapPin = new GIM.MapPin(domElementContainer);
 
-        GIM.SVGParser.loadURL(sourceURL, function (sourceString) {
+        GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
             addFloorSelector();
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
             var floorElements = sourceSVG.getElementsByTagName('g');
@@ -142,7 +142,7 @@ GIM.Map3D = function (domElementContainer) {
             var machineAStarNode = astarNodes[GIM.MACHINE_NODE_ID];
             showFloors([machineAStarNode.data.floorId]);
 
-            cameraPosition.setCamera(Math.PI * 0.25, 6400, 0);
+            cameraPosition.setCamera(Math.PI * 0.15, 6400, 0);
             cameraPosition.posX = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
         });
     }
@@ -203,41 +203,73 @@ GIM.Map3D = function (domElementContainer) {
         }
     }
 
+    function averageVectors(vector3Ds){
+        var tmpVectors;
+
+        var startFloorPathPoints = [];
+        var endFloorPathPoints = [];
+        var gapFloorPathPoints = [];
+
+        var preVector = null;
+        var distance;
+        for(var i = 0;i < vector3Ds.length;i ++){
+            var vector = vector3Ds[i];
+            if(preVector) {
+                distance = preVector.distanceTo(vector);
+                if(vector.z !== preVector.z){
+                    startFloorEndIndex = i - 1;
+                    endFloorStartIndex = i;
+                    break;
+                }
+            }
+            preVector = vector;
+        }
+
+        var lengthTotal = 0;
+//        while()
+
+
+        console.log(vector3Ds[startFloorEndIndex].z,vector3Ds[endFloorStartIndex].z,distance);
+        return vector3Ds;
+    }
+
     function drawPath(vector3Ds) {
+        vector3Ds =averageVectors(vector3Ds);
+
         var pathGeometry = new THREE.Geometry();
         var vector3D;
-        if (false) {
+        if (true) {
             var spline = new THREE.Spline(vector3Ds);
-            var sub = 12;
+            spline.reparametrizeByArcLength(1);
+            var sub = 20;
             for (var i = 0; i < vector3Ds.length * sub; i++) {
+//                vector3D = spline.getPoint(i / (vector3Ds.length * sub));
                 vector3D = spline.getPoint(i / (vector3Ds.length * sub));
                 pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z);
             }
+            pathMesh = new THREE.Line( pathGeometry, new THREE.LineDashedMaterial( { color: GIM.PATH_COLOR, dashSize: 6, gapSize: 4, linewidth: 4 } ), THREE.LinePieces );
         } else {
             for (var i = 0; i < vector3Ds.length; i++) {
                 vector3D = vector3Ds[i];
                 pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z);
             }
+            pathMesh = new THREE.Line(pathGeometry, new THREE.LineBasicMaterial({color: GIM.PATH_COLOR}));
         }
 
-//        for(var i = 0;i < pathGeometry.vertices.length;i ++){
-//            if(i % 1 === 0){
-//                var vector3DofPath = pathGeometry.vertices[i];
-////                var pointGeometry = new THREE.PlaneGeometry(3,3,1,1);
-//                var pointGeometry = new THREE.CircleGeometry(0,0,10,10);
-//                var pointMaterial = new THREE.MeshBasicMaterial({color:GIM.PATH_COLOR});
-//                var pointMesh = new THREE.Mesh(pointGeometry,pointMaterial);
-//                container3D.add(pointMesh);
-//                pointMesh.position.x = vector3DofPath.x;
-//                pointMesh.position.y = vector3DofPath.y;
-//                pointMesh.position.z = vector3DofPath.z;
-//            }
-//        }
+        for(var i = 0;i < pathGeometry.vertices.length;i ++){
+            if(i % 3 === 0){
+                var vector3DofPath = pathGeometry.vertices[i];
+//                var pointGeometry = new THREE.PlaneGeometry(3,3,1,1);
+                var pointGeometry = new THREE.CircleGeometry(4,12);
+                var pointMaterial = new THREE.MeshBasicMaterial({color:GIM.PATH_COLOR});
+                var pointMesh = new THREE.Mesh(pointGeometry,pointMaterial);
+                container3D.add(pointMesh);
+                pointMesh.position.x = vector3DofPath.x;
+                pointMesh.position.y = vector3DofPath.y;
+                pointMesh.position.z = vector3DofPath.z;
+            }
+        }
 
-//        if(curSelectedUnit3D)
-
-        var pathMaterial = new THREE.LineBasicMaterial({color: GIM.PATH_COLOR, opacity: 0});
-        pathMesh = new THREE.Line(pathGeometry, pathMaterial);
         container3D.add(pathMesh);
     }
 
@@ -452,7 +484,7 @@ GIM.Map3D = function (domElementContainer) {
         floorSelector.appendChild(floorLogoContainer);
         floorLogoContainer.style.cssText = "height:120px;width:200px";
 
-        floorLogoContainer.innerHTML = "<p style='margin:0;position:absolute;font-size: 26px;font-weight: bold;font-family: \'Microsoft Yahei\';'>L" + floorId.substr(5, 1) + "</p>";
+        floorLogoContainer.innerHTML = "<p style='margin:0;position:absolute;font-size: 26px;font-weight: bold;font-family: \'Microsoft Yahei\';'>" + floorId.substr(5, 1) + "F</p>";
 
         var floorLogoImage = new Image();
         floorLogoImages.push(floorLogoImage);

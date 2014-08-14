@@ -26,7 +26,7 @@ GIM.DisplayUnit3D = function (unitData) {
     var tmpMesh = null;
     function addMesh(){
         var path = GIM.SVGParser.parse(unitData.d);
-        var shape3d = path.toShapes(true)[0].extrude({amount: unitData.deep * 0.8, bevelEnabled: false});
+        var shape3d = path.toShapes(true)[0].extrude({amount: unitData.deep * 1, bevelEnabled: false});
 
         var color = new THREE.Color(unitData.fill);
         var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color/*, opacity: 0.5, transparent: true,wireframe:true*/});
@@ -55,7 +55,8 @@ GIM.DisplayUnit3D = function (unitData) {
         textCanvas.style.cssText = "width:"+textCanvas.width+"px;height:"+textCanvas.height+"px;background:#FF0000;margin:2px";
 
         var textCTX = textCanvas.getContext("2d");
-        textCTX.font = "20px Microsoft Yahei";
+//        textCTX.font = "20px Microsoft Yahei";
+        textCTX.font = "20px Felix Titling";
         textCTX.fillStyle = "#000";
         textCTX.fillText(text,0,17);
 //        document.body.appendChild(textCanvas);
@@ -67,7 +68,7 @@ GIM.DisplayUnit3D = function (unitData) {
         var textMesh = new THREE.Mesh(textGeometry,textMaterial);
         textMesh.position.x = unitData.nodePosition.x;
         textMesh.position.y = - unitData.nodePosition.y;
-        textMesh.position.z = parseInt(unitData.deep) + 2;
+        textMesh.position.z = parseInt(unitData.deep) + 3;
         if(tmpMesh) tmpMesh.add(textMesh);
         else tmpMesh = textMesh;
 
@@ -89,13 +90,12 @@ GIM.DisplayUnit3D = function (unitData) {
         case GIM.NODE_TYPE_GROUND:
             addMesh();
             unitData.selectable = false;
-            tmpMesh.position.z = - unitData.deep;
+            tmpMesh.position.z = - (unitData.deep * 1 + 1);
             break;
         case GIM.NODE_TYPE_SHOP:
             addMesh();
             if (unitData.bindShopId) {
-//                addLogo("assets/img/shoplogo/" + unitData.bindShopId + ".png");
-//                addLogo("assets/img/shoplogo/9.png");
+//                addLogo("assets/img/shoplogo/0.png");
                 addText(unitData.bindShopId);
             }
             break;
@@ -131,18 +131,6 @@ GIM.DisplayUnit3D = function (unitData) {
 }
 
 GIM.NodeTypes = {
-
-//    GIM.NODE_TYPE_ASTAR 		= "0";
-//    GIM.NODE_TYPE_GROUND 		= "1";
-//    GIM.NODE_TYPE_SHOP 		    = "2";
-//    GIM.NODE_TYPE_MACHINE		= "3";
-//    GIM.NODE_TYPE_ESCALATOR 	= "4";
-//    GIM.NODE_TYPE_LIFT 		    = "5";
-//    GIM.NODE_TYPE_STAIRS        = "6";
-//    GIM.NODE_TYPE_TOILET		= "7";
-//    GIM.NODE_TYPE_SERVICE		= "8";
-//    GIM.NODE_TYPE_ATM   		= "9";
-
     "3": {
         "nodeTypeName": "MACHINE",
         "nodeTypeId": "3",

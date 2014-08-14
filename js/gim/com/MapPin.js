@@ -8,10 +8,12 @@
 
 GIM.MapPin = function (parentContainer) {
     var pin = {
-        width: 220,
-        height: 180,
-        pinRadius: 57,
-        maxRadius: 98,
+        width: 180,
+        height: 124,
+//        pinRadius: 57,
+//        maxRadius: 98,
+        pinRadius: 42,
+        maxRadius: 80,
         container: document.createElement("div"),
         menuCanvas: document.createElement("canvas"),
         pinCanvas: document.createElement("canvas"),
@@ -52,9 +54,9 @@ GIM.MapPin = function (parentContainer) {
             }
 
             this.gotoImage.src = "assets/img/mappin/goto.png";
-            this.gotoImage.style.cssText = "top: 64px;position: absolute;left: 16px;";
+            this.gotoImage.style.cssText = "top: 42px;position: absolute;left: 12px;";
             this.searchImage.src = "assets/img/mappin/search.png";
-            this.searchImage.style.cssText = "top: 68px;position: absolute;left: 170px;";
+            this.searchImage.style.cssText = "top: 42px;position: absolute;left: 136px;";
         },
         _isOpenning: false,
         open: function (x, y, shopLogoURL) {
@@ -171,15 +173,20 @@ GIM.MapPin = function (parentContainer) {
                 rate = this._radius / this.pinRadius;
             }
 
-            this.logoCanvas.style.top = (centerY - this.pinRadius * rate + this.pinRadius - this.logoImage.height * 0.5 + 1.5) + "px";
-            var logoRadius = (tmpRadius > this.pinRadius ? this.pinRadius : tmpRadius) - 3;
-            if(logoRadius < 0) logoRadius = 0;
-            logoCanvasCTX.beginPath();
-            logoCanvasCTX.arc(this.logoImage.width * 0.5, logoRadius , logoRadius, Math.PI * 0, Math.PI * 2);
-            var pat = logoCanvasCTX.createPattern(this.logoImage, "no-repeat");
-            logoCanvasCTX.fillStyle = pat;
-            logoCanvasCTX.fill();
-            logoCanvasCTX.closePath();
+            try{
+                this.logoCanvas.style.top = (centerY - this.pinRadius * rate + this.pinRadius - this.logoImage.height * 0.5 + 1.5) + "px";
+                var logoRadius = (tmpRadius > this.pinRadius ? this.pinRadius : tmpRadius) - 3;
+                if(logoRadius < 0) logoRadius = 0;
+                logoCanvasCTX.beginPath();
+                logoCanvasCTX.arc(this.logoImage.width * 0.5, logoRadius , logoRadius, Math.PI * 0, Math.PI * 2);
+                var pat = logoCanvasCTX.createPattern(this.logoImage, "no-repeat");
+                logoCanvasCTX.fillStyle = pat;
+                logoCanvasCTX.fill();
+                logoCanvasCTX.closePath();
+            }catch (e){
+                console.log(e);
+                this.logoImage.src = GIM.DEFAULT_SHOP_LOGO_URL;
+            }
         }
     }
 

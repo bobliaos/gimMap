@@ -18,11 +18,12 @@ GIM.NODE_TYPE_ATM   		= "9";
 GIM.SERVER                  = "192.168.1.151:3000";
 GIM.MACHINE_NODE_ID         = "node_2014_8_13_01:18:25_578";
 
-GIM.FLOOR_GAP               = 800;
+GIM.FLOOR_GAP               = 1220;
 GIM.PATH_COLOR              = 0xFF0033;
 GIM.MAP_OFFSET_Y            = 300;
 GIM.MAP_BACKGROUND_COLOR    = 0xDDDDDD;
 
+GIM.DATA_SOURCE_URL         = "assets/data.sgxml";
 GIM.DEFAULT_SHOP_LOGO_URL   = "assets/img/shoplogo/0.png";
 
 GIM.goDetail                = function(shopId){};
