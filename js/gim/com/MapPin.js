@@ -38,6 +38,9 @@ GIM.MapPin = function (parentContainer) {
             this.pinCanvas.style.cssText = "width:" + this.width + "px;height:" + this.height + "px;position:absolute;top:0px;left:0px;";
             this.pinCanvas.width = this.width;
             this.pinCanvas.height = this.height;
+            this.logoCanvas.width = 90;
+            this.logoCanvas.height = 90;
+            this.logoCanvas.cssText = "width:82px;height:82px";
 
             this.pinCanvas.id = "pinCanvas";
             this.logoCanvas.id = "logoCanvas";
@@ -48,7 +51,7 @@ GIM.MapPin = function (parentContainer) {
             this.logoImage.onload = function(event){
                 var left = (this.bindPin.width - event.currentTarget.naturalWidth) * 0.5;
                 var top = (this.bindPin.height - event.currentTarget.naturalHeight) * 0.5;
-                this.bindPin.logoCanvas.style.cssText = "position:absolute;top:" + top + "px;left:" + left + "px;display:block";
+                this.bindPin.logoCanvas.style.cssText = "width:90px;height:90px;position:absolute;top:" + top + "px;left:" + left + "px;display:block";
                 this.bindPin.updateDisplay();
                 console.log(this.bindPin.logoCanvas.style.cssText);
             }
@@ -71,12 +74,13 @@ GIM.MapPin = function (parentContainer) {
             this.container.style.left = (x - this.width * 0.5) + "px";
             this.container.style.top = (y - this.height) + "px";
 
-            this.radius = 10;
-            this.alpha = 0.3;
-            this.rotation = - Math.PI * 2;
             TWEEN.remove(this);
             TWEEN.remove(this.gotoImage.style);
             TWEEN.remove(this.searchImage.style);
+
+            this.radius = 10;
+            this.alpha = 0.3;
+            this.rotation = 0;
             this.gotoImage.style.display = this.searchImage.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
             new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 600).easing(TWEEN.Easing.Back.Out).onComplete(function(){
@@ -91,7 +95,7 @@ GIM.MapPin = function (parentContainer) {
             this.logoImage.src = "";
             this.logoCanvas.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
-            new TWEEN.Tween(this).to({alpha: 0, rotation: Math.PI * 2, radius: 10}, 400).easing(TWEEN.Easing.Back.In).onComplete(function () {
+            new TWEEN.Tween(this).to({alpha: 0, rotation: 0, radius: 10}, 400).easing(TWEEN.Easing.Back.In).onComplete(function () {
                 if (!this._isOpenning)
                     this.container.style.display = "none";
             }).start();

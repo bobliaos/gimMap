@@ -4,6 +4,8 @@
 
 var GIM = { VERSION : '0.1' };
 
+GIM.mapInstans             = null;
+
 GIM.NODE_TYPE_ASTAR 		= "0";
 GIM.NODE_TYPE_GROUND 		= "1";
 GIM.NODE_TYPE_SHOP 		    = "2";
