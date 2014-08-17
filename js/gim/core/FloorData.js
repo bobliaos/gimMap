@@ -30,7 +30,8 @@ GIM.UnitData = function(pathElement){
         d : pathElement.getAttribute("d"),
         fill : pathElement.getAttribute("fill"),
         deep : pathElement.getAttribute("deep"),
-        floorId : null
+        floorId : null,
+        shopName : ""
     };
     var nodePositionStringArr = pathElement.getAttribute("nodePosition").split(",");
     data.nodePosition = {
@@ -39,6 +40,14 @@ GIM.UnitData = function(pathElement){
     }
     data.selectable = true;
     data.astarNode = new GIM.AStarNode(data);
+
+    for(var i = 0;i < GIM.shopList.length;i ++){
+        var shopData = GIM.shopList[i];
+        if(shopData.shop_room === data.bindShopId){
+            data.shopName = shopData.name;
+            break;
+        }
+    }
 
     return data;
 }

@@ -18,7 +18,7 @@ GIM.SVGParser = {
         svgLoader.send(null);
     },
 
-    getSVGObject: function (svgString,tagName) {
+    getSVGObject: function (svgString) {
         var p = new DOMParser();
         return p.parseFromString(svgString,"text/xml");
     },

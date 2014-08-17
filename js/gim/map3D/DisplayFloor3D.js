@@ -15,7 +15,6 @@ GIM.DisplayFloor3D = function (gElement) {
         var displayUnit3D = new GIM.DisplayUnit3D(unitData);
         if(displayUnit3D.mesh) {
             this.mesh.add(displayUnit3D.mesh);
-//            displayUnit3D.mesh.position.z = unitData.meshZ + ;
         }
         this.subUnit3Ds[unitData.nodeId] = displayUnit3D;
     }
@@ -29,13 +28,17 @@ GIM.DisplayUnit3D = function (unitData) {
         var shape3d = path.toShapes(true)[0].extrude({amount: unitData.deep * 1, bevelEnabled: false});
 
         var color = new THREE.Color(unitData.fill);
-        var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color/*, opacity: 0.5, transparent: true,wireframe:true*/});
+        var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color});
 
         tmpMesh = new THREE.Mesh(shape3d, material);
     }
 
+    var positionOffsetZ = 10;
+
     function addLogo(logoURL,isLogo){
-        var logoGeometry = new THREE.PlaneGeometry(isLogo?40:80, isLogo?40:80, 1, 1);
+        var logoSize = isLogo ? 40 : 60;
+
+        var logoGeometry = new THREE.PlaneGeometry(logoSize, logoSize, 1, 1);
         var logoTexture = THREE.ImageUtils.loadTexture(logoURL);
         var logoMaterial = new THREE.MeshBasicMaterial({map: logoTexture, transparent: true});
         var logoMesh = new THREE.Mesh(logoGeometry, logoMaterial);
@@ -43,23 +46,30 @@ GIM.DisplayUnit3D = function (unitData) {
         if(tmpMesh) tmpMesh.add(logoMesh);
         else tmpMesh = logoMesh;
         logoMesh.position.x = unitData.nodePosition.x;
-        logoMesh.position.y = - unitData.nodePosition.y;
-        logoMesh.position.z = parseInt(unitData.deep) + 2;
+        logoMesh.position.y = - unitData.nodePosition.y + (isLogo ? 0 : logoSize * 0.5);
+        logoMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
         if(isLogo) logoMesh.position.z = 30;
     }
 
-    function addText(text){
+    function addText(text,offsetY,fontSize){
+        if(text == "") return;
+        if(offsetY === undefined) offsetY = 0;
+        if(fontSize === undefined) fontSize = 18;
+
+        var fontStyle = "Bold " + fontSize + "px " + GIM.FONT_NAME;
+
         var textCanvas = document.createElement("canvas");
-        textCanvas.width = 70;
-        textCanvas.height = 22;
-        textCanvas.style.cssText = "width:"+textCanvas.width+"px;height:"+textCanvas.height+"px;background:#FF0000;margin:2px";
+//        document.body.appendChild(textCanvas);
 
         var textCTX = textCanvas.getContext("2d");
-//        textCTX.font = "20px Microsoft Yahei";
-        textCTX.font = "20px Felix Titling";
+        textCTX.font = fontStyle;
+        textCanvas.width = textCTX.measureText(text).width + 2;
+        textCanvas.height = 24;
+        textCanvas.style.cssText = "width:"+textCanvas.width+"px;height:"+textCanvas.height+"px;background:#FF0000;margin:2px;";
+
+        textCTX.font = fontStyle;
         textCTX.fillStyle = "#000";
-        textCTX.fillText(text,0,17);
-//        document.body.appendChild(textCanvas);
+        textCTX.fillText(text,1,textCanvas.height - 6);
 
         var textGeometry = new THREE.PlaneGeometry(textCanvas.width,textCanvas.height,1,1);
         var textTexture = new THREE.Texture(textCanvas);
@@ -67,21 +77,10 @@ GIM.DisplayUnit3D = function (unitData) {
         var textMaterial = new THREE.MeshBasicMaterial({map:textTexture,transparent:true});
         var textMesh = new THREE.Mesh(textGeometry,textMaterial);
         textMesh.position.x = unitData.nodePosition.x;
-        textMesh.position.y = - unitData.nodePosition.y;
-        textMesh.position.z = parseInt(unitData.deep) + 3;
+        textMesh.position.y = - unitData.nodePosition.y - offsetY - textCanvas.height * 0.5;
+        textMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
         if(tmpMesh) tmpMesh.add(textMesh);
         else tmpMesh = textMesh;
-
-//        pin.style.display = "block";
-//        pin.style.left = pinX - pin.width * 0.5 + "px";
-//        pin.style.top = pinY - pin.height + "px";
-//
-//        if (text != undefined) {
-//            var ctx = pin.getContext("2d");
-//            ctx.font = "20px Microsoft Yahei";
-//            ctx.strokeText(text, 10, pin.width * 0.5);
-//        }
-//    }
     }
 
     switch (unitData.nodeTypeId) {
@@ -96,7 +95,8 @@ GIM.DisplayUnit3D = function (unitData) {
             addMesh();
             if (unitData.bindShopId) {
 //                addLogo("assets/img/shoplogo/0.png");
-                //addText(unitData.bindShopId);
+                addText(unitData.shopName);
+                addText(unitData.bindShopId,18,14);
             }
             break;
         case GIM.NODE_TYPE_MACHINE:
@@ -122,48 +122,12 @@ GIM.DisplayUnit3D = function (unitData) {
     }
 
     if(tmpMesh){
+        tmpMesh.castShadow = true;
+        tmpMesh.receiveShadow = true;
         this.mesh = tmpMesh;
         this.mesh.displayUnit3D = this;
     }
     this.data = unitData;
 
     return this;
-}
-
-GIM.NodeTypes = {
-    "3": {
-        "nodeTypeName": "MACHINE",
-        "nodeTypeId": "3",
-        "nodeTypeLogo": "img/nodetypelogo/machine.png"
-    },
-    "4": {
-        "nodeTypeName": "ESCALATOR",
-        "nodeTypeId": "4",
-        "nodeTypeLogo": "img/nodetypelogo/escalator.png"
-    },
-    "5": {
-        "nodeTypeName": "LIFT",
-        "nodeTypeId": "5",
-        "nodeTypeLogo": "img/nodetypelogo/lift.png"
-    },
-    "6": {
-        "nodeTypeName": "STAIRS",
-        "nodeTypeId": "6",
-        "nodeTypeLogo": ""
-    },
-    "7": {
-        "nodeTypeName": "TOILET",
-        "nodeTypeId": "7",
-        "nodeTypeLogo": "img/nodetypelogo/toilet.png"
-    },
-    "8": {
-        "nodeTypeName": "SERVICE",
-        "nodeTypeId": "7",
-        "nodeTypeLogo": "img/nodetypelogo/service.png"
-    },
-    "9": {
-        "nodeTypeName": "ATM",
-        "nodeTypeId": "7",
-        "nodeTypeLogo": "img/nodetypelogo/atm.png"
-    }
 }
