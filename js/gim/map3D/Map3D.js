@@ -2,21 +2,17 @@
  * @author bob / http://bobliaos.diandian.com
  * */
 
-GIM.Map3D = function (domElementContainer) {
+GIM.Map3D = function (mainContainer) {
     var isDebug = false;
 
     var targetRotation = 0;
     var targetRotationOnMouseDown = 0;
     var mouseX = 0;
     var mouseXOnMouseDown = 0;
-    var containerWidth = domElementContainer.clientWidth;
-    var containerHeight = domElementContainer.clientHeight;
-    var containerHalfWidth = containerWidth * 0.5;
-    var containerHalfHeight = containerHeight * 0.5;
 
-    var renderer, stats;
-    var scene, camera, container3D;
-    var projector;
+    var containerWidth,containerHeight,containerHalfWidth,containerHalfHeight;
+
+    var renderer, stats, scene, camera, container3D, projector;
 
     var meshes = [];
     var serviceLogoMeshes = [];
@@ -87,7 +83,7 @@ GIM.Map3D = function (domElementContainer) {
         selectUint3DByShopId(shopId);
 
         if (curSelectedUnit3D) {
-            console.log("- [GimMap].navigateTo Shop", curSelectedUnit3D.data.bindShopId);
+            console.log("- [GimMap]Map3D.navigateTo Shop", curSelectedUnit3D.data.bindShopId);
 
             var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
             var endFloorId = curSelectedUnit3D.data.floorId;
@@ -111,7 +107,7 @@ GIM.Map3D = function (domElementContainer) {
 
         if (mapPin._isOpenning) mapPin.close();
 
-        console.log("- [GimMap].showFloors:", floorIds.toString());
+        console.log("- [GimMap]Map3D.showFloors:", floorIds.toString());
 
         //UPDATE FLOOR LOGOS
         for (var i = 0; i < floorSelecterLogos.length; i++) {
@@ -243,6 +239,21 @@ GIM.Map3D = function (domElementContainer) {
         }
     }
 
+    function setSize(width,height){
+        console.log("- [GimMap]Map3D.setSize:",width,height);
+
+        containerWidth = width;
+        containerHeight = height;
+
+        containerHalfWidth = containerWidth * 0.5;
+        containerHalfHeight = containerHeight * 0.5;
+
+        camera.aspect = containerWidth / containerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(containerWidth , containerHeight);
+    }
+
     //ASSIST FUNCTIONS//////////////////////////////////////////
 
     function averageVectors(vector3Ds) {
@@ -276,7 +287,7 @@ GIM.Map3D = function (domElementContainer) {
             for (var nodeId in floor3D.subUnit3Ds) {
                 var unit3D = floor3D.subUnit3Ds[nodeId];
                 if (shopId === unit3D.data.bindShopId) {
-                    console.log("- [GimMap].selectUint3DByShopId:", shopId, "DONE!");
+                    console.log("- [GimMap]Map3D.selectUint3DByShopId:", shopId, "DONE!");
                     selectUnit3D(unit3D);
                     break;
                 }
@@ -296,7 +307,7 @@ GIM.Map3D = function (domElementContainer) {
         if (intersects.length > 0) {
             var mesh = intersects[0].object;
             if (mesh.displayUnit3D && mesh.displayUnit3D.data.selectable) {
-                console.log("- [GimMap].selectUnit3DByPosition", mesh.displayUnit3D.data.nodeId);
+                console.log("- [GimMap]Map3D.selectUnit3DByPosition", mesh.displayUnit3D.data.nodeId);
                 selectUnit3D(mesh.displayUnit3D);
             }
         }
@@ -306,10 +317,10 @@ GIM.Map3D = function (domElementContainer) {
         curSelectedUnit3D = unit3D;
         if (!unit3D.mesh.isServiceLogo) {
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
-//            var color = new THREE.color(curSelectedUnit3D.data.fill);
-//            color = color * 1.1;
-//            curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: curSelectedUnit3D.data.fill});
-            curSelectedUnit3D.mesh.material = selectedUnit3DMaterial;
+            var color = new THREE.Color(curSelectedUnit3D.data.fill);
+            color.add(new THREE.Color(0x333333));
+            curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color });
+//            curSelectedUnit3D.mesh.material = selectedUnit3DMaterial;
         } else {
 
             for (var i = 0; i < serviceLogoMeshes.length; i++) {
@@ -346,7 +357,7 @@ GIM.Map3D = function (domElementContainer) {
             for (var i = 0; i < GIM.shopList.length; i++) {
                 var shop = GIM.shopList[i];
                 if (shop.shop_room.toString() === shopId) {
-                    console.log("- [GimMap].getShopLogoURL:", shopId);
+                    console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
                     shopLogoURL = GIM.SERVER + "/system" + shop.shop_logo;
                 }
             }
@@ -356,44 +367,25 @@ GIM.Map3D = function (domElementContainer) {
 
     //EVENT HANDLERS/////////////////////////////////////////////
 
-    function onDocumentMouseDown(event) {
+    function onContainerMouseDown(event) {
         event.preventDefault();
 
-        document.addEventListener('mousemove', onDocumentMouseMove, false);
-        document.addEventListener('mouseup', onDocumentMouseOut, false);
-        document.addEventListener('mouseout', onDocumentMouseOut, false);
+        mainContainer.addEventListener('mousemove', onContainerMouseMove, false);
+        mainContainer.addEventListener('mouseup', onContainerMouseOut, false);
+        mainContainer.addEventListener('mouseout', onContainerMouseOut, false);
 
         clearPath();
         mapPin.close();
 
         if (event.target.id === "gotoImage" && event.offsetY < mapPin.width) {
             if (curSelectedUnit3D) {
-                console.log("- [GimMap].onDocumentMouseDown ShopId:", curSelectedUnit3D.data.bindShopId);
+                console.log("- [GimMap]Map3D.onContainerMouseDown ShopId:", curSelectedUnit3D.data.bindShopId);
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     navigateTo(curSelectedUnit3D.data.bindShopId);
                 }
-//                else{
-//                    console.log("- [GimMap].navigateTo Shop", curSelectedUnit3D.data.bindShopId);
-//
-//                    var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
-//                    var endFloorId = curSelectedUnit3D.data.floorId;
-//                    showFloors(startFloorId === endFloorId ? [startFloorId] : [startFloorId, endFloorId]);
-//
-//                    var vector3Ds = [];
-//                    var pathNodes = GIM.AStar.search(astarNodes, GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
-//                    for (var i = 0; i < pathNodes.length; i++) {
-//                        var pathNode = pathNodes[i];
-//                        var floorId = pathNode.data.floorId;
-//                        var floor3D = floor3Ds[floorId];
-//                        var vector3 = new THREE.Vector3(pathNode.x, pathNode.y, floor3D.mesh.position.z + 5);
-//                        vector3Ds.push(vector3);
-//                    }
-//                    drawPath(vector3Ds);
-////                        showPinOnUnit3D(curSelectedUnit3D);
-//                }
             }
         } else if (event.target.id === "searchImage") {
-            console.log("- [GimMap].goDetail:", curSelectedUnit3D.data.bindShopId);
+            console.log("- [GimMap]Map3D.goDetail:", curSelectedUnit3D.data.bindShopId);
             GIM.goDetail(curSelectedUnit3D.data.bindShopId);
         } else {
             selectUnit3DByPosition(event.offsetX, event.offsetY);
@@ -401,7 +393,7 @@ GIM.Map3D = function (domElementContainer) {
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     showPinOnUnit3D(curSelectedUnit3D);
                 } else {
-                    console.log("- [GimMap].navigateTo Shop", curSelectedUnit3D.data.bindShopId);
+                    console.log("- [GimMap]Map3D.navigateTo Shop", curSelectedUnit3D.data.bindShopId);
 
                     var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
                     var endFloorId = curSelectedUnit3D.data.floorId;
@@ -422,27 +414,30 @@ GIM.Map3D = function (domElementContainer) {
         }
     }
 
-    function onDocumentMouseMove(event) {
+    function onContainerMouseMove(event) {
         mouseX = event.clientX - containerHalfWidth;
         targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
     }
 
-    function onDocumentMouseOut(event) {
-        document.removeEventListener('mousemove', onDocumentMouseMove, false);
-        document.removeEventListener('mouseup', onDocumentMouseOut, false);
-        document.removeEventListener('mouseout', onDocumentMouseOut, false);
+    function onContainerMouseOut(event) {
+        mainContainer.removeEventListener('mousemove', onContainerMouseMove, false);
+        mainContainer.removeEventListener('mouseup', onContainerMouseOut, false);
+        mainContainer.removeEventListener('mouseout', onContainerMouseOut, false);
     }
 
     //INITIALIZE FUNCTIONS///////////////////////////////////////
 
     function init() {
-        GIM.navitateTo = navigateTo;
-        domElementContainer.style.cssText += "overflow: hidden;position: absolute;";
-        init3d();
-        if (isDebug) addStats();
-        document.addEventListener('mousedown', onDocumentMouseDown, false);
-        animate();
-        setInterval(doPathAnimate, pathAnimateTime);
+        GIM.SVGParser.loadURL(GIM.SHOP_LIST_URL, function (jsonString) {
+            GIM.shopList = JSON.parse(jsonString);
+            GIM.navitateTo = navigateTo;
+            GIM.setSize = setSize;
+            init3d();
+            if (isDebug) addStats();
+            mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
+            animate();
+            setInterval(doPathAnimate, pathAnimateTime);
+        });
     }
 
     function init3d() {
@@ -450,16 +445,18 @@ GIM.Map3D = function (domElementContainer) {
         var far = 10000;
 
         renderer = new THREE.WebGLRenderer({antialias: true});
-        domElementContainer.appendChild(renderer.domElement);
+        mainContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
-        renderer.setSize(containerWidth, containerHeight);
+        renderer.setSize(64 , 64);
         renderer.shadowMapEnabled = true;
         renderer.shadowMapType = THREE.PCFShadowMap;
 
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(60, containerWidth / containerHeight, near, far);
+        camera = new THREE.PerspectiveCamera(60, 1, near, far);
         container3D = new THREE.Object3D();
         scene.add(container3D);
+
+        setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
 
         var light = new THREE.DirectionalLight(0x000000, 0);
         scene.add(light);
@@ -471,11 +468,11 @@ GIM.Map3D = function (domElementContainer) {
         light.shadowBias = 0.0001;
         light.shadowDarkness = 0.6;
         light.shadowMapWidth = light.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-//        light.shadowCameraVisible = true;
+        if(isDebug) light.shadowCameraVisible = true;
 
         var backLight = new THREE.DirectionalLight(0x333333, 1);
         scene.add(backLight);
-        backLight.position.set(400, 400, 400);
+        backLight.position.set(400, 500, 400);
 
         if (isDebug) {
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
@@ -484,7 +481,7 @@ GIM.Map3D = function (domElementContainer) {
 
         projector = new THREE.Projector();
 
-        mapPin = new GIM.MapPin(domElementContainer);
+        mapPin = new GIM.MapPin(mainContainer);
 
         GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
             addFloorSelector();
@@ -537,11 +534,11 @@ GIM.Map3D = function (domElementContainer) {
 
     function addFloorSelector() {
         floorSelector = document.createElement("div");
-        domElementContainer.appendChild(floorSelector);
+        mainContainer.appendChild(floorSelector);
         floorSelector.style.cssText = "position:absolute;top:240px;left:0px";
 
         serviceSelector = document.createElement("div");
-        domElementContainer.appendChild(serviceSelector);
+        mainContainer.appendChild(serviceSelector);
         serviceSelector.style.cssText = "position:absolute;top:30px;left:240px";
 
         var imgURLs = ["assets/img/servicelogo/1.png", "assets/img/servicelogo/2.png", "assets/img/servicelogo/3.png", "assets/img/servicelogo/4.png", "assets/img/servicelogo/5.png", "assets/img/servicelogo/6.png"];   //"assets/img/servicelogo/1.png"
@@ -621,7 +618,7 @@ GIM.Map3D = function (domElementContainer) {
     function addStats() {
         stats = new Stats();
         stats.domElement.style.cssText += 'position:absolute;top:0px';
-        domElementContainer.appendChild(stats.domElement);
+        mainContainer.appendChild(stats.domElement);
     }
 
     function animate() {
@@ -643,15 +640,14 @@ GIM.Map3D = function (domElementContainer) {
         TWEEN.update();
     }
 
-    GIM.SVGParser.loadURL("assets/shoplist.json", function (jsonString) {
-        GIM.shopList = JSON.parse(jsonString);
+    GIM.SVGParser.loadURL(GIM.CONFIG_URL,function(configJSONString){
+        var config = JSON.parse(configJSONString);
+        if(typeof (config.server) !== "undefined"               && config.server !== "")            GIM.SERVER          = config.server;
+        if(typeof (config.machindeNodeId) !== "undefined"       && config.machindeNodeId !== "")    GIM.MACHINE_NODE_ID = config.machindeNodeId;
+        if(typeof (config.shadowRank) !== "undefined"           && config.shadowRank !== "")        GIM.SHADOW_MAP_SIZE = parseFloat(config.shadowRank) * 1024;
+        if(typeof (config.sourceSVGURL) !== "undefined"         && config.sourceSVGURL !== "")      GIM.DATA_SOURCE_URL = config.sourceSVGURL;
+        if(typeof (config.sourceShopListURL) !== "undefined"    && config.sourceShopListURL !== "") GIM.SHOP_LIST_URL   = config.sourceShopListURL;
+
         init();
     });
-
-//    if (!GIM.mapInstans) {
-//        GIM.mapInstans = this;
-//    } else {
-//        console.log("- [GimMap].constructor:mapInstance was instanced!")
-//    }
-
 }

@@ -8,7 +8,7 @@ GIM.DisplayFloor3D = function (gElement) {
     this.mesh = new THREE.Object3D();
     this.mesh.displayUnit3D = this;
 
-    console.log(this.data.floorId, "CONSTRUCTION...");
+    console.log("- [GimMap]DisplayFloor3D.constructor:",this.data.floorId, "CONSTRUCTING...");
 
     for (var key in this.data.unitsData) {
         var unitData = this.data.unitsData[key];

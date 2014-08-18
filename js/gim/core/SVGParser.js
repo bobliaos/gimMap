@@ -5,6 +5,7 @@
 GIM.SVGParser = {
 
     loadURL : function(sourceURL,callBackFunc){
+        console.log("- [GimMap]SVGParser.loadURL >>> ",sourceURL);
         var svgLoader = new XMLHttpRequest();
         svgLoader.onreadystatechange = function () {
             if (svgLoader.readyState == 4) {

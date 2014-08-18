@@ -6,8 +6,6 @@
     <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/stats.min.js"></script>
     <script type="text/javascript" src="js/tween.min.js"></script>
-    <script type="text/javascript" src="js/jquery.js"></script>
-
 
     <script type="text/javascript" src="js/gim/GIM.js"></script>
     <script type="text/javascript" src="js/gim/core/SVGParser.js"></script>
@@ -16,39 +14,44 @@
     <script type="text/javascript" src="js/gim/map3D/Map3D.js"></script>
     <script type="text/javascript" src="js/gim/map3D/DisplayFloor3D.js"></script>
     <script type="text/javascript" src="js/gim/com/MapPin.js"></script>
-    <script type="text/javascript">
-        window.onload = function () {
-//            map = new GIM.Map3D(mapContainer);
-//            GIM.navitateTo("707");
-        };
 
-        var map;
-        var container = null;
-        function showMap(){
-            if(!container){
-                container = document.createElement("div");
-                container.style.cssText = "width: 1040px;height: 1440px;";
-                map = new GIM.Map3D(container);
-//                container.addEventListener("webglcontextlost", function(event) {
-//                    console.log("昆紧靠");
-//                }, true);
-            }
+    <script type="text/javascript">
+        var container;
+        function showMap() {
+            container = document.createElement("div");
             mapContainer.appendChild(container);
+
+            container.appendChild(GIM.mapInstance);
         }
 
-        function hideMap(){
+        function hideMap() {
             mapContainer.removeChild(container);
+            delete container;
+        }
+
+        function navigateTo(){
+            var shopId = document.getElementById("shopIdInput").value;
+            if(shopId !== "")
+                GIM.navitateTo(shopId);
+            else
+                alert("请先输入店铺号");
+        }
+
+        GIM.goDetail = function(shopId){
+            alert("显示店铺 " + shopId + " 的详情!");
         }
     </script>
 </head>
-<body style="padding: 0;margin: 0">
-    <!--<div id="mapContainer" style="width: 1040px;height: 1440px;background: #F03;">-->
-    <div style="background: #0099CC;width: 1040px;height: 360px;cursor: pointer">
-        <div style="background: #FF0033;width:220px;height: 124px" onclick="showMap()">显示地图</div>
-        <div style="background: #FFFF33;width:220px;height: 124px" onclick="hideMap()">隐藏地图</div>
-    </div>
-    <div id="mapContainer" style="width: 1040px;height: 1440px;">
-    <!--<div id="mapContainer" style="width: 520px;height: 720px;background: #F03;">-->
-    </div>
+<body style="margin: 0;padding: 0;">
+<div style="background: #0099CC;width: 1040px;height: 360px;cursor: pointer">
+    <button onclick="showMap()">显示地图</button>
+    <br/>
+    <button onclick="hideMap()">隐藏地图</button>
+    <br/>
+    <input placeholder="请输入店铺号" id="shopIdInput" type="text" value=""/>
+    <button onclick="navigateTo()">开始导航</button>
+</div>
+<div id="mapContainer" style="width: 1040px;height: 1440px;">
+</div>
 </body>
 </html>

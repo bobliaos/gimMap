@@ -53,7 +53,6 @@ GIM.MapPin = function (parentContainer) {
                 var top = (this.bindPin.height - event.currentTarget.naturalHeight) * 0.5;
                 this.bindPin.logoCanvas.style.cssText = "width:90px;height:90px;position:absolute;top:" + top + "px;left:" + left + "px;display:block";
                 this.bindPin.updateDisplay();
-                console.log(this.bindPin.logoCanvas.style.cssText);
             }
 
             this.gotoImage.src = "assets/img/mappin/goto.png";
@@ -191,7 +190,7 @@ GIM.MapPin = function (parentContainer) {
                 logoCanvasCTX.fill();
                 logoCanvasCTX.closePath();
             }catch (e){
-                console.log(e);
+                console.log("- [GimMap]MapPin Load Image Error!");
                 this.logoImage.src = GIM.DEFAULT_SHOP_LOGO_URL;
             }
         }
