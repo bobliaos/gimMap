@@ -31,7 +31,8 @@ GIM.UnitData = function(pathElement){
         fill : pathElement.getAttribute("fill"),
         deep : pathElement.getAttribute("deep"),
         floorId : null,
-        shopName : ""
+        shopName : "",
+        origZ : 0
     };
     var nodePositionStringArr = pathElement.getAttribute("nodePosition").split(",");
     data.nodePosition = {

@@ -19,7 +19,7 @@ GIM.Map3D = function (domElementContainer) {
     var projector;
 
     var meshes = [];
-    var logoOnlyMeshes = [];
+    var serviceLogoMeshes = [];
     var sourceSVG;
     var floor3Ds = {};
     var curSelectedUnit3D = null;
@@ -28,8 +28,8 @@ GIM.Map3D = function (domElementContainer) {
     var pathMesh;
     var astarNodes = {};
     var floorSelecterLogos = [];
-    var minFloorPositionZ = -3500;
-    var maxFloorPositionZ = 2000;
+    var minFloorPositionZ = -4200;
+    var maxFloorPositionZ = 1200;
 
     var pathAnimatePointMeshes = [];
     var pathAnimatePointSize = 4;
@@ -107,11 +107,11 @@ GIM.Map3D = function (domElementContainer) {
     }
 
     function showFloors(floorIds) {
-        if(curShownFloorIds === null) curShownFloorIds = floorIds;
+        if (curShownFloorIds === null) curShownFloorIds = floorIds;
 
-        if(mapPin._isOpenning) mapPin.close();
+        if (mapPin._isOpenning) mapPin.close();
 
-        console.log("- [GimMap].showFloors:",floorIds.toString());
+        console.log("- [GimMap].showFloors:", floorIds.toString());
 
         //UPDATE FLOOR LOGOS
         for (var i = 0; i < floorSelecterLogos.length; i++) {
@@ -129,8 +129,8 @@ GIM.Map3D = function (domElementContainer) {
             floor3D.mesh.position.z = minFloorPositionZ;
         }
 
-        if(floorIds.length === 1){
-            if(curShownFloorIds.length > 0){
+        if (floorIds.length === 1) {
+            if (curShownFloorIds.length > 0) {
                 var preFloorId = curShownFloorIds[0];
                 var curFloorId = floorIds[0];
                 var preVisibleFloor3D = floor3Ds[preFloorId];
@@ -138,22 +138,22 @@ GIM.Map3D = function (domElementContainer) {
 
                 curVisibleFloor3D.mesh.visible = preVisibleFloor3D.mesh.visible = true;
 
-                if(preVisibleFloor3D !== curVisibleFloor3D){
-                    var isUp = parseInt(preFloorId.substr(5,1)) > parseInt(curFloorId.substr(5, 1));
+                if (preVisibleFloor3D !== curVisibleFloor3D) {
+                    var isUp = parseInt(preFloorId.substr(5, 1)) > parseInt(curFloorId.substr(5, 1));
                     preVisibleFloor3D.mesh.position.z = 0;
                     curVisibleFloor3D.mesh.position.z = isUp ? minFloorPositionZ : maxFloorPositionZ;
                     new TWEEN.Tween(preVisibleFloor3D.mesh.position).to({z: isUp ? maxFloorPositionZ : minFloorPositionZ}, 800).easing(TWEEN.Easing.Exponential.Out).start();
                     new TWEEN.Tween(curVisibleFloor3D.mesh.position).to({z: 0}, 800).easing(TWEEN.Easing.Exponential.Out).start();
-                }else{
+                } else {
                     preVisibleFloor3D.mesh.position.z = 0;
                 }
 
             }
-        }else if(floorIds.length === 2){
+        } else if (floorIds.length === 2) {
             var floor3D1 = floor3Ds[floorIds[0]];
             var floor3D2 = floor3Ds[floorIds[1]];
             floor3D1.mesh.visible = floor3D2.mesh.visible = true;
-            var isUp = parseInt(floor3D1.data.floorId.substr(5,1)) > parseInt(floor3D2.data.floorId.substr(5, 1));
+            var isUp = parseInt(floor3D1.data.floorId.substr(5, 1)) > parseInt(floor3D2.data.floorId.substr(5, 1));
             floor3D1.mesh.position.z = GIM.FLOOR_GAP * 0.5 * (isUp ? 1 : -1);
             floor3D2.mesh.position.z = GIM.FLOOR_GAP * 0.5 * (isUp ? -1 : 1);
         }
@@ -161,15 +161,15 @@ GIM.Map3D = function (domElementContainer) {
         curShownFloorIds = floorIds;
     }
 
-    function showPinOnUnit3D(unit3D){
-        if(unit3D === null) return;
+    function showPinOnUnit3D(unit3D) {
+        if (unit3D === null) return;
 
         var wordCoordinate = toScreenCoordinate(unit3D.data.nodePosition.x, -unit3D.data.nodePosition.y, unit3D.mesh.parent.position.z + parseInt(unit3D.data.deep) + 20);
         mapPin.open(wordCoordinate.x, wordCoordinate.y, getShopLogoURL(unit3D.data.bindShopId));
     }
 
     function showNodeTypes(nodeTypeId) {
-        for (var i = 0;i < curShownFloorIds.length;i ++) {
+        for (var i = 0; i < curShownFloorIds.length; i++) {
             var floor3D = floor3Ds[curShownFloorIds[i]];
             for (var nodeId in floor3D.subUnit3Ds) {
                 var unit3D = floor3D.subUnit3Ds[nodeId];
@@ -178,7 +178,7 @@ GIM.Map3D = function (domElementContainer) {
                     unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
                     new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
                     new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
-                }else{
+                } else {
 
                 }
             }
@@ -186,7 +186,7 @@ GIM.Map3D = function (domElementContainer) {
     }
 
     function drawPath(vector3Ds) {
-        vector3Ds =averageVectors(vector3Ds);
+        vector3Ds = averageVectors(vector3Ds);
 
         var pathGeometry = new THREE.Geometry();
         var vector3D;
@@ -198,42 +198,44 @@ GIM.Map3D = function (domElementContainer) {
         pathMesh = new THREE.Line(pathGeometry, new THREE.LineBasicMaterial({color: GIM.PATH_COLOR}));
         pathMesh.visible = isDebug;
 
-        for(var i = 0;i < pathGeometry.vertices.length;i ++){
+        for (var i = 0; i < pathGeometry.vertices.length; i++) {
             var vector3DofPath = pathGeometry.vertices[i];
-            var pointGeometry = new THREE.CircleGeometry(pathAnimatePointSize,8);
-            var pointMaterial = new THREE.MeshBasicMaterial({color:GIM.PATH_COLOR});
-            var pointMesh = new THREE.Mesh(pointGeometry,pointMaterial);
-            container3D.add(pointMesh);
-            pathAnimatePointMeshes.push(pointMesh);
-            pointMesh.position.x = vector3DofPath.x;
-            pointMesh.position.y = vector3DofPath.y;
-            pointMesh.position.z = vector3DofPath.z;
+            if (!(pathGeometry.vertices[i + 1] && pathGeometry.vertices[i].z !== pathGeometry.vertices[i + 1].z && i % 2 != 0)) {
+                var pointGeometry = new THREE.CircleGeometry(pathAnimatePointSize, 8);
+                var pointMaterial = new THREE.MeshBasicMaterial({color: GIM.PATH_COLOR});
+                var pointMesh = new THREE.Mesh(pointGeometry, pointMaterial);
+                container3D.add(pointMesh);
+                pathAnimatePointMeshes.push(pointMesh);
+                pointMesh.position.x = vector3DofPath.x;
+                pointMesh.position.y = vector3DofPath.y;
+                pointMesh.position.z = vector3DofPath.z + 15;
+            }
         }
 
         container3D.add(pathMesh);
     }
 
-    function doPathAnimate(){
-        pathAnimateIndexDelta ++;
-        if(pathAnimateIndexDelta > pathAnimateCircleLength) pathAnimateIndexDelta = 0;
-        for(var i = 0;i < pathAnimatePointMeshes.length;i ++){
+    function doPathAnimate() {
+        pathAnimateIndexDelta++;
+        if (pathAnimateIndexDelta > pathAnimateCircleLength) pathAnimateIndexDelta = 0;
+        for (var i = 0; i < pathAnimatePointMeshes.length; i++) {
             var mesh = pathAnimatePointMeshes[i];
             mesh.scale.x = mesh.scale.y = (1 - (i + pathAnimateIndexDelta) % pathAnimateCircleLength / pathAnimateCircleLength);
-            if(mesh.scale.x < 0.3)
+            if (mesh.scale.x < 0.3)
                 mesh.scale.x = mesh.scale.y = 1;
         }
     }
 
-    function clearPath(){
+    function clearPath() {
         if (pathMesh) {
             pathMesh.parent.remove(pathMesh);
             pathMesh = null;
             delete pathMesh;
         }
 
-        while(pathAnimatePointMeshes.length > 0){
+        while (pathAnimatePointMeshes.length > 0) {
             var mesh = pathAnimatePointMeshes.pop();
-            if(mesh){
+            if (mesh) {
                 mesh.parent.remove(mesh);
                 mesh = null;
                 delete mesh;
@@ -243,20 +245,19 @@ GIM.Map3D = function (domElementContainer) {
 
     //ASSIST FUNCTIONS//////////////////////////////////////////
 
-    function averageVectors(vector3Ds){
-        var gap = 16;
+    function averageVectors(vector3Ds) {
         var resultVector3Ds = [];
 
         var preVector = null;
-        for (var i = 0;i < vector3Ds.length;i ++){
+        for (var i = 0; i < vector3Ds.length; i++) {
             var vector = vector3Ds[i];
-            if(preVector){
+            if (preVector) {
                 resultVector3Ds.push(preVector);
                 var tmpVector = vector.clone().sub(preVector);
                 var length = tmpVector.length();
-                if(length > gap){
-                    var times = parseInt(length / gap);
-                    for(var t = 1;t < times;t ++){
+                if (length > GIM.PATH_POINT_GAP) {
+                    var times = parseInt(length / GIM.PATH_POINT_GAP);
+                    for (var t = 1; t < times; t++) {
                         resultVector3Ds.push(tmpVector.clone().multiplyScalar(t / times).add(preVector));
                     }
                 }
@@ -275,7 +276,7 @@ GIM.Map3D = function (domElementContainer) {
             for (var nodeId in floor3D.subUnit3Ds) {
                 var unit3D = floor3D.subUnit3Ds[nodeId];
                 if (shopId === unit3D.data.bindShopId) {
-                    console.log("- [GimMap].selectUint3DByShopId:", shopId,"DONE!");
+                    console.log("- [GimMap].selectUint3DByShopId:", shopId, "DONE!");
                     selectUnit3D(unit3D);
                     break;
                 }
@@ -301,19 +302,29 @@ GIM.Map3D = function (domElementContainer) {
         }
     }
 
-    function selectUnit3D(unit3D){
+    function selectUnit3D(unit3D) {
         curSelectedUnit3D = unit3D;
-        if(!unit3D.mesh.isLogo){
+        if (!unit3D.mesh.isServiceLogo) {
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
+//            var color = new THREE.color(curSelectedUnit3D.data.fill);
+//            color = color * 1.1;
+//            curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: curSelectedUnit3D.data.fill});
             curSelectedUnit3D.mesh.material = selectedUnit3DMaterial;
+        } else {
+
+            for (var i = 0; i < serviceLogoMeshes.length; i++) {
+                var mesh = serviceLogoMeshes[i];
+                new TWEEN.Tween(mesh.position).to({z: unit3D.data.origZ}, 500).easing(TWEEN.Easing.Elastic.Out).start();
+            }
+            new TWEEN.Tween(unit3D.mesh.position).to({z: unit3D.data.origZ + 20}, 500).easing(TWEEN.Easing.Elastic.Out).start();
         }
-        new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.4, x: unit3D.mesh.isLogo ? 1.2 : 1, y: unit3D.mesh.isLogo ? 1.2 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
+        new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.4, x: unit3D.mesh.isServiceLogo ? 1.1 : 1, y: unit3D.mesh.isServiceLogo ? 1.1 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
     }
 
     //UPDATE curSelectedUnit3D ONLY!
-    function clearSelectedUnit3D(){
-        if (curSelectedUnit3D !== null){
-            if(preSelectedUnit3DMaterial !== null && !curSelectedUnit3D.mesh.isLogo) curSelectedUnit3D.mesh.material = preSelectedUnit3DMaterial;
+    function clearSelectedUnit3D() {
+        if (curSelectedUnit3D !== null) {
+            if (preSelectedUnit3DMaterial !== null && !curSelectedUnit3D.mesh.isServiceLogo) curSelectedUnit3D.mesh.material = preSelectedUnit3DMaterial;
             new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1, x: 1, y: 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
             curSelectedUnit3D = null;
         }
@@ -358,9 +369,38 @@ GIM.Map3D = function (domElementContainer) {
         if (event.target.id === "gotoImage" && event.offsetY < mapPin.width) {
             if (curSelectedUnit3D) {
                 console.log("- [GimMap].onDocumentMouseDown ShopId:", curSelectedUnit3D.data.bindShopId);
-                if(curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP){
+                if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     navigateTo(curSelectedUnit3D.data.bindShopId);
-                }else{
+                }
+//                else{
+//                    console.log("- [GimMap].navigateTo Shop", curSelectedUnit3D.data.bindShopId);
+//
+//                    var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
+//                    var endFloorId = curSelectedUnit3D.data.floorId;
+//                    showFloors(startFloorId === endFloorId ? [startFloorId] : [startFloorId, endFloorId]);
+//
+//                    var vector3Ds = [];
+//                    var pathNodes = GIM.AStar.search(astarNodes, GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
+//                    for (var i = 0; i < pathNodes.length; i++) {
+//                        var pathNode = pathNodes[i];
+//                        var floorId = pathNode.data.floorId;
+//                        var floor3D = floor3Ds[floorId];
+//                        var vector3 = new THREE.Vector3(pathNode.x, pathNode.y, floor3D.mesh.position.z + 5);
+//                        vector3Ds.push(vector3);
+//                    }
+//                    drawPath(vector3Ds);
+////                        showPinOnUnit3D(curSelectedUnit3D);
+//                }
+            }
+        } else if (event.target.id === "searchImage") {
+            console.log("- [GimMap].goDetail:", curSelectedUnit3D.data.bindShopId);
+            GIM.goDetail(curSelectedUnit3D.data.bindShopId);
+        } else {
+            selectUnit3DByPosition(event.offsetX, event.offsetY);
+            if(curSelectedUnit3D){
+                if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
+                    showPinOnUnit3D(curSelectedUnit3D);
+                } else {
                     console.log("- [GimMap].navigateTo Shop", curSelectedUnit3D.data.bindShopId);
 
                     var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
@@ -377,15 +417,8 @@ GIM.Map3D = function (domElementContainer) {
                         vector3Ds.push(vector3);
                     }
                     drawPath(vector3Ds);
-//                        showPinOnUnit3D(curSelectedUnit3D);
                 }
             }
-        } else if (event.target.id === "searchImage") {
-            console.log("- [GimMap].goDetail:", curSelectedUnit3D.data.bindShopId);
-            GIM.goDetail(curSelectedUnit3D.data.bindShopId);
-        } else {
-            selectUnit3DByPosition(event.offsetX, event.offsetY);
-            showPinOnUnit3D(curSelectedUnit3D);
         }
     }
 
@@ -402,14 +435,14 @@ GIM.Map3D = function (domElementContainer) {
 
     //INITIALIZE FUNCTIONS///////////////////////////////////////
 
-    function init(){
+    function init() {
         GIM.navitateTo = navigateTo;
         domElementContainer.style.cssText += "overflow: hidden;position: absolute;";
         init3d();
         if (isDebug) addStats();
         document.addEventListener('mousedown', onDocumentMouseDown, false);
         animate();
-        setInterval(doPathAnimate,pathAnimateTime);
+        setInterval(doPathAnimate, pathAnimateTime);
     }
 
     function init3d() {
@@ -417,7 +450,6 @@ GIM.Map3D = function (domElementContainer) {
         var far = 10000;
 
         renderer = new THREE.WebGLRenderer({antialias: true});
-//        renderer = new THREE.CanvasRenderer({antialias: true});
         domElementContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
         renderer.setSize(containerWidth, containerHeight);
@@ -425,31 +457,28 @@ GIM.Map3D = function (domElementContainer) {
         renderer.shadowMapType = THREE.PCFShadowMap;
 
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(15, containerWidth / containerHeight, near, far);
+        camera = new THREE.PerspectiveCamera(60, containerWidth / containerHeight, near, far);
         container3D = new THREE.Object3D();
         scene.add(container3D);
 
-//        var light = new THREE.DirectionalLight(0x333333);
-//        scene.add(light);
-//        light.position.set(1000, -1000, 1000).normalize();
+        var light = new THREE.DirectionalLight(0x000000, 0);
+        scene.add(light);
+        light.position.set(1400, -2200, 2200);
+        light.target.position.set(500, -300, 0);
+        light.castShadow = true;
+        light.shadowCameraNear = 1800;
+        light.shadowCameraFar = 4500;
+        light.shadowBias = 0.0001;
+        light.shadowDarkness = 0.6;
+        light.shadowMapWidth = light.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
+//        light.shadowCameraVisible = true;
 
-        var spotLight = new THREE.SpotLight(0xFFFFFF,0.5);
-        scene.add(spotLight);
-        spotLight.position.set(1400,-1200,2000);
-        spotLight.target.position.set(500,0,0);
-        spotLight.castShadow = true;
-        spotLight.shadowCameraNear = 1000;
-        spotLight.shadowCameraFar = 6000;
-        spotLight.shadowCameraFov = 60;
-        spotLight.shadowBias = 0.0001;
-        spotLight.shadowDarkness = 0.6;
-        spotLight.shadowMapWidth = GIM.SHADOW_MAP_SIZE;
-        spotLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-        if(isDebug)
-            spotLight.shadowCameraVisible = true;
+        var backLight = new THREE.DirectionalLight(0x333333, 1);
+        scene.add(backLight);
+        backLight.position.set(400, 400, 400);
 
         if (isDebug) {
-            var plane = new THREE.Mesh( new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
+            var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
             container3D.add(plane);
         }
 
@@ -473,7 +502,7 @@ GIM.Map3D = function (domElementContainer) {
                     var pushMesh = floor3D.subUnit3Ds[key].mesh;
                     if (pushMesh) {
                         meshes.push(pushMesh);
-                        if (pushMesh.isLogo) logoOnlyMeshes.push(pushMesh);
+                        if (pushMesh.isServiceLogo) serviceLogoMeshes.push(pushMesh);
                     }
                 }
 
@@ -481,10 +510,10 @@ GIM.Map3D = function (domElementContainer) {
                 for (var key in floor3D.data.unitsData) {
                     var unitData = floor3D.data.unitsData[key];
                     astarNodes[unitData.nodeId] = unitData.astarNode;
-                    if(unitData.nodeId === GIM.MACHINE_NODE_ID) isCurFloor = true;
+                    if (unitData.nodeId === GIM.MACHINE_NODE_ID) isCurFloor = true;
                 }
 
-                addFloorLogo(floor3D.data.floorId, "assets/img/floorlogo/" + floor3D.data.floorId + ".png",isCurFloor);
+                addFloorLogo(floor3D.data.floorId, "assets/img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor);
             }
 
             for (var nodeId in astarNodes) {
@@ -501,7 +530,7 @@ GIM.Map3D = function (domElementContainer) {
 
             showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
 
-            cameraPosition.setCamera(Math.PI * 0.15, 6400, 0);
+            cameraPosition.setCamera(Math.PI * 0.25, 1800, 0);
             cameraPosition.posX = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
         });
     }
@@ -528,22 +557,22 @@ GIM.Map3D = function (domElementContainer) {
                 var targetImage = event.target;
                 TWEEN.remove(targetImage);
                 targetImage.style.opacity = 0;
-                new TWEEN.Tween(targetImage.style).to({opacity : 1}, 300).easing(TWEEN.Easing.Exponential.InOut).start();
+                new TWEEN.Tween(targetImage.style).to({opacity: 1}, 300).easing(TWEEN.Easing.Exponential.InOut).start();
             }
         }
     }
 
     function addFloorLogo(floorId, logoURL, isCurFloor) {
         var floorLabelAndLogo = {
-            id : floorId,
-            width : 170,
-            height : 120,
-            container : document.createElement("div"),
-            floorLabel : document.createElement("p"),
-            floorCurLabel : document.createElement("p"),
-            floorLogoImage : new Image(),
-            _selected : false,
-            set selected(value){
+            id: floorId,
+            width: 170,
+            height: 120,
+            container: document.createElement("div"),
+            floorLabel: document.createElement("p"),
+            floorCurLabel: document.createElement("p"),
+            floorLogoImage: new Image(),
+            _selected: false,
+            set selected(value) {
                 this._selected = value;
                 this.container.style.opacity = value ? 1 : 0.4;
                 this.container.style.border = value ? "1px dashed #FF0033" : "1px dashed #AAAAAA";
@@ -552,14 +581,18 @@ GIM.Map3D = function (domElementContainer) {
                 TWEEN.remove(this);
                 new TWEEN.Tween(this).to({scale: value ? 1.2 : 1}, 300).easing(TWEEN.Easing.Exponential.Out).start();
             },
-            get selected(){return this._selected},
-            _scale : 1,
-            set scale(value){
+            get selected() {
+                return this._selected
+            },
+            _scale: 1,
+            set scale(value) {
                 this._scale = value;
                 this.container.style.height = (this.height * value) + "px";
                 this.container.style.width = (this.width * value) + "px";
             },
-            get scale(){return this._scale;}
+            get scale() {
+                return this._scale;
+            }
         };
 
         floorSelector.appendChild(floorLabelAndLogo.container);
@@ -570,9 +603,9 @@ GIM.Map3D = function (domElementContainer) {
         floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLogoImage);
 
         floorLabelAndLogo.container.style.cssText = "position:relative;height:" + floorLabelAndLogo.height + "px;width:" + floorLabelAndLogo.width + "px;opacity:0.3;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
-        floorLabelAndLogo.floorLabel.style.cssText = "margin:0 0 0 4px;";
-        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 20px;font-weight: normal;position:absolute;top:5px;left:40px;margin:0;";
-        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%";
+        floorLabelAndLogo.floorLabel.style.cssText = "margin:0;position:absolute;left:2px;top:2px;line-height:22px";
+        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 20px;font-weight: normal;position:absolute;top:0px;left:40px;margin:0;";
+        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%;position:absolute;top:36px;left:2px;";
 
         floorLabelAndLogo.floorLabel.innerHTML = floorId.substr(5, 1) + "F";
         floorLabelAndLogo.floorCurLabel.innerHTML = isCurFloor ? "当前楼层" : "目标楼层";
@@ -601,23 +634,24 @@ GIM.Map3D = function (domElementContainer) {
             stats.update();
         }
 
-        for (var i = 0; i < logoOnlyMeshes.length; i++) {
-            var mesh = logoOnlyMeshes[i];
-            mesh.lookAt(camera.position);
+        for (var i = 0; i < serviceLogoMeshes.length; i++) {
+            var mesh = serviceLogoMeshes[i];
+//            mesh.lookAt(camera.position);
         }
 
         renderer.render(scene, camera);
         TWEEN.update();
     }
 
-    if(!GIM.mapInstans){
-        GIM.SVGParser.loadURL("assets/shoplist.json", function (jsonString) {
-            GIM.shopList = JSON.parse(jsonString);
-            init();
-        });
-        GIM.mapInstans = this;
-    }else{
-        console.log("- [GimMap].constructor:mapInstance was instanced!")
-    }
+    GIM.SVGParser.loadURL("assets/shoplist.json", function (jsonString) {
+        GIM.shopList = JSON.parse(jsonString);
+        init();
+    });
+
+//    if (!GIM.mapInstans) {
+//        GIM.mapInstans = this;
+//    } else {
+//        console.log("- [GimMap].constructor:mapInstance was instanced!")
+//    }
 
 }

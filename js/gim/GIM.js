@@ -17,17 +17,18 @@ GIM.NODE_TYPE_TOILET		= "7";
 GIM.NODE_TYPE_SERVICE		= "8";
 GIM.NODE_TYPE_ATM   		= "9";
 
-GIM.SERVER                  = "192.168.1.151:3000";
+GIM.SERVER                  = "192.168.1.208:3000";
 GIM.MACHINE_NODE_ID         = "node_2014_8_13_01:18:25_578";
 
-GIM.FLOOR_GAP               = 1220;
+GIM.FLOOR_GAP               = 700;
+GIM.PATH_POINT_GAP          = 15;
 GIM.PATH_COLOR              = 0xFF0033;
 GIM.MAP_OFFSET_Y            = 200;
 GIM.MAP_BACKGROUND_COLOR    = 0xDDDDDD;
 GIM.SELECTED_COLOR          = 0xFFBB00;
-GIM.FONT_NAME               = "Microsoft Yahei";
-//GIM.FONT_NAME             = "Felix Titling";
-GIM.SHADOW_MAP_SIZE         = 4 * 1024;
+//GIM.FONT_NAME               = "Microsoft Yahei";
+GIM.FONT_NAME               = "造字工房悦黑演示版常规体";
+GIM.SHADOW_MAP_SIZE         = 0.5 * 1024;
 
 GIM.DATA_SOURCE_URL         = "assets/data.sgxml";
 GIM.DEFAULT_SHOP_LOGO_URL   = "assets/img/shoplogo/0.png";

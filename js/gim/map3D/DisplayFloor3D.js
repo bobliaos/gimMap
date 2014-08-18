@@ -35,20 +35,26 @@ GIM.DisplayUnit3D = function (unitData) {
 
     var positionOffsetZ = 10;
 
-    function addLogo(logoURL,isLogo){
-        var logoSize = isLogo ? 40 : 60;
+    function addLogo(logoURL,isServiceLogo){
+        var logoSize = isServiceLogo ? 60 : 80;
 
         var logoGeometry = new THREE.PlaneGeometry(logoSize, logoSize, 1, 1);
         var logoTexture = THREE.ImageUtils.loadTexture(logoURL);
         var logoMaterial = new THREE.MeshBasicMaterial({map: logoTexture, transparent: true});
         var logoMesh = new THREE.Mesh(logoGeometry, logoMaterial);
-        logoMesh.isLogo = isLogo;
+        logoMesh.isServiceLogo = isServiceLogo;
         if(tmpMesh) tmpMesh.add(logoMesh);
         else tmpMesh = logoMesh;
+        logoMesh.castShadow = true;
+        logoMesh.receiveShadow = true;
         logoMesh.position.x = unitData.nodePosition.x;
-        logoMesh.position.y = - unitData.nodePosition.y + (isLogo ? 0 : logoSize * 0.5);
+        logoMesh.position.y = - unitData.nodePosition.y + (isServiceLogo ? 0 : logoSize * 0.5);
         logoMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
-        if(isLogo) logoMesh.position.z = 30;
+        logoMesh.rotation.x = Math.PI * 0.25;
+        if(isServiceLogo) {
+            unitData.origZ = 50;
+            logoMesh.position.z = unitData.origZ;
+        }
     }
 
     function addText(text,offsetY,fontSize){
@@ -56,7 +62,8 @@ GIM.DisplayUnit3D = function (unitData) {
         if(offsetY === undefined) offsetY = 0;
         if(fontSize === undefined) fontSize = 18;
 
-        var fontStyle = "Bold " + fontSize + "px " + GIM.FONT_NAME;
+//        var fontStyle = "Bold " + fontSize + "px " + GIM.FONT_NAME;
+        var fontStyle = fontSize + "px " + GIM.FONT_NAME;
 
         var textCanvas = document.createElement("canvas");
 //        document.body.appendChild(textCanvas);

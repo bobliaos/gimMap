@@ -18,14 +18,35 @@
     <script type="text/javascript" src="js/gim/com/MapPin.js"></script>
     <script type="text/javascript">
         window.onload = function () {
-            var map = new GIM.Map3D(mapContainer);
-            GIM.navitateTo("707");
+//            map = new GIM.Map3D(mapContainer);
+//            GIM.navitateTo("707");
         };
+
+        var map;
+        var container = null;
+        function showMap(){
+            if(!container){
+                container = document.createElement("div");
+                container.style.cssText = "width: 1040px;height: 1440px;";
+                map = new GIM.Map3D(container);
+//                container.addEventListener("webglcontextlost", function(event) {
+//                    console.log("昆紧靠");
+//                }, true);
+            }
+            mapContainer.appendChild(container);
+        }
+
+        function hideMap(){
+            mapContainer.removeChild(container);
+        }
     </script>
 </head>
 <body style="padding: 0;margin: 0">
     <!--<div id="mapContainer" style="width: 1040px;height: 1440px;background: #F03;">-->
-    <div style="background: #0099CC;width: 1040px;height: 360px"></div>
+    <div style="background: #0099CC;width: 1040px;height: 360px;cursor: pointer">
+        <div style="background: #FF0033;width:220px;height: 124px" onclick="showMap()">显示地图</div>
+        <div style="background: #FFFF33;width:220px;height: 124px" onclick="hideMap()">隐藏地图</div>
+    </div>
     <div id="mapContainer" style="width: 1040px;height: 1440px;">
     <!--<div id="mapContainer" style="width: 520px;height: 720px;background: #F03;">-->
     </div>
