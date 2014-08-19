@@ -35,7 +35,7 @@ GIM.NODE_TYPE_TOILET		= "7";
 GIM.NODE_TYPE_SERVICE		= "8";
 GIM.NODE_TYPE_ATM   		= "9";
 
-GIM.SERVER                  = "192.168.1.208:3000";
+GIM.SERVER                  = "http://192.168.1.208:3000";
 GIM.MACHINE_NODE_ID         = "node_2014_8_13_01:18:25_578";
 
 GIM.FLOOR_GAP               = 700;

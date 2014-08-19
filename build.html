@@ -10,6 +10,22 @@
     <script type="text/javascript" src="build/gimmap.min.js"></script>
 
     <script type="text/javascript">
+        function init() {
+            var config = {
+                server: "127.0.0.1",
+                machindeNodeId: "node_2014_8_13_01:18:25_578",
+                shadowRank: "6",
+                sourceSVGURL: "assets/data.sgxml",
+                sourceShopListURL: "assets/shoplist.json"
+            };
+
+            GIM.SERVER          = config.server;
+            GIM.MACHINE_NODE_ID = config.machindeNodeId;
+            GIM.SHADOW_MAP_SIZE = parseFloat(config.shadowRank) * 512;
+            GIM.DATA_SOURCE_URL = config.sourceSVGURL;
+            GIM.SHOP_LIST_URL   = config.sourceShopListURL;
+        }
+
         var container;
         function showMap() {
             container = document.createElement("div");
@@ -36,7 +52,7 @@
         }
     </script>
 </head>
-<body style="margin: 0;padding: 0;">
+<body style="margin: 0;padding: 0;" onload="init()">
 <div style="background: #0099CC;width: 1040px;height: 360px;cursor: pointer">
     <button onclick="showMap()">显示地图</button>
     <br/>

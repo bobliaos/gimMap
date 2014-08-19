@@ -796,6 +796,7 @@ GIM.DisplayUnit3D = function (unitData) {
 
 GIM.Map3D = function (mainContainer) {
     var isDebug = false;
+    var isHideShadow = false;
 
     var targetRotation = 0;
     var targetRotationOnMouseDown = 0;
@@ -830,7 +831,6 @@ GIM.Map3D = function (mainContainer) {
     var serviceSelector;
 
     var preSelectedUnit3DMaterial = null;
-    var selectedUnit3DMaterial = new THREE.MeshLambertMaterial({color: GIM.SELECTED_COLOR, ambient: GIM.SELECTED_COLOR, emissive: GIM.SELECTED_COLOR});
 
     var cameraPosition = {
         _radian: 0,
@@ -1236,6 +1236,8 @@ GIM.Map3D = function (mainContainer) {
         var near = 1;
         var far = 10000;
 
+        isHideShadow = GIM.SHADOW_MAP_SIZE === 0;
+
         renderer = new THREE.WebGLRenderer({antialias: true});
         mainContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
@@ -1250,21 +1252,23 @@ GIM.Map3D = function (mainContainer) {
 
         setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
 
-        var light = new THREE.DirectionalLight(0x000000, 0);
-        scene.add(light);
-        light.position.set(1400, -2200, 2200);
-        light.target.position.set(500, -300, 0);
-        light.castShadow = true;
-        light.shadowCameraNear = 1800;
-        light.shadowCameraFar = 4500;
-        light.shadowBias = 0.0001;
-        light.shadowDarkness = 0.6;
-        light.shadowMapWidth = light.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-        if(isDebug) light.shadowCameraVisible = true;
+        if(!false) {
+            var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
+            scene.add(shadowLight);
+            shadowLight.position.set(1400, -2200, 2200);
+            shadowLight.target.position.set(500, -300, 0);
+            shadowLight.castShadow = true;
+            shadowLight.shadowCameraNear = 1800;
+            shadowLight.shadowCameraFar = 4500;
+            shadowLight.shadowBias = 0.0001;
+            shadowLight.shadowDarkness = 0.6;
+            shadowLight.shadowMapWidth = shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
+            if(isDebug) shadowLight.shadowCameraVisible = true;
+        }
 
-        var backLight = new THREE.DirectionalLight(0x333333, 1);
+        var backLight = new THREE.DirectionalLight(0x333333, 0.8);
         scene.add(backLight);
-        backLight.position.set(400, 500, 400);
+        backLight.position.set(400, 500, 500);
 
         if (isDebug) {
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
@@ -1432,14 +1436,5 @@ GIM.Map3D = function (mainContainer) {
         TWEEN.update();
     }
 
-    GIM.SVGParser.loadURL(GIM.CONFIG_URL,function(configJSONString){
-        var config = JSON.parse(configJSONString);
-        if(typeof (config.server) !== "undefined"               && config.server !== "")            GIM.SERVER          = config.server;
-        if(typeof (config.machindeNodeId) !== "undefined"       && config.machindeNodeId !== "")    GIM.MACHINE_NODE_ID = config.machindeNodeId;
-        if(typeof (config.shadowRank) !== "undefined"           && config.shadowRank !== "")        GIM.SHADOW_MAP_SIZE = parseFloat(config.shadowRank) * 1024;
-        if(typeof (config.sourceSVGURL) !== "undefined"         && config.sourceSVGURL !== "")      GIM.DATA_SOURCE_URL = config.sourceSVGURL;
-        if(typeof (config.sourceShopListURL) !== "undefined"    && config.sourceShopListURL !== "") GIM.SHOP_LIST_URL   = config.sourceShopListURL;
-
-        init();
-    });
+    init();
 }

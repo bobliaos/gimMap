@@ -16,6 +16,22 @@
     <script type="text/javascript" src="js/gim/com/MapPin.js"></script>
 
     <script type="text/javascript">
+        function init() {
+            var config = {
+                server: "http://192.168.1.208:3000",
+                machindeNodeId: "node_2014_8_13_01:18:25_578",
+                shadowRank: "4",
+                sourceSVGURL: "assets/data.sgxml",
+                sourceShopListURL: "assets/shoplist.json"
+            };
+
+            GIM.SERVER          = config.server;
+            GIM.MACHINE_NODE_ID = config.machindeNodeId;
+            GIM.SHADOW_MAP_SIZE = parseFloat(config.shadowRank) * 512;
+            GIM.DATA_SOURCE_URL = config.sourceSVGURL;
+            GIM.SHOP_LIST_URL   = config.sourceShopListURL;
+        }
+
         var container;
         function showMap() {
             container = document.createElement("div");
@@ -29,20 +45,20 @@
             delete container;
         }
 
-        function navigateTo(){
+        function navigateTo() {
             var shopId = document.getElementById("shopIdInput").value;
-            if(shopId !== "")
+            if (shopId !== "")
                 GIM.navitateTo(shopId);
             else
                 alert("请先输入店铺号");
         }
 
-        GIM.goDetail = function(shopId){
+        GIM.goDetail = function (shopId) {
             alert("显示店铺 " + shopId + " 的详情!");
         }
     </script>
 </head>
-<body style="margin: 0;padding: 0;">
+<body style="margin: 0;padding: 0;" onload="init()">
 <div style="background: #0099CC;width: 1040px;height: 360px;cursor: pointer">
     <button onclick="showMap()">显示地图</button>
     <br/>

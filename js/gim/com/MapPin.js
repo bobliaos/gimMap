@@ -13,7 +13,7 @@ GIM.MapPin = function (parentContainer) {
 //        pinRadius: 57,
 //        maxRadius: 98,
         pinRadius: 42,
-        maxRadius: 86,
+        maxRadius: 90,
         container: document.createElement("div"),
         menuCanvas: document.createElement("canvas"),
         pinCanvas: document.createElement("canvas"),
@@ -65,7 +65,6 @@ GIM.MapPin = function (parentContainer) {
             this._isOpenning = true;
 
             if(shopLogoURL === "") shopLogoURL = GIM.DEFAULT_SHOP_LOGO_URL;
-            else shopLogoURL = "http://" + shopLogoURL;
             this.logoImage.src = shopLogoURL;
             console.log("- [GimMap]MapPin.open:",shopLogoURL,this.logoImage.src);
 
@@ -136,18 +135,18 @@ GIM.MapPin = function (parentContainer) {
             var tmpRadius = this._radius > this.maxRadius ? this.maxRadius : this._radius;
             tmpRadius = tmpRadius < 0 ? 0 : tmpRadius;
 
-            pinCanvasCTX.strokeStyle = "rgba(255,255,255," + this._alpha + ")";
-            pinCanvasCTX.lineWidth = 4;
-            pinCanvasCTX.fillStyle = "rgba(195,13,35," + this._alpha + ")";
+            pinCanvasCTX.strokeStyle = "rgba(128,128,128," + this._alpha + ")";
+            pinCanvasCTX.lineWidth = 2;
+            pinCanvasCTX.fillStyle = "rgba(128,128,128," + this._alpha + ")";
             pinCanvasCTX.lineCap = "round";
             pinCanvasCTX.beginPath();
             var centerX = this.width * 0.5;
             var centerY = this.height - this._radius + 20;
             if(centerY < this.height * 0.5 + 20) centerY = this.height * 0.5 + 20;
-            var bottomY = this.height - pinCanvasCTX.lineWidth;
+            var bottomY = this.height - pinCanvasCTX.lineWidth - 4;
             var curRadius = tmpRadius > this.pinRadius ? this.pinRadius : tmpRadius;
             pinCanvasCTX.moveTo(centerX, bottomY);
-            pinCanvasCTX.arc(centerX, centerY, curRadius, Math.PI * (0.5 + 0.13), Math.PI * (0.5 - 0.13));
+            pinCanvasCTX.arc(centerX, centerY, curRadius, Math.PI * (0.5 + 0.04), Math.PI * (0.5 - 0.04));
             pinCanvasCTX.lineTo(centerX, bottomY);
             pinCanvasCTX.stroke();
             pinCanvasCTX.fill();
@@ -155,11 +154,9 @@ GIM.MapPin = function (parentContainer) {
 
             //draw menuCanvas
             if (tmpRadius > this.pinRadius + 10) {
-                var angle = 8 * Math.PI / 180;
-
                 menuCanvasCTX.strokeStyle = "rgba(255,255,255," + this._alpha + ")";
                 menuCanvasCTX.lineWidth = 4;
-                menuCanvasCTX.fillStyle = "rgba(235,97,104," + this._alpha + ")";
+                menuCanvasCTX.fillStyle = "rgba(181,0,65," + this._alpha + ")";
                 var menuCenterX = this.width * 0.5;
                 var menuCenterY = this.height * 0.5 + 20;
                 menuCanvasCTX.beginPath();

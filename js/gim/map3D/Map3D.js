@@ -4,6 +4,7 @@
 
 GIM.Map3D = function (mainContainer) {
     var isDebug = false;
+    var isHideShadow = false;
 
     var targetRotation = 0;
     var targetRotationOnMouseDown = 0;
@@ -38,7 +39,6 @@ GIM.Map3D = function (mainContainer) {
     var serviceSelector;
 
     var preSelectedUnit3DMaterial = null;
-    var selectedUnit3DMaterial = new THREE.MeshLambertMaterial({color: GIM.SELECTED_COLOR, ambient: GIM.SELECTED_COLOR, emissive: GIM.SELECTED_COLOR});
 
     var cameraPosition = {
         _radian: 0,
@@ -318,11 +318,11 @@ GIM.Map3D = function (mainContainer) {
         if (!unit3D.mesh.isServiceLogo) {
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
             var color = new THREE.Color(curSelectedUnit3D.data.fill);
-            color.add(new THREE.Color(0x333333));
+            var i = color.getHSL();
+            color.setHSL(i.h, i.s + 0.3, i.l + 0.07);
             curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color });
-//            curSelectedUnit3D.mesh.material = selectedUnit3DMaterial;
+//            curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: GIM.SELECTED_COLOR, ambient: GIM.SELECTED_COLOR, emissive: GIM.SELECTED_COLOR });
         } else {
-
             for (var i = 0; i < serviceLogoMeshes.length; i++) {
                 var mesh = serviceLogoMeshes[i];
                 new TWEEN.Tween(mesh.position).to({z: unit3D.data.origZ}, 500).easing(TWEEN.Easing.Elastic.Out).start();
@@ -335,7 +335,12 @@ GIM.Map3D = function (mainContainer) {
     //UPDATE curSelectedUnit3D ONLY!
     function clearSelectedUnit3D() {
         if (curSelectedUnit3D !== null) {
-            if (preSelectedUnit3DMaterial !== null && !curSelectedUnit3D.mesh.isServiceLogo) curSelectedUnit3D.mesh.material = preSelectedUnit3DMaterial;
+            if (preSelectedUnit3DMaterial !== null && !curSelectedUnit3D.mesh.isServiceLogo) {
+                var tmpMaterial = curSelectedUnit3D.mesh.material;
+                tmpMaterial = undefined;
+                delete  tmpMaterial;
+                curSelectedUnit3D.mesh.material = preSelectedUnit3DMaterial;
+            }
             new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1, x: 1, y: 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
             curSelectedUnit3D = null;
         }
@@ -444,6 +449,8 @@ GIM.Map3D = function (mainContainer) {
         var near = 1;
         var far = 10000;
 
+        isHideShadow = GIM.SHADOW_MAP_SIZE === 0;
+
         renderer = new THREE.WebGLRenderer({antialias: true});
         mainContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
@@ -458,21 +465,23 @@ GIM.Map3D = function (mainContainer) {
 
         setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
 
-        var light = new THREE.DirectionalLight(0x000000, 0);
-        scene.add(light);
-        light.position.set(1400, -2200, 2200);
-        light.target.position.set(500, -300, 0);
-        light.castShadow = true;
-        light.shadowCameraNear = 1800;
-        light.shadowCameraFar = 4500;
-        light.shadowBias = 0.0001;
-        light.shadowDarkness = 0.6;
-        light.shadowMapWidth = light.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-        if(isDebug) light.shadowCameraVisible = true;
+        if(!false) {
+            var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
+            scene.add(shadowLight);
+            shadowLight.position.set(1400, -2200, 2200);
+            shadowLight.target.position.set(500, -300, 0);
+            shadowLight.castShadow = true;
+            shadowLight.shadowCameraNear = 1800;
+            shadowLight.shadowCameraFar = 4500;
+            shadowLight.shadowBias = 0.0001;
+            shadowLight.shadowDarkness = 0.6;
+            shadowLight.shadowMapWidth = shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
+            if(isDebug) shadowLight.shadowCameraVisible = true;
+        }
 
-        var backLight = new THREE.DirectionalLight(0x333333, 1);
+        var backLight = new THREE.DirectionalLight(0x333333, 0.8);
         scene.add(backLight);
-        backLight.position.set(400, 500, 400);
+        backLight.position.set(400, 500, 500);
 
         if (isDebug) {
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
@@ -563,7 +572,7 @@ GIM.Map3D = function (mainContainer) {
         var floorLabelAndLogo = {
             id: floorId,
             width: 170,
-            height: 120,
+            height: 112,
             container: document.createElement("div"),
             floorLabel: document.createElement("p"),
             floorCurLabel: document.createElement("p"),
@@ -572,7 +581,7 @@ GIM.Map3D = function (mainContainer) {
             set selected(value) {
                 this._selected = value;
                 this.container.style.opacity = value ? 1 : 0.4;
-                this.container.style.border = value ? "1px dashed #FF0033" : "1px dashed #AAAAAA";
+//                this.container.style.border = value ? "1px dashed #FF0033" : "1px dashed #AAAAAA";
                 this.container.style.color = value ? "#FF0033" : "#222222";
                 this.floorCurLabel.style.display = value ? "block" : "none";
                 TWEEN.remove(this);
@@ -595,14 +604,14 @@ GIM.Map3D = function (mainContainer) {
         floorSelector.appendChild(floorLabelAndLogo.container);
         floorSelecterLogos.push(floorLabelAndLogo);
 
+        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLogoImage);
         floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLabel);
         floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorCurLabel);
-        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLogoImage);
 
-        floorLabelAndLogo.container.style.cssText = "position:relative;height:" + floorLabelAndLogo.height + "px;width:" + floorLabelAndLogo.width + "px;opacity:0.3;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
+        floorLabelAndLogo.container.style.cssText = "position:relative;height:" + floorLabelAndLogo.height + "px;width:" + floorLabelAndLogo.width + "px;opacity:0.3;margin-bottom:8px;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
         floorLabelAndLogo.floorLabel.style.cssText = "margin:0;position:absolute;left:2px;top:2px;line-height:22px";
-        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 20px;font-weight: normal;position:absolute;top:0px;left:40px;margin:0;";
-        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%;position:absolute;top:36px;left:2px;";
+        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 16px;font-weight: normal;position:absolute;bottom:2px;left:2px;margin:0;";
+        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%;position:absolute;top:22px;left:2px;";
 
         floorLabelAndLogo.floorLabel.innerHTML = floorId.substr(5, 1) + "F";
         floorLabelAndLogo.floorCurLabel.innerHTML = isCurFloor ? "当前楼层" : "目标楼层";
@@ -640,14 +649,5 @@ GIM.Map3D = function (mainContainer) {
         TWEEN.update();
     }
 
-    GIM.SVGParser.loadURL(GIM.CONFIG_URL,function(configJSONString){
-        var config = JSON.parse(configJSONString);
-        if(typeof (config.server) !== "undefined"               && config.server !== "")            GIM.SERVER          = config.server;
-        if(typeof (config.machindeNodeId) !== "undefined"       && config.machindeNodeId !== "")    GIM.MACHINE_NODE_ID = config.machindeNodeId;
-        if(typeof (config.shadowRank) !== "undefined"           && config.shadowRank !== "")        GIM.SHADOW_MAP_SIZE = parseFloat(config.shadowRank) * 1024;
-        if(typeof (config.sourceSVGURL) !== "undefined"         && config.sourceSVGURL !== "")      GIM.DATA_SOURCE_URL = config.sourceSVGURL;
-        if(typeof (config.sourceShopListURL) !== "undefined"    && config.sourceShopListURL !== "") GIM.SHOP_LIST_URL   = config.sourceShopListURL;
-
-        init();
-    });
+    init();
 }
