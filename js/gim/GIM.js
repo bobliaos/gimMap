@@ -14,7 +14,7 @@ var GIM = {
         if(this._mapInstance === null){
             console.log("- [GimMap]GIM.VERSION:",this.VERSION,this.INFO);
             this._mapInstance = document.createElement("div");
-            this._mapInstance.style.cssText = "width: 1040px;height: 1440px;overflow: hidden;position: absolute;background:#000000";
+            this._mapInstance.style.cssText = "width: 1040px;height: 1440px;overflow: hidden;position: absolute;background:#888888";
             this._map = new GIM.Map3D(this._mapInstance);
         }
         return this._mapInstance;
@@ -39,7 +39,7 @@ GIM.SERVER                  = "http://192.168.1.208:3000";
 GIM.MACHINE_NODE_ID         = "node_2014_8_13_01:18:25_578";
 
 GIM.FLOOR_GAP               = 700;
-GIM.PATH_POINT_GAP          = 12;
+GIM.PATH_POINT_GAP          = 8;
 GIM.PATH_COLOR              = 0xFF0000;
 GIM.MAP_OFFSET_Y            = 200;
 GIM.MAP_BACKGROUND_COLOR    = 0xDDDDDD;

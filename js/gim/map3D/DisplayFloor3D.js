@@ -35,8 +35,8 @@ GIM.DisplayUnit3D = function (unitData) {
 
     var positionOffsetZ = 10;
 
-    function addLogo(logoURL,isServiceLogo){
-        var logoSize = isServiceLogo ? 60 : 80;
+    function addLogo(logoURL,isServiceLogo,logoSize){
+        var logoSize = logoSize === undefined ? (isServiceLogo ? 60 : 80) : logoSize;
 
         var logoGeometry = new THREE.PlaneGeometry(logoSize, logoSize, 1, 1);
         var logoTexture = THREE.ImageUtils.loadTexture(logoURL);
@@ -52,7 +52,7 @@ GIM.DisplayUnit3D = function (unitData) {
         logoMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
         logoMesh.rotation.x = Math.PI * 0.25;
         if(isServiceLogo) {
-            unitData.origZ = 50;
+            unitData.origZ = logoSize * 0.5 + 10;
             logoMesh.position.z = unitData.origZ;
         }
     }
