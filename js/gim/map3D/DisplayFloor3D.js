@@ -48,7 +48,7 @@ GIM.DisplayUnit3D = function (unitData) {
         logoMesh.castShadow = true;
         logoMesh.receiveShadow = true;
         logoMesh.position.x = unitData.nodePosition.x;
-        logoMesh.position.y = - unitData.nodePosition.y + (isServiceLogo ? 0 : logoSize * 0.5);
+        logoMesh.position.y = - unitData.nodePosition.y + (isServiceLogo ? 0 : logoSize * 0.5) + (logoSize > 100 ? 20 : 0);
         logoMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
         logoMesh.rotation.x = Math.PI * 0.25;
         if(isServiceLogo) {
@@ -107,7 +107,15 @@ GIM.DisplayUnit3D = function (unitData) {
             }
             break;
         case GIM.NODE_TYPE_MACHINE:
-            addLogo("assets/img/nodetypelogo/machine.png",true);
+            addLogo("assets/img/nodetypelogo/machine_.png",true,101);
+            var tween = new TWEEN.Tween(tmpMesh.material);
+
+            function doAnimate(){
+                tween.to({opacity:1},600).easing(TWEEN.Easing.Elastic.InOut).onComplete(function(){
+                    tween.to({opacity:0},220).easing(TWEEN.Easing.Linear.None).onComplete(doAnimate).start();
+                }).delay(Math.random() * 600 + 300).start();
+            }
+            doAnimate();
             break;
         case GIM.NODE_TYPE_ESCALATOR:
             addLogo("assets/img/nodetypelogo/escalator.png",true);

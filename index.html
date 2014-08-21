@@ -36,6 +36,7 @@
         var container;
         function showMap() {
             container = document.createElement("div");
+            container.style.position = "absolute";
             mapContainer.appendChild(container);
 
             container.appendChild(GIM.mapInstance);
@@ -68,7 +69,7 @@
     <input placeholder="请输入店铺号" id="shopIdInput" type="text" value=""/>
     <button onclick="navigateTo()">开始导航</button>
 </div>
-<div id="mapContainer" style="width: 1040px;height: 1440px;">
+<div id="mapContainer" style="width: 1040px;height: 1440px;text-align: center">
 </div>
 </body>
 </html>

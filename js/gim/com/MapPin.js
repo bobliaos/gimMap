@@ -13,7 +13,7 @@ GIM.MapPin = function (parentContainer) {
 //        pinRadius: 57,
 //        maxRadius: 98,
         pinRadius: 42,
-        maxRadius: 90,
+        maxRadius: 88,
         container: document.createElement("div"),
         menuCanvas: document.createElement("canvas"),
         pinCanvas: document.createElement("canvas"),
@@ -81,7 +81,7 @@ GIM.MapPin = function (parentContainer) {
             this.rotation = 0;
             this.gotoImage.style.display = this.searchImage.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
-            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 500).easing(TWEEN.Easing.Elastic.Out).onComplete(function(){
+            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 30).easing(TWEEN.Easing.Elastic.Out).onComplete(function(){
                 this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
                 this.gotoImage.style.display = this.searchImage.style.display = "block";
                 new TWEEN.Tween(this.gotoImage.style).to({opacity:1},200).start();
@@ -93,7 +93,7 @@ GIM.MapPin = function (parentContainer) {
             this.logoImage.src = "";
             this.logoCanvas.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
-            new TWEEN.Tween(this).to({alpha: 0, rotation: 0, radius: 10}, 400).easing(TWEEN.Easing.Back.In).onComplete(function () {
+            new TWEEN.Tween(this).to({alpha: 0, rotation: 0, radius: 10}, 20).easing(TWEEN.Easing.Back.In).onComplete(function () {
                 if (!this._isOpenning)
                     this.container.style.display = "none";
             }).start();
@@ -135,9 +135,9 @@ GIM.MapPin = function (parentContainer) {
             var tmpRadius = this._radius > this.maxRadius ? this.maxRadius : this._radius;
             tmpRadius = tmpRadius < 0 ? 0 : tmpRadius;
 
-            pinCanvasCTX.strokeStyle = "rgba(128,128,128," + this._alpha + ")";
+            pinCanvasCTX.strokeStyle = "#2d3540";
             pinCanvasCTX.lineWidth = 2;
-            pinCanvasCTX.fillStyle = "rgba(128,128,128," + this._alpha + ")";
+            pinCanvasCTX.fillStyle = "#2d3540";
             pinCanvasCTX.lineCap = "round";
             pinCanvasCTX.beginPath();
             var centerX = this.width * 0.5;
@@ -154,15 +154,21 @@ GIM.MapPin = function (parentContainer) {
 
             //draw menuCanvas
             if (tmpRadius > this.pinRadius + 10) {
-                menuCanvasCTX.strokeStyle = "rgba(255,255,255," + this._alpha + ")";
+                menuCanvasCTX.strokeStyle = "#FFFFFF";
                 menuCanvasCTX.lineWidth = 4;
-                menuCanvasCTX.fillStyle = "rgba(181,0,65," + this._alpha + ")";
+                menuCanvasCTX.fillStyle = "#cc1847";
                 var menuCenterX = this.width * 0.5;
                 var menuCenterY = this.height * 0.5 + 20;
                 menuCanvasCTX.beginPath();
                 menuCanvasCTX.moveTo(menuCenterX, menuCenterY);
                 menuCanvasCTX.arc(menuCenterX, menuCenterY, tmpRadius,  - Math.PI * 0.5,- Math.PI * 0.254);
                 menuCanvasCTX.lineTo(menuCenterX, menuCenterY);
+                menuCanvasCTX.closePath();
+                menuCanvasCTX.stroke();
+                menuCanvasCTX.fill();
+
+                menuCanvasCTX.fillStyle = "#2d3540";
+                menuCanvasCTX.beginPath();
                 menuCanvasCTX.moveTo(menuCenterX, menuCenterY);
                 menuCanvasCTX.arc(menuCenterX, menuCenterY, tmpRadius, -Math.PI * 0.246,0);
                 menuCanvasCTX.lineTo(menuCenterX, menuCenterY);

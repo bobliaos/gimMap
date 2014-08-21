@@ -555,7 +555,7 @@ GIM.Map3D = function (mainContainer) {
     function addFloorSelector() {
         floorSelector = document.createElement("div");
         mainContainer.appendChild(floorSelector);
-        floorSelector.style.cssText = "position:absolute;top:240px;left:0px";
+        floorSelector.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;";
 
         var upImage = new Image();
         var downImage = new Image();
