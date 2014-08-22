@@ -27,6 +27,7 @@ GIM.Map3D = function (mainContainer) {
     var floorSelecterLogos = [];
     var minFloorPositionZ = -4200;
     var maxFloorPositionZ = 1200;
+    var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
     var pathAnimateIndexDelta = 0;
@@ -75,6 +76,13 @@ GIM.Map3D = function (mainContainer) {
         }
     };
 
+    function reset(){
+        console.log("- [GimMap]Map3D.reset");
+        if(isMapReady){
+            clearPath();
+            showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
+        }
+    }
 
     //MAIN FUNCTIONS///////////////////////////////////////////
 
@@ -257,9 +265,6 @@ GIM.Map3D = function (mainContainer) {
         camera.updateProjectionMatrix();
 
         renderer.setSize(containerWidth , containerHeight);
-
-        floorSelector.style.display = "block";
-        serviceSelector.style.display = "block";
     }
 
     //ASSIST FUNCTIONS//////////////////////////////////////////
@@ -439,16 +444,18 @@ GIM.Map3D = function (mainContainer) {
     //INITIALIZE FUNCTIONS///////////////////////////////////////
 
     function init() {
-        GIM.SVGParser.loadURL(GIM.SHOP_LIST_URL, function (jsonString) {
-            GIM.shopList = JSON.parse(jsonString);
+        GIM.SVGParser.loadURL(GIM.SHOP_LIST_URL, function (json) {
+//            GIM.shopList = JSON.parse(jsonString);
+            GIM.shopList = json;
             GIM.navitateTo = navigateTo;
             GIM.setSize = setSize;
             init3d();
             if (isDebug) addStats();
-            mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
             animate();
             setInterval(doPathAnimate, pathAnimateTime);
             setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
+            mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
+            mainContainer.addEventListener("DOMNodeInserted",reset,false);
         });
     }
 
@@ -499,6 +506,8 @@ GIM.Map3D = function (mainContainer) {
 
         GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
             addFloorSelector();
+
+//            var json = JSON.parse(sourceString);
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
 
             var floorElements = sourceSVG.getElementsByTagName('g');
@@ -549,6 +558,8 @@ GIM.Map3D = function (mainContainer) {
 
             cameraPosition.setCamera(Math.PI * 0.25, 1800, 0);
             cameraPosition.posX = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
+
+            isMapReady = true;
         });
     }
 

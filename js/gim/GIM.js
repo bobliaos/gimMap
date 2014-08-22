@@ -49,6 +49,6 @@ GIM.FONT_NAME               = "Microsoft Yahei";
 GIM.SHADOW_MAP_SIZE         = 2 * 1024;
 
 GIM.CONFIG_URL              = "map.conf";
-GIM.DATA_SOURCE_URL         = "assets/data.sgxml";
+GIM.DATA_SOURCE_URL         = "assets/data.json";
 GIM.SHOP_LIST_URL           = "assets/shoplist.json";
 GIM.DEFAULT_SHOP_LOGO_URL   = "assets/img/shoplogo/0.png";

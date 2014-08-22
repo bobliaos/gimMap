@@ -5,18 +5,22 @@
 GIM.SVGParser = {
 
     loadURL : function(sourceURL,callBackFunc){
-        console.log("- [GimMap]SVGParser.loadURL >>> ",sourceURL);
-        var svgLoader = new XMLHttpRequest();
-        svgLoader.onreadystatechange = function () {
-            if (svgLoader.readyState == 4) {
-                if (svgLoader.status == 200) {
-                    var svgString = svgLoader.responseText;
-                    callBackFunc(svgString);
-                }
-            }
-        }
-        svgLoader.open("GET", sourceURL, false);
-        svgLoader.send(null);
+//        console.log("- [GimMap]SVGParser.loadURL >>> ",sourceURL);
+//        var svgLoader = new XMLHttpRequest();
+//        svgLoader.onreadystatechange = function () {
+//            if (svgLoader.readyState == 4) {
+//                if (svgLoader.status == 200) {
+//                    var svgString = svgLoader.responseText;
+//                    callBackFunc(svgString);
+//                }
+//            }
+//        }
+//        svgLoader.open("GET", sourceURL, false);
+//        svgLoader.send(null);
+
+        $.getJSON(sourceURL,function(data){
+            if(typeof (callBackFunc) != "undefined") callBackFunc(data);
+        });
     },
 
     getSVGObject: function (svgString) {
