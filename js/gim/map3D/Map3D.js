@@ -580,31 +580,14 @@ GIM.Map3D = function (mainContainer) {
         mainContainer.appendChild(serviceSelector);
         serviceSelector.style.cssText = "position:absolute;top:30px;left:230px";
 
-        var imgURLs = ["assets/img/servicelogo/1_.png", "assets/img/servicelogo/2_.png", "assets/img/servicelogo/3_.png", "assets/img/servicelogo/4_.png", "assets/img/servicelogo/5_.png", "assets/img/servicelogo/6_.png"];
-        var imgDownURLs = ["assets/img/servicelogo/1.png", "assets/img/servicelogo/2.png", "assets/img/servicelogo/3.png", "assets/img/servicelogo/4.png", "assets/img/servicelogo/5.png", "assets/img/servicelogo/6.png"];
         var imgNodeTypeIds = [GIM.NODE_TYPE_MACHINE, GIM.NODE_TYPE_SERVICE, GIM.NODE_TYPE_ATM, GIM.NODE_TYPE_TOILET, GIM.NODE_TYPE_ESCALATOR, GIM.NODE_TYPE_LIFT];   //"assets/img/servicelogo/1.png"
-        for (var i = 0; i < imgURLs.length; i++) {
-            var img = new Image();
-            serviceSelector.appendChild(img);
-            img.style.cssText = "position:absolute;left:" + (i * 111) + "px";
-            img.nodeTypeId = imgNodeTypeIds[i];
-            img.index = i;
-            img.src = imgURLs[i];
-
-            img.onclick = function(event){
-                var targetImage = event.target;
-                targetImage.src = imgDownURLs[targetImage.index];
-                showNodeTypes(targetImage.nodeTypeId);
-                setTimeout(function(){
-                    targetImage.src = imgURLs[targetImage.index];
-                },1500)
-            }
+        var imgNodeTypeTexts = ["我的位置", "服务中心", "ATM", "洗手间", "扶梯", "升降梯"];
+        for (var i = 0; i < imgNodeTypeIds.length; i++) {
+            var index = imgNodeTypeIds[i];
+            var text = imgNodeTypeTexts[i];
+            var serviceLogo = new GIM.ServiceLogo(serviceSelector,index,text);
+            serviceLogo.disable = true;
         }
-
-        var textImage = new Image();
-        serviceSelector.appendChild(textImage);
-        textImage.src = "assets/img/servicelogo/0.png";
-        textImage.style.cssText = "position:absolute;top:60px;left:-10px";
     }
 
     function addFloorLogo(floorId, logoURL, isCurFloor) {

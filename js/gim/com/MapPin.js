@@ -22,7 +22,6 @@ GIM.MapPin = function (parentContainer) {
         gotoImage: new Image(),
         searchImage: new Image(),
         init: function () {
-            parentContainer.appendChild(this.container);
             this.container.appendChild(this.menuCanvas);
             this.container.appendChild(this.pinCanvas);
             this.container.appendChild(this.logoCanvas);
@@ -30,6 +29,8 @@ GIM.MapPin = function (parentContainer) {
 
             this.container.appendChild(this.gotoImage);
             this.container.appendChild(this.searchImage);
+
+            parentContainer.appendChild(this.container);
 
             this.container.style.cssText = "width:" + this.width + "px;height:" + this.height + "px;position:absolute;top:0px;left:0px;display:none;";   //background:#222222
             this.menuCanvas.style.cssText = "width:" + this.width + "px;height:" + this.height + "px;position:absolute;top:0px;left:0px;";
