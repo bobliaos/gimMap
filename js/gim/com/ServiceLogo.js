@@ -30,12 +30,10 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
             parentContainer.appendChild(this.container);
 
             this.logoImage.style.cssText = "";
-            this.logoText.style.cssText = "color:#444444;font-family:Microsoft Yahei;margin-top:12px;";
-            this.container.style.cssText = "width:100px;height:100px;margin-left: 6px;float:left";
+            this.logoText.style.cssText = "color:#444444;font-size:18px;font-family:Microsoft Yahei;margin-top:12px;";
+            this.container.style.cssText = "width:100px;height:100px;margin-left: 0px;float:left";
 
             this.logoText.innerHTML = text;
-
-            this.container.addEventListener("click",this.on);
 
             this._isReady = true;
 
@@ -44,7 +42,6 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
         _isReady : false,
         _logoOn: false,
         set logoOn(value) {
-            console.log("LOGO ON");
             this._logoOn = value;
             this.updateDisplay();
         },
@@ -60,19 +57,25 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
             return this._disable;
         },
         updateDisplay: function () {
-            if(this._isReady) this.logoImage.src = this._disable ? this.logoDisableURL : (this._logoOn ? this.logoOnURL : this.logoOffURL);
-            console.log("---------------",this.logoImage.src);
+            if(this._isReady) {
+                this.logoImage.src = this._disable ? this.logoDisableURL : (this._logoOn ? this.logoOnURL : this.logoOffURL);
+                this.logoText.style.color = this._disable ? "#888888" : (this._logoOn ? "#FF0033" : "#222244");
+            }
         },
-        on : function() {
-            this.logoOn = true;
-            setTimeout(this.off,this.onTime);
-        },
-        off : function() {
-            this.logoOn = false;
-        }
+        onClickHandler:function(){}
     }
 
     serviceLogo.init();
+
+    serviceLogo.container.addEventListener("click",function(){
+        if(!serviceLogo._disable)
+            serviceLogo.onClickHandler(serviceLogo.index.toString());
+
+        serviceLogo.logoOn = true;
+        setTimeout(function(){
+            serviceLogo.logoOn = false;
+        },serviceLogo.onTime);
+    });
 
     return serviceLogo;
 }

@@ -37,6 +37,7 @@ GIM.Map3D = function (mainContainer) {
     var mapPin;
     var floorSelector;
     var serviceSelector;
+    var serviceLogos = [];
 
     var preSelectedUnit3DMaterial = null;
 
@@ -150,7 +151,6 @@ GIM.Map3D = function (mainContainer) {
                 } else {
                     preVisibleFloor3D.mesh.position.z = 0;
                 }
-
             }
         } else if (floorIds.length === 2) {
             var floor3D1 = floor3Ds[floorIds[0]];
@@ -162,6 +162,26 @@ GIM.Map3D = function (mainContainer) {
         }
 
         curShownFloorIds = floorIds;
+
+        var currentAvaliableNodeTypeIds = [];
+        for (var i = 0; i < curShownFloorIds.length; i++) {
+            var floor3D = floor3Ds[curShownFloorIds[i]];
+            for (var nodeId in floor3D.subUnit3Ds) {
+                var unit3D = floor3D.subUnit3Ds[nodeId];
+                var nodeTypeId = unit3D.data.nodeTypeId;
+                if(currentAvaliableNodeTypeIds.indexOf(nodeTypeId) < 0)
+                    currentAvaliableNodeTypeIds.push(nodeTypeId);
+            }
+        }
+
+        for (var i = 0;i < serviceLogos.length;i ++){
+            var serviceLogo = serviceLogos[i];
+            serviceLogo.disable = (currentAvaliableNodeTypeIds.indexOf(serviceLogo.index) < 0);
+            if(serviceLogo.index == GIM.NODE_TYPE_MACHINE){
+                var machineFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
+                serviceLogo.disable = curShownFloorIds.indexOf(machineFloorId) == -1;
+            }
+        }
     }
 
     function showPinOnUnit3D(unit3D) {
@@ -169,23 +189,6 @@ GIM.Map3D = function (mainContainer) {
 
         var wordCoordinate = toScreenCoordinate(unit3D.data.nodePosition.x, -unit3D.data.nodePosition.y, unit3D.mesh.parent.position.z + parseInt(unit3D.data.deep) + 20);
         mapPin.open(wordCoordinate.x, wordCoordinate.y, getShopLogoURL(unit3D.data.bindShopId));
-    }
-
-    function showNodeTypes(nodeTypeId) {
-        for (var i = 0; i < curShownFloorIds.length; i++) {
-            var floor3D = floor3Ds[curShownFloorIds[i]];
-            for (var nodeId in floor3D.subUnit3Ds) {
-                var unit3D = floor3D.subUnit3Ds[nodeId];
-                if (unit3D.data.nodeTypeId === nodeTypeId) {
-                    unit3D.mesh.material.opacity = 0;
-                    unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
-                    new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
-                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
-                } else {
-
-                }
-            }
-        }
     }
 
     function drawPath(vector3Ds) {
@@ -505,7 +508,7 @@ GIM.Map3D = function (mainContainer) {
         mapPin = new GIM.MapPin(mainContainer);
 
         GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
-            addFloorSelector();
+            addComponents();
 
 //            var json = JSON.parse(sourceString);
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
@@ -563,7 +566,9 @@ GIM.Map3D = function (mainContainer) {
         });
     }
 
-    function addFloorSelector() {
+    var zoomBar;
+
+    function addComponents() {
         floorSelector = document.createElement("div");
         mainContainer.appendChild(floorSelector);
         floorSelector.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;";
@@ -586,7 +591,28 @@ GIM.Map3D = function (mainContainer) {
             var index = imgNodeTypeIds[i];
             var text = imgNodeTypeTexts[i];
             var serviceLogo = new GIM.ServiceLogo(serviceSelector,index,text);
-            serviceLogo.disable = true;
+            serviceLogos.push(serviceLogo);
+
+            serviceLogo.onClickHandler = showNodeTypes;
+        }
+
+        zoomBar = new GIM.ZoomBar(mainContainer);
+    }
+
+    function showNodeTypes(nodeTypeId) {
+        for (var i = 0; i < curShownFloorIds.length; i++) {
+            var floor3D = floor3Ds[curShownFloorIds[i]];
+            for (var nodeId in floor3D.subUnit3Ds) {
+                var unit3D = floor3D.subUnit3Ds[nodeId];
+                if (unit3D.data.nodeTypeId === nodeTypeId) {
+                    unit3D.mesh.material.opacity = 0;
+                    unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
+                    new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
+                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
+                } else {
+
+                }
+            }
         }
     }
 

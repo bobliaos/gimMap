@@ -14,7 +14,7 @@ var GIM = {
         if(this._mapInstance === null){
             console.log("- [GimMap]GIM.VERSION:",this.VERSION,this.INFO);
             this._mapInstance = document.createElement("div");
-            this._mapInstance.style.cssText = "width: 1040px;height: 1440px;overflow: hidden;position: absolute;background:#000000";
+            this._mapInstance.style.cssText = "width: 1040px;height: 1440px;overflow: hidden;position: absolute;background:#888888";
             this._map = new GIM.Map3D(this._mapInstance);
         }
         return this._mapInstance;
@@ -35,11 +35,11 @@ GIM.NODE_TYPE_TOILET		= "7";
 GIM.NODE_TYPE_SERVICE		= "8";
 GIM.NODE_TYPE_ATM   		= "9";
 
-GIM.SERVER                  = "192.168.1.208:3000";
+GIM.SERVER                  = "http://192.168.1.208:3000";
 GIM.MACHINE_NODE_ID         = "node_2014_8_13_01:18:25_578";
 
 GIM.FLOOR_GAP               = 700;
-GIM.PATH_POINT_GAP          = 12;
+GIM.PATH_POINT_GAP          = 8;
 GIM.PATH_COLOR              = 0xFF0000;
 GIM.MAP_OFFSET_Y            = 200;
 GIM.MAP_BACKGROUND_COLOR    = 0xDDDDDD;
@@ -49,7 +49,7 @@ GIM.FONT_NAME               = "Microsoft Yahei";
 GIM.SHADOW_MAP_SIZE         = 2 * 1024;
 
 GIM.CONFIG_URL              = "map.conf";
-GIM.DATA_SOURCE_URL         = "assets/data.sgxml";
+GIM.DATA_SOURCE_URL         = "assets/data.json";
 GIM.SHOP_LIST_URL           = "assets/shoplist.json";
 GIM.DEFAULT_SHOP_LOGO_URL   = "assets/img/shoplogo/0.png";
 
@@ -86,7 +86,7 @@ GIM.MapPin = function (parentContainer) {
 //        pinRadius: 57,
 //        maxRadius: 98,
         pinRadius: 42,
-        maxRadius: 86,
+        maxRadius: 88,
         container: document.createElement("div"),
         menuCanvas: document.createElement("canvas"),
         pinCanvas: document.createElement("canvas"),
@@ -95,7 +95,6 @@ GIM.MapPin = function (parentContainer) {
         gotoImage: new Image(),
         searchImage: new Image(),
         init: function () {
-            parentContainer.appendChild(this.container);
             this.container.appendChild(this.menuCanvas);
             this.container.appendChild(this.pinCanvas);
             this.container.appendChild(this.logoCanvas);
@@ -103,6 +102,8 @@ GIM.MapPin = function (parentContainer) {
 
             this.container.appendChild(this.gotoImage);
             this.container.appendChild(this.searchImage);
+
+            parentContainer.appendChild(this.container);
 
             this.container.style.cssText = "width:" + this.width + "px;height:" + this.height + "px;position:absolute;top:0px;left:0px;display:none;";   //background:#222222
             this.menuCanvas.style.cssText = "width:" + this.width + "px;height:" + this.height + "px;position:absolute;top:0px;left:0px;";
@@ -138,7 +139,6 @@ GIM.MapPin = function (parentContainer) {
             this._isOpenning = true;
 
             if(shopLogoURL === "") shopLogoURL = GIM.DEFAULT_SHOP_LOGO_URL;
-            else shopLogoURL = "http://" + shopLogoURL;
             this.logoImage.src = shopLogoURL;
             console.log("- [GimMap]MapPin.open:",shopLogoURL,this.logoImage.src);
 
@@ -155,7 +155,7 @@ GIM.MapPin = function (parentContainer) {
             this.rotation = 0;
             this.gotoImage.style.display = this.searchImage.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
-            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 500).easing(TWEEN.Easing.Elastic.Out).onComplete(function(){
+            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 30).easing(TWEEN.Easing.Elastic.Out).onComplete(function(){
                 this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
                 this.gotoImage.style.display = this.searchImage.style.display = "block";
                 new TWEEN.Tween(this.gotoImage.style).to({opacity:1},200).start();
@@ -167,7 +167,7 @@ GIM.MapPin = function (parentContainer) {
             this.logoImage.src = "";
             this.logoCanvas.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
-            new TWEEN.Tween(this).to({alpha: 0, rotation: 0, radius: 10}, 400).easing(TWEEN.Easing.Back.In).onComplete(function () {
+            new TWEEN.Tween(this).to({alpha: 0, rotation: 0, radius: 10}, 20).easing(TWEEN.Easing.Back.In).onComplete(function () {
                 if (!this._isOpenning)
                     this.container.style.display = "none";
             }).start();
@@ -209,18 +209,18 @@ GIM.MapPin = function (parentContainer) {
             var tmpRadius = this._radius > this.maxRadius ? this.maxRadius : this._radius;
             tmpRadius = tmpRadius < 0 ? 0 : tmpRadius;
 
-            pinCanvasCTX.strokeStyle = "rgba(255,255,255," + this._alpha + ")";
-            pinCanvasCTX.lineWidth = 4;
-            pinCanvasCTX.fillStyle = "rgba(195,13,35," + this._alpha + ")";
+            pinCanvasCTX.strokeStyle = "#2d3540";
+            pinCanvasCTX.lineWidth = 2;
+            pinCanvasCTX.fillStyle = "#2d3540";
             pinCanvasCTX.lineCap = "round";
             pinCanvasCTX.beginPath();
             var centerX = this.width * 0.5;
             var centerY = this.height - this._radius + 20;
             if(centerY < this.height * 0.5 + 20) centerY = this.height * 0.5 + 20;
-            var bottomY = this.height - pinCanvasCTX.lineWidth;
+            var bottomY = this.height - pinCanvasCTX.lineWidth - 4;
             var curRadius = tmpRadius > this.pinRadius ? this.pinRadius : tmpRadius;
             pinCanvasCTX.moveTo(centerX, bottomY);
-            pinCanvasCTX.arc(centerX, centerY, curRadius, Math.PI * (0.5 + 0.13), Math.PI * (0.5 - 0.13));
+            pinCanvasCTX.arc(centerX, centerY, curRadius, Math.PI * (0.5 + 0.04), Math.PI * (0.5 - 0.04));
             pinCanvasCTX.lineTo(centerX, bottomY);
             pinCanvasCTX.stroke();
             pinCanvasCTX.fill();
@@ -228,17 +228,21 @@ GIM.MapPin = function (parentContainer) {
 
             //draw menuCanvas
             if (tmpRadius > this.pinRadius + 10) {
-                var angle = 8 * Math.PI / 180;
-
-                menuCanvasCTX.strokeStyle = "rgba(255,255,255," + this._alpha + ")";
+                menuCanvasCTX.strokeStyle = "#FFFFFF";
                 menuCanvasCTX.lineWidth = 4;
-                menuCanvasCTX.fillStyle = "rgba(235,97,104," + this._alpha + ")";
+                menuCanvasCTX.fillStyle = "#cc1847";
                 var menuCenterX = this.width * 0.5;
                 var menuCenterY = this.height * 0.5 + 20;
                 menuCanvasCTX.beginPath();
                 menuCanvasCTX.moveTo(menuCenterX, menuCenterY);
                 menuCanvasCTX.arc(menuCenterX, menuCenterY, tmpRadius,  - Math.PI * 0.5,- Math.PI * 0.254);
                 menuCanvasCTX.lineTo(menuCenterX, menuCenterY);
+                menuCanvasCTX.closePath();
+                menuCanvasCTX.stroke();
+                menuCanvasCTX.fill();
+
+                menuCanvasCTX.fillStyle = "#2d3540";
+                menuCanvasCTX.beginPath();
                 menuCanvasCTX.moveTo(menuCenterX, menuCenterY);
                 menuCanvasCTX.arc(menuCenterX, menuCenterY, tmpRadius, -Math.PI * 0.246,0);
                 menuCanvasCTX.lineTo(menuCenterX, menuCenterY);
@@ -275,6 +279,129 @@ GIM.MapPin = function (parentContainer) {
 }
 
 /**
+ * <div id="logo">
+ *     <image id="menuCanvas"/>
+ *     <text id="logoAndPinCanvas"/>
+ * </div>
+ * @author bob / http://bobliaos.diandian.com
+ * */
+
+GIM.ServiceLogo = function (parentContainer,index,text) {
+    var serviceLogo = {
+        onTime : 1000,
+        index : -1,
+        path : "assets/img/servicelogo/",
+        logoOnURL : "",
+        logoOffURL : "",
+        logoDisableURL : "",
+        width: 180,
+        height: 160,
+        container: document.createElement("div"),
+        logoImage: new Image(),
+        logoText: document.createElement("div"),
+        init: function () {
+            this.index = index;
+            this.logoOnURL = this.path + index + ".png";
+            this.logoOffURL = this.path + index + "_.png";
+            this.logoDisableURL = this.path + index + "__.png";
+
+            this.container.appendChild(this.logoImage);
+            this.container.appendChild(this.logoText);
+            parentContainer.appendChild(this.container);
+
+            this.logoImage.style.cssText = "";
+            this.logoText.style.cssText = "color:#444444;font-size:18px;font-family:Microsoft Yahei;margin-top:12px;";
+            this.container.style.cssText = "width:100px;height:100px;margin-left: 0px;float:left";
+
+            this.logoText.innerHTML = text;
+
+            this._isReady = true;
+
+            this.updateDisplay();
+        },
+        _isReady : false,
+        _logoOn: false,
+        set logoOn(value) {
+            this._logoOn = value;
+            this.updateDisplay();
+        },
+        get logoOn() {
+            return this._logoOn;
+        },
+        _disable: false,
+        set disable(value) {
+            this._disable = value;
+            this.updateDisplay();
+        },
+        get disable() {
+            return this._disable;
+        },
+        updateDisplay: function () {
+            if(this._isReady) {
+                this.logoImage.src = this._disable ? this.logoDisableURL : (this._logoOn ? this.logoOnURL : this.logoOffURL);
+                this.logoText.style.color = this._disable ? "#888888" : (this._logoOn ? "#FF0033" : "#222244");
+            }
+        },
+        onClickHandler:function(){}
+    }
+
+    serviceLogo.init();
+
+    serviceLogo.container.addEventListener("click",function(){
+        if(!serviceLogo._disable)
+            serviceLogo.onClickHandler(serviceLogo.index.toString());
+
+        serviceLogo.logoOn = true;
+        setTimeout(function(){
+            serviceLogo.logoOn = false;
+        },serviceLogo.onTime);
+    });
+
+    return serviceLogo;
+}
+
+/**
+ * <div id="logo">
+ *     <image id="menuCanvas"/>
+ *     <text id="logoAndPinCanvas"/>
+ * </div>
+ * @author bob / http://bobliaos.diandian.com
+ * */
+
+GIM.ZoomBar = function (parentContainer) {
+    var bar = {
+        width: 180,
+        height: 160,
+        container: document.createElement("div"),
+        plus: document.createElement("canvas"),
+        minus: document.createElement("canvas"),
+        rail: document.createElement("canvas"),
+        thumb: document.createElement("canvas"),
+        init: function () {
+            this.container.appendChild(this.rail);
+            this.container.appendChild(this.plus);
+            this.container.appendChild(this.minus);
+            this.container.appendChild(this.thumb);
+
+            parentContainer.appendChild(this.container);
+
+            this.container.style.cssText = "position: absolute;top: 460px;right: 20px;visibility:hidden";
+            this.plus.style.cssText = "width: 80px;height: 80px;background: #99CC33;position: absolute;bottom: 0px;left: 0px;";
+            this.minus.style.cssText = "width: 80px;height: 80px;background: #99CC33;position: absolute;bottom: 0px;left: 0px;";
+            this.rail.style.cssText = "background: #0099CC;width: 80px;height: 400px;position: absolute;left: 0px;top: 0px";
+            this.thumb.style.cssText = "";
+        },
+        updateDisplay: function(){
+
+        }
+    }
+
+    bar.init();
+
+    return bar;
+}
+
+/**
  * @author bob / http://bobliaos.diandian.com
  * */
 
@@ -296,39 +423,6 @@ GIM.FloorData = function(gElement){
     return data;
 }
 
-GIM.UnitData = function(pathElement){
-    var data = {
-        origSVG : pathElement,
-        nodeId : pathElement.getAttribute("nodeId"),
-        nodeTypeId : pathElement.getAttribute("nodeTypeId"),
-        bindNodeIds : pathElement.getAttribute("bindNodeIds"),
-        bindShopId : pathElement.getAttribute("bindShopId"),
-        d : pathElement.getAttribute("d"),
-        fill : pathElement.getAttribute("fill"),
-        deep : pathElement.getAttribute("deep"),
-        floorId : null,
-        shopName : "",
-        origZ : 0
-    };
-    var nodePositionStringArr = pathElement.getAttribute("nodePosition").split(",");
-    data.nodePosition = {
-        x : parseFloat(nodePositionStringArr[0]),
-        y : parseFloat(nodePositionStringArr[1])
-    }
-    data.selectable = true;
-    data.astarNode = new GIM.AStarNode(data);
-
-    for(var i = 0;i < GIM.shopList.length;i ++){
-        var shopData = GIM.shopList[i];
-        if(shopData.shop_room === data.bindShopId){
-            data.shopName = shopData.name;
-            break;
-        }
-    }
-
-    return data;
-}
-
 /**
  * @author bob / http://bobliaos.diandian.com
  * */
@@ -336,18 +430,22 @@ GIM.UnitData = function(pathElement){
 GIM.SVGParser = {
 
     loadURL : function(sourceURL,callBackFunc){
-        console.log("- [GimMap]SVGParser.loadURL >>> ",sourceURL);
-        var svgLoader = new XMLHttpRequest();
-        svgLoader.onreadystatechange = function () {
-            if (svgLoader.readyState == 4) {
-                if (svgLoader.status == 200) {
-                    var svgString = svgLoader.responseText;
-                    callBackFunc(svgString);
-                }
-            }
-        }
-        svgLoader.open("GET", sourceURL, false);
-        svgLoader.send(null);
+//        console.log("- [GimMap]SVGParser.loadURL >>> ",sourceURL);
+//        var svgLoader = new XMLHttpRequest();
+//        svgLoader.onreadystatechange = function () {
+//            if (svgLoader.readyState == 4) {
+//                if (svgLoader.status == 200) {
+//                    var svgString = svgLoader.responseText;
+//                    callBackFunc(svgString);
+//                }
+//            }
+//        }
+//        svgLoader.open("GET", sourceURL, false);
+//        svgLoader.send(null);
+
+        $.getJSON(sourceURL,function(data){
+            if(typeof (callBackFunc) != "undefined") callBackFunc(data);
+        });
     },
 
     getSVGObject: function (svgString) {
@@ -573,6 +671,43 @@ GIM.SVGParser = {
  * @author bob / http://bobliaos.diandian.com
  * */
 
+GIM.UnitData = function(pathElement){
+    var data = {
+        origSVG : pathElement,
+        nodeId : pathElement.getAttribute("nodeId"),
+        nodeTypeId : pathElement.getAttribute("nodeTypeId"),
+        bindNodeIds : pathElement.getAttribute("bindNodeIds"),
+        bindShopId : pathElement.getAttribute("bindShopId"),
+        d : pathElement.getAttribute("d"),
+        fill : pathElement.getAttribute("fill"),
+        deep : pathElement.getAttribute("deep"),
+        floorId : null,
+        shopName : "",
+        origZ : 0
+    };
+    var nodePositionStringArr = pathElement.getAttribute("nodePosition").split(",");
+    data.nodePosition = {
+        x : parseFloat(nodePositionStringArr[0]),
+        y : parseFloat(nodePositionStringArr[1])
+    }
+    data.selectable = true;
+    data.astarNode = new GIM.AStarNode(data);
+
+    for(var i = 0;i < GIM.shopList.length;i ++){
+        var shopData = GIM.shopList[i];
+        if(shopData.shop_room === data.bindShopId){
+            data.shopName = shopData.name;
+            break;
+        }
+    }
+
+    return data;
+}
+
+/**
+ * @author bob / http://bobliaos.diandian.com
+ * */
+
 GIM.AStar = {
     search : function(nodes,startNodeId,endNodeId){
         //clear
@@ -672,6 +807,10 @@ GIM.DisplayFloor3D = function (gElement) {
     return this;
 }
 
+/**
+ * @author bob / http://bobliaos.diandian.com
+ * */
+
 GIM.DisplayUnit3D = function (unitData) {
     var tmpMesh = null;
     function addMesh(){
@@ -686,8 +825,8 @@ GIM.DisplayUnit3D = function (unitData) {
 
     var positionOffsetZ = 10;
 
-    function addLogo(logoURL,isServiceLogo){
-        var logoSize = isServiceLogo ? 60 : 80;
+    function addLogo(logoURL,isServiceLogo,logoSize){
+        var logoSize = logoSize === undefined ? (isServiceLogo ? 60 : 80) : logoSize;
 
         var logoGeometry = new THREE.PlaneGeometry(logoSize, logoSize, 1, 1);
         var logoTexture = THREE.ImageUtils.loadTexture(logoURL);
@@ -699,11 +838,11 @@ GIM.DisplayUnit3D = function (unitData) {
         logoMesh.castShadow = true;
         logoMesh.receiveShadow = true;
         logoMesh.position.x = unitData.nodePosition.x;
-        logoMesh.position.y = - unitData.nodePosition.y + (isServiceLogo ? 0 : logoSize * 0.5);
+        logoMesh.position.y = - unitData.nodePosition.y + (isServiceLogo ? 0 : logoSize * 0.5) + (logoSize > 100 ? 20 : 0);
         logoMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
         logoMesh.rotation.x = Math.PI * 0.25;
         if(isServiceLogo) {
-            unitData.origZ = 50;
+            unitData.origZ = logoSize * 0.5 + 20;
             logoMesh.position.z = unitData.origZ;
         }
     }
@@ -758,7 +897,15 @@ GIM.DisplayUnit3D = function (unitData) {
             }
             break;
         case GIM.NODE_TYPE_MACHINE:
-            addLogo("assets/img/nodetypelogo/machine.png",true);
+            addLogo("assets/img/nodetypelogo/machine_.png",true,120);
+            var tween = new TWEEN.Tween(tmpMesh.material);
+
+            function doAnimate(){
+                tween.to({opacity:1},600).easing(TWEEN.Easing.Elastic.InOut).onComplete(function(){
+                    tween.to({opacity:0},220).easing(TWEEN.Easing.Linear.None).onComplete(doAnimate).start();
+                }).delay(Math.random() * 600 + 300).start();
+            }
+            doAnimate();
             break;
         case GIM.NODE_TYPE_ESCALATOR:
             addLogo("assets/img/nodetypelogo/escalator.png",true);
@@ -819,9 +966,9 @@ GIM.Map3D = function (mainContainer) {
     var floorSelecterLogos = [];
     var minFloorPositionZ = -4200;
     var maxFloorPositionZ = 1200;
+    var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
-    var pathAnimatePointSize = 4;
     var pathAnimateIndexDelta = 0;
     var pathAnimateTime = 60;
     var pathAnimateCircleLength = 25;
@@ -829,6 +976,7 @@ GIM.Map3D = function (mainContainer) {
     var mapPin;
     var floorSelector;
     var serviceSelector;
+    var serviceLogos = [];
 
     var preSelectedUnit3DMaterial = null;
 
@@ -868,6 +1016,13 @@ GIM.Map3D = function (mainContainer) {
         }
     };
 
+    function reset(){
+        console.log("- [GimMap]Map3D.reset");
+        if(isMapReady){
+            clearPath();
+            showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
+        }
+    }
 
     //MAIN FUNCTIONS///////////////////////////////////////////
 
@@ -935,7 +1090,6 @@ GIM.Map3D = function (mainContainer) {
                 } else {
                     preVisibleFloor3D.mesh.position.z = 0;
                 }
-
             }
         } else if (floorIds.length === 2) {
             var floor3D1 = floor3Ds[floorIds[0]];
@@ -947,6 +1101,26 @@ GIM.Map3D = function (mainContainer) {
         }
 
         curShownFloorIds = floorIds;
+
+        var currentAvaliableNodeTypeIds = [];
+        for (var i = 0; i < curShownFloorIds.length; i++) {
+            var floor3D = floor3Ds[curShownFloorIds[i]];
+            for (var nodeId in floor3D.subUnit3Ds) {
+                var unit3D = floor3D.subUnit3Ds[nodeId];
+                var nodeTypeId = unit3D.data.nodeTypeId;
+                if(currentAvaliableNodeTypeIds.indexOf(nodeTypeId) < 0)
+                    currentAvaliableNodeTypeIds.push(nodeTypeId);
+            }
+        }
+
+        for (var i = 0;i < serviceLogos.length;i ++){
+            var serviceLogo = serviceLogos[i];
+            serviceLogo.disable = (currentAvaliableNodeTypeIds.indexOf(serviceLogo.index) < 0);
+            if(serviceLogo.index == GIM.NODE_TYPE_MACHINE){
+                var machineFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
+                serviceLogo.disable = curShownFloorIds.indexOf(machineFloorId) == -1;
+            }
+        }
     }
 
     function showPinOnUnit3D(unit3D) {
@@ -954,23 +1128,6 @@ GIM.Map3D = function (mainContainer) {
 
         var wordCoordinate = toScreenCoordinate(unit3D.data.nodePosition.x, -unit3D.data.nodePosition.y, unit3D.mesh.parent.position.z + parseInt(unit3D.data.deep) + 20);
         mapPin.open(wordCoordinate.x, wordCoordinate.y, getShopLogoURL(unit3D.data.bindShopId));
-    }
-
-    function showNodeTypes(nodeTypeId) {
-        for (var i = 0; i < curShownFloorIds.length; i++) {
-            var floor3D = floor3Ds[curShownFloorIds[i]];
-            for (var nodeId in floor3D.subUnit3Ds) {
-                var unit3D = floor3D.subUnit3Ds[nodeId];
-                if (unit3D.data.nodeTypeId === nodeTypeId) {
-                    unit3D.mesh.material.opacity = 0;
-                    unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
-                    new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
-                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
-                } else {
-
-                }
-            }
-        }
     }
 
     function drawPath(vector3Ds) {
@@ -981,36 +1138,42 @@ GIM.Map3D = function (mainContainer) {
 
         for (var i = 0; i < vector3Ds.length; i++) {
             vector3D = vector3Ds[i];
-            pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z);
+            pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z + 15);
         }
         pathMesh = new THREE.Line(pathGeometry, new THREE.LineBasicMaterial({color: GIM.PATH_COLOR}));
-        pathMesh.visible = isDebug;
+//        pathMesh.visible = isDebug;
 
         for (var i = 0; i < pathGeometry.vertices.length; i++) {
             var vector3DofPath = pathGeometry.vertices[i];
             if (!(pathGeometry.vertices[i + 1] && pathGeometry.vertices[i].z !== pathGeometry.vertices[i + 1].z && i % 2 != 0)) {
-                var pointGeometry = new THREE.CircleGeometry(pathAnimatePointSize, 8);
+                var pointGeometry = new THREE.CircleGeometry(6, 8);
                 var pointMaterial = new THREE.MeshBasicMaterial({color: GIM.PATH_COLOR});
                 var pointMesh = new THREE.Mesh(pointGeometry, pointMaterial);
                 container3D.add(pointMesh);
+                pointMesh.visible = false;
                 pathAnimatePointMeshes.push(pointMesh);
                 pointMesh.position.x = vector3DofPath.x;
                 pointMesh.position.y = vector3DofPath.y;
-                pointMesh.position.z = vector3DofPath.z + 15;
+                pointMesh.position.z = vector3DofPath.z;
             }
         }
+
+        pathAnimateCircleLength = pathAnimatePointMeshes.length;
+        pathAnimateIndexDelta = pathAnimatePointMeshes.length;
 
         container3D.add(pathMesh);
     }
 
     function doPathAnimate() {
-        pathAnimateIndexDelta++;
-        if (pathAnimateIndexDelta > pathAnimateCircleLength) pathAnimateIndexDelta = 0;
+        pathAnimateIndexDelta--;
+        if (pathAnimateIndexDelta < 0) pathAnimateIndexDelta = pathAnimateCircleLength;
         for (var i = 0; i < pathAnimatePointMeshes.length; i++) {
             var mesh = pathAnimatePointMeshes[i];
-            mesh.scale.x = mesh.scale.y = (1 - (i + pathAnimateIndexDelta) % pathAnimateCircleLength / pathAnimateCircleLength);
-            if (mesh.scale.x < 0.3)
-                mesh.scale.x = mesh.scale.y = 1;
+            mesh.visible = i === pathAnimateIndexDelta;
+//            mesh.scale.x = mesh.scale.y = (1 - (i + pathAnimateIndexDelta) % pathAnimateCircleLength / pathAnimateCircleLength);
+//            if (mesh.scale.x < 0.1)
+//                mesh.scale.x = mesh.scale.y = 1;
+//            mesh.scale.x = mesh.scale.y = i === pathAnimateIndexDelta ? 1 : 0.1;
         }
     }
 
@@ -1071,7 +1234,6 @@ GIM.Map3D = function (mainContainer) {
         return resultVector3Ds;
     }
 
-    //UPDATE curSelectedUnit3D ONLY!
     function selectUint3DByShopId(shopId) {
         clearSelectedUnit3D();
         for (var key in floor3Ds) {
@@ -1087,7 +1249,6 @@ GIM.Map3D = function (mainContainer) {
         }
     }
 
-    //UPDATE curSelectedUnit3D ONLY!
     function selectUnit3DByPosition(mouseX, mouseY) {
         clearSelectedUnit3D();
         mouseX = 2 * mouseX / containerWidth - 1;
@@ -1107,27 +1268,32 @@ GIM.Map3D = function (mainContainer) {
 
     function selectUnit3D(unit3D) {
         curSelectedUnit3D = unit3D;
-        if (!unit3D.mesh.isServiceLogo) {
+        if (unit3D.mesh.isServiceLogo) {
+            new TWEEN.Tween(unit3D.mesh.position).to({z: unit3D.data.origZ + 20}, 500).easing(TWEEN.Easing.Elastic.Out).start();
+        } else {
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
             var color = new THREE.Color(curSelectedUnit3D.data.fill);
-            color.add(new THREE.Color(0x333333));
+            var i = color.getHSL();
+            color.setHSL(i.h, i.s + 0.3, i.l + 0.07);
             curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color });
-//            curSelectedUnit3D.mesh.material = selectedUnit3DMaterial;
-        } else {
-
-            for (var i = 0; i < serviceLogoMeshes.length; i++) {
-                var mesh = serviceLogoMeshes[i];
-                new TWEEN.Tween(mesh.position).to({z: unit3D.data.origZ}, 500).easing(TWEEN.Easing.Elastic.Out).start();
-            }
-            new TWEEN.Tween(unit3D.mesh.position).to({z: unit3D.data.origZ + 20}, 500).easing(TWEEN.Easing.Elastic.Out).start();
+            new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.4, x: unit3D.mesh.isServiceLogo ? 1.1 : 1, y: unit3D.mesh.isServiceLogo ? 1.1 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
         }
-        new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.4, x: unit3D.mesh.isServiceLogo ? 1.1 : 1, y: unit3D.mesh.isServiceLogo ? 1.1 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
     }
 
-    //UPDATE curSelectedUnit3D ONLY!
     function clearSelectedUnit3D() {
+        for (var i = 0; i < serviceLogoMeshes.length; i++) {
+            var mesh = serviceLogoMeshes[i];
+            if(mesh.position.z != mesh.displayUnit3D.data.origZ)
+                new TWEEN.Tween(mesh.position).to({z: mesh.displayUnit3D.data.origZ}, 500).easing(TWEEN.Easing.Elastic.Out).start();
+        }
+
         if (curSelectedUnit3D !== null) {
-            if (preSelectedUnit3DMaterial !== null && !curSelectedUnit3D.mesh.isServiceLogo) curSelectedUnit3D.mesh.material = preSelectedUnit3DMaterial;
+            if (preSelectedUnit3DMaterial !== null && !curSelectedUnit3D.mesh.isServiceLogo) {
+                var tmpMaterial = curSelectedUnit3D.mesh.material;
+                tmpMaterial = undefined;
+                delete  tmpMaterial;
+                curSelectedUnit3D.mesh.material = preSelectedUnit3DMaterial;
+            }
             new TWEEN.Tween(curSelectedUnit3D.mesh.scale).to({z: 1, x: 1, y: 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
             curSelectedUnit3D = null;
         }
@@ -1220,15 +1386,18 @@ GIM.Map3D = function (mainContainer) {
     //INITIALIZE FUNCTIONS///////////////////////////////////////
 
     function init() {
-        GIM.SVGParser.loadURL(GIM.SHOP_LIST_URL, function (jsonString) {
-            GIM.shopList = JSON.parse(jsonString);
+        GIM.SVGParser.loadURL(GIM.SHOP_LIST_URL, function (json) {
+//            GIM.shopList = JSON.parse(jsonString);
+            GIM.shopList = json;
             GIM.navitateTo = navigateTo;
             GIM.setSize = setSize;
             init3d();
             if (isDebug) addStats();
-            mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
             animate();
             setInterval(doPathAnimate, pathAnimateTime);
+            setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
+            mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
+            mainContainer.addEventListener("DOMNodeInserted",reset,false);
         });
     }
 
@@ -1249,8 +1418,6 @@ GIM.Map3D = function (mainContainer) {
         camera = new THREE.PerspectiveCamera(60, 1, near, far);
         container3D = new THREE.Object3D();
         scene.add(container3D);
-
-        setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
 
         if(!false) {
             var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
@@ -1280,7 +1447,9 @@ GIM.Map3D = function (mainContainer) {
         mapPin = new GIM.MapPin(mainContainer);
 
         GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
-            addFloorSelector();
+            addComponents();
+
+//            var json = JSON.parse(sourceString);
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
 
             var floorElements = sourceSVG.getElementsByTagName('g');
@@ -1291,19 +1460,25 @@ GIM.Map3D = function (mainContainer) {
                 floor3Ds[floor3D.data.floorId] = floor3D;
                 container3D.add(floor3D.mesh);
 
+                var isCurFloor = false;
                 for (var key in floor3D.subUnit3Ds) {
                     var pushMesh = floor3D.subUnit3Ds[key].mesh;
                     if (pushMesh) {
                         meshes.push(pushMesh);
                         if (pushMesh.isServiceLogo) serviceLogoMeshes.push(pushMesh);
+                        if(pushMesh.displayUnit3D.data.nodeTypeId === GIM.NODE_TYPE_MACHINE){
+                            if(pushMesh.displayUnit3D.data.nodeId === GIM.MACHINE_NODE_ID) isCurFloor = true;
+                            else {
+                                pushMesh.position.x = -20000;
+                                pushMesh.visible = false;
+                            }
+                        }
                     }
                 }
 
-                var isCurFloor = false;
                 for (var key in floor3D.data.unitsData) {
                     var unitData = floor3D.data.unitsData[key];
                     astarNodes[unitData.nodeId] = unitData.astarNode;
-                    if (unitData.nodeId === GIM.MACHINE_NODE_ID) isCurFloor = true;
                 }
 
                 addFloorLogo(floor3D.data.floorId, "assets/img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor);
@@ -1325,32 +1500,57 @@ GIM.Map3D = function (mainContainer) {
 
             cameraPosition.setCamera(Math.PI * 0.25, 1800, 0);
             cameraPosition.posX = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
+
+            isMapReady = true;
         });
     }
 
-    function addFloorSelector() {
+    var zoomBar;
+
+    function addComponents() {
         floorSelector = document.createElement("div");
         mainContainer.appendChild(floorSelector);
-        floorSelector.style.cssText = "position:absolute;top:240px;left:0px";
+        floorSelector.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;";
+
+        var upImage = new Image();
+        var downImage = new Image();
+        floorSelector.appendChild(upImage);
+        floorSelector.appendChild(downImage);
+        upImage.src = "assets/img/up.png";
+        downImage.src = "assets/img/down.png";
+        upImage.style.cssText = downImage.style.cssText = "left: 60px;position: relative;";
 
         serviceSelector = document.createElement("div");
         mainContainer.appendChild(serviceSelector);
-        serviceSelector.style.cssText = "position:absolute;top:30px;left:240px";
+        serviceSelector.style.cssText = "position:absolute;top:30px;left:230px";
 
-        var imgURLs = ["assets/img/servicelogo/1.png", "assets/img/servicelogo/2.png", "assets/img/servicelogo/3.png", "assets/img/servicelogo/4.png", "assets/img/servicelogo/5.png", "assets/img/servicelogo/6.png"];   //"assets/img/servicelogo/1.png"
         var imgNodeTypeIds = [GIM.NODE_TYPE_MACHINE, GIM.NODE_TYPE_SERVICE, GIM.NODE_TYPE_ATM, GIM.NODE_TYPE_TOILET, GIM.NODE_TYPE_ESCALATOR, GIM.NODE_TYPE_LIFT];   //"assets/img/servicelogo/1.png"
-        for (var i = 0; i < imgURLs.length; i++) {
-            var img = new Image();
-            serviceSelector.appendChild(img);
-            img.style.cssText = "position:absolute;left:" + (i * 100) + "px";
-            img.nodeTypeId = imgNodeTypeIds[i];
-            img.src = imgURLs[i];
-            img.onclick = function (event) {
-                showNodeTypes(event.target.nodeTypeId);
-                var targetImage = event.target;
-                TWEEN.remove(targetImage);
-                targetImage.style.opacity = 0;
-                new TWEEN.Tween(targetImage.style).to({opacity: 1}, 300).easing(TWEEN.Easing.Exponential.InOut).start();
+        var imgNodeTypeTexts = ["我的位置", "服务中心", "ATM", "洗手间", "扶梯", "升降梯"];
+        for (var i = 0; i < imgNodeTypeIds.length; i++) {
+            var index = imgNodeTypeIds[i];
+            var text = imgNodeTypeTexts[i];
+            var serviceLogo = new GIM.ServiceLogo(serviceSelector,index,text);
+            serviceLogos.push(serviceLogo);
+
+            serviceLogo.onClickHandler = showNodeTypes;
+        }
+
+        zoomBar = new GIM.ZoomBar(mainContainer);
+    }
+
+    function showNodeTypes(nodeTypeId) {
+        for (var i = 0; i < curShownFloorIds.length; i++) {
+            var floor3D = floor3Ds[curShownFloorIds[i]];
+            for (var nodeId in floor3D.subUnit3Ds) {
+                var unit3D = floor3D.subUnit3Ds[nodeId];
+                if (unit3D.data.nodeTypeId === nodeTypeId) {
+                    unit3D.mesh.material.opacity = 0;
+                    unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
+                    new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
+                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
+                } else {
+
+                }
             }
         }
     }
@@ -1359,7 +1559,7 @@ GIM.Map3D = function (mainContainer) {
         var floorLabelAndLogo = {
             id: floorId,
             width: 170,
-            height: 120,
+            height: 112,
             container: document.createElement("div"),
             floorLabel: document.createElement("p"),
             floorCurLabel: document.createElement("p"),
@@ -1368,7 +1568,7 @@ GIM.Map3D = function (mainContainer) {
             set selected(value) {
                 this._selected = value;
                 this.container.style.opacity = value ? 1 : 0.4;
-                this.container.style.border = value ? "1px dashed #FF0033" : "1px dashed #AAAAAA";
+//                this.container.style.border = value ? "1px dashed #FF0033" : "1px dashed #AAAAAA";
                 this.container.style.color = value ? "#FF0033" : "#222222";
                 this.floorCurLabel.style.display = value ? "block" : "none";
                 TWEEN.remove(this);
@@ -1388,17 +1588,18 @@ GIM.Map3D = function (mainContainer) {
             }
         };
 
-        floorSelector.appendChild(floorLabelAndLogo.container);
+        floorSelector.insertBefore(floorLabelAndLogo.container,floorSelector.lastChild);
+
         floorSelecterLogos.push(floorLabelAndLogo);
 
+        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLogoImage);
         floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLabel);
         floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorCurLabel);
-        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLogoImage);
 
-        floorLabelAndLogo.container.style.cssText = "position:relative;height:" + floorLabelAndLogo.height + "px;width:" + floorLabelAndLogo.width + "px;opacity:0.3;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
+        floorLabelAndLogo.container.style.cssText = "position:relative;height:" + floorLabelAndLogo.height + "px;width:" + floorLabelAndLogo.width + "px;opacity:0.3;margin-bottom:8px;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
         floorLabelAndLogo.floorLabel.style.cssText = "margin:0;position:absolute;left:2px;top:2px;line-height:22px";
-        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 20px;font-weight: normal;position:absolute;top:0px;left:40px;margin:0;";
-        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%;position:absolute;top:36px;left:2px;";
+        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 16px;font-weight: normal;position:absolute;bottom:2px;left:2px;margin:0;";
+        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%;position:absolute;top:22px;left:2px;";
 
         floorLabelAndLogo.floorLabel.innerHTML = floorId.substr(5, 1) + "F";
         floorLabelAndLogo.floorCurLabel.innerHTML = isCurFloor ? "当前楼层" : "目标楼层";

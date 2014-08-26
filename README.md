@@ -1,5 +1,16 @@
 机器位置设置
+单向扶梯寻路
 优化寻路算法
+地图缩放按钮条
+地图旋转,图标向镜头
+
+函数分离
+Map3D:
+    loadData();
+    addComponents();
+组件分离
+Display3D Unit3D ...
+
 
 http://terms.rongyi.com/suning_legoushi/terminals/53e09e8721232f697d000002/activities
 
