@@ -97,8 +97,6 @@ GIM.ZoomBar = function (parentContainer) {
             ctx.strokeStyle = "#FFFFFF";
             ctx.lineWidth = 8;
             ctx.fillStyle = "#888888";
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = "#000000";
             ctx.arc(this.imageSize * 0.5,this.imageSize * 0.5,(this.imageSize - ctx.lineWidth - 6) * 0.5,0,Math.PI * 2);
             ctx.stroke();
             ctx.fill();
@@ -115,7 +113,7 @@ GIM.ZoomBar = function (parentContainer) {
             this.updateDisplay();
         },
         updateDisplay: function(){
-            this.container.style.visibility = "hidden";
+//            this.container.style.visibility = "hidden";
             this.thumb.style.top = (this.maxThumbY - this.minThumbY) * (100 - this._percent) * 0.01 + this.minThumbY;
         },
         _percent: 0,
