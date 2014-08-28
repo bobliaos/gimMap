@@ -6,6 +6,51 @@
  * @author bob / http://bobliaos.diandian.com
  * */
 
+GIM.ServiceSelector = function(parentContainer,showNodeTypes){
+    var selector = {
+        container: document.createElement("div"),
+        serviceLogos: [],
+        init: function(){
+            parentContainer.appendChild(this.container);
+
+            this.container.style.cssText = "position:absolute;top:30px;left:230px";
+
+            var imgNodeTypeIds = [GIM.NODE_TYPE_MACHINE, GIM.NODE_TYPE_SERVICE, GIM.NODE_TYPE_ATM, GIM.NODE_TYPE_TOILET, GIM.NODE_TYPE_ESCALATOR, GIM.NODE_TYPE_LIFT];   //"assets/img/servicelogo/1.png"
+            var imgNodeTypeTexts = ["我的位置", "服务中心", "ATM", "洗手间", "扶梯", "升降梯"];
+            for (var i = 0; i < imgNodeTypeIds.length; i++) {
+                var index = imgNodeTypeIds[i];
+                var text = imgNodeTypeTexts[i];
+                var serviceLogo = new GIM.ServiceLogo(this.container,index,text);
+                this.serviceLogos.push(serviceLogo);
+                serviceLogo.onClickHandler = showNodeTypes;
+            }
+        },
+        setLogos: function(floor3Ds,astarNodes,curShownFloorIds){
+            var currentAvaliableNodeTypeIds = [];
+            for (var i = 0; i < curShownFloorIds.length; i++) {
+                var floor3D = floor3Ds[curShownFloorIds[i]];
+                for (var nodeId in floor3D.subUnit3Ds) {
+                    var unit3D = floor3D.subUnit3Ds[nodeId];
+                    var nodeTypeId = unit3D.data.nodeTypeId;
+                    if(currentAvaliableNodeTypeIds.indexOf(nodeTypeId) < 0)
+                        currentAvaliableNodeTypeIds.push(nodeTypeId);
+                }
+            }
+
+            for (var i = 0;i < this.serviceLogos.length;i ++){
+                var serviceLogo = this.serviceLogos[i];
+                serviceLogo.disable = (currentAvaliableNodeTypeIds.indexOf(serviceLogo.index) < 0);
+                if(serviceLogo.index == GIM.NODE_TYPE_MACHINE){
+                    var machineFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
+                    serviceLogo.disable = curShownFloorIds.indexOf(machineFloorId) == -1;
+                }
+            }
+        }
+    };
+    selector.init();
+    return selector;
+}
+
 GIM.ServiceLogo = function (parentContainer,index,text) {
     var serviceLogo = {
         onTime : 1000,

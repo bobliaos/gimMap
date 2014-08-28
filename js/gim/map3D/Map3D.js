@@ -11,9 +11,9 @@ GIM.Map3D = function (mainContainer) {
     var mouseX = 0;
     var mouseXOnMouseDown = 0;
 
-    var containerWidth,containerHeight,containerHalfWidth,containerHalfHeight;
+    var containerWidth, containerHeight, containerHalfWidth, containerHalfHeight;
 
-    var renderer, stats, scene, camera, container3D, projector;
+    var renderer, stats, scene, cameraController, container3D, projector;
 
     var meshes = [];
     var serviceLogoMeshes = [];
@@ -24,7 +24,6 @@ GIM.Map3D = function (mainContainer) {
 
     var pathMesh;
     var astarNodes = {};
-    var floorSelecterLogos = [];
     var minFloorPositionZ = -4200;
     var maxFloorPositionZ = 1200;
     var isMapReady = false;
@@ -38,48 +37,11 @@ GIM.Map3D = function (mainContainer) {
     var mapPin;
     var floorSelector;
     var serviceSelector;
-    var serviceLogos = [];
 
     var preSelectedUnit3DMaterial = null;
 
-    var cameraPosition = {
-        _radian: 0,
-        _distance: 0,
-        _posX: 0,
-        set radian(value) {
-            this._radian = value;
-            this.setCamera(this._radian, this._distance, this._posX);
-        },
-        get radian() {
-            return this._radian;
-        },
-        set distance(value) {
-            this._distance = value;
-            this.setCamera(this._radian, this._distance, this._posX);
-        },
-        get distance() {
-            return this._distance;
-        },
-        set posX(value) {
-            this._posX = value;
-            this.setCamera(this._radian, this._distance, this._posX);
-        },
-        get posX() {
-//            return this._posX;
-        },
-        setCamera: function (radian, distance, posX) {
-            if (this._radian !== radian) this._radian = radian;
-            if (this._distance !== distance) this._distance = distance;
-            if (this._posX !== posX) this._posX = posX;
-            var posZ = Math.cos(radian) * distance;
-            var posY = Math.sin(radian) * distance + GIM.MAP_OFFSET_Y;
-            camera.position.set(this._posX, -posY, posZ);
-            camera.rotation.x = radian;
-        }
-    };
-
-    function reset(){
-        if(isMapReady){
+    function reset() {
+        if (isMapReady) {
             clearPath();
             showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
         }
@@ -99,9 +61,9 @@ GIM.Map3D = function (mainContainer) {
 
             var vector3Ds = [];
             var pathNodes = searchPath(GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
-            if(pathNodes.length === 0){
+            if (pathNodes.length === 0) {
                 showFloors([startFloorId]);
-            }else{
+            } else {
                 for (var i = 0; i < pathNodes.length; i++) {
                     var pathNode = pathNodes[i];
                     var floor3D = floor3Ds[pathNode.data.floorId];
@@ -114,7 +76,7 @@ GIM.Map3D = function (mainContainer) {
         }
     }
 
-    function searchPath(startNodeId, endNodeId){
+    function searchPath(startNodeId, endNodeId) {
         var startNode = astarNodes[startNodeId].data;
         var endNode = astarNodes[endNodeId].data;
 
@@ -124,33 +86,33 @@ GIM.Map3D = function (mainContainer) {
         var startFloorAStarNodes = {};
         var endFloorAStarNodes = {};
 
-        for(var key in astarNodes){
+        for (var key in astarNodes) {
             var astarNode = astarNodes[key];
-            if(astarNode.data.floorId == startFloorId)
+            if (astarNode.data.floorId == startFloorId)
                 startFloorAStarNodes[key] = astarNode;
-            else if(astarNode.data.floorId == endFloorId)
+            else if (astarNode.data.floorId == endFloorId)
                 endFloorAStarNodes[key] = astarNode;
         }
 
         var pathNodes = [];
-        if(startFloorId === endFloorId){
+        if (startFloorId === endFloorId) {
             pathNodes = GIM.AStar.search(startFloorAStarNodes, GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
-        }else{
+        } else {
             var startFloorEndAStarNode = null;
             var endFloorStartAStarNode = null;
 
-            for(var key in startFloorAStarNodes){
+            for (var key in startFloorAStarNodes) {
                 var astarNode = startFloorAStarNodes[key];
-                if(astarNode.data.nodeTypeId === GIM.NODE_TYPE_LIFT || astarNode.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR){
-                    for(var i = 0;i < astarNode.bindNodes.length;i ++){
+                if (astarNode.data.nodeTypeId === GIM.NODE_TYPE_LIFT || astarNode.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR) {
+                    for (var i = 0; i < astarNode.bindNodes.length; i++) {
                         var bindAStarNode = astarNode.bindNodes[i];
-                        if(bindAStarNode.data.floorId === endFloorId){
+                        if (bindAStarNode.data.floorId === endFloorId) {
                             startFloorEndAStarNode = astarNode;
                             endFloorStartAStarNode = bindAStarNode;
                             break;
                         }
                     }
-                    if(startFloorEndAStarNode !== null && endFloorStartAStarNode !== null){
+                    if (startFloorEndAStarNode !== null && endFloorStartAStarNode !== null) {
                         var startFloorPathNodes = GIM.AStar.search(startFloorAStarNodes, GIM.MACHINE_NODE_ID, startFloorEndAStarNode.data.nodeId);
                         var endFloorPathNodes = GIM.AStar.search(endFloorAStarNodes, endFloorStartAStarNode.data.nodeId, curSelectedUnit3D.data.nodeId);
 
@@ -174,13 +136,7 @@ GIM.Map3D = function (mainContainer) {
         console.log("- [GimMap]Map3D.showFloors:", floorIds.toString());
 
         //UPDATE FLOOR LOGOS
-        for (var i = 0; i < floorSelecterLogos.length; i++) {
-            var floorLogo = floorSelecterLogos[i];
-            floorLogo.selected = false;
-            if (floorIds.indexOf(floorSelecterLogos[i].id) > -1) {
-                floorLogo.selected = true;
-            }
-        }
+        floorSelector.showFloors(floorIds);
 
         //HIDE ALL FLOORS
         for (var key in floor3Ds) {
@@ -219,25 +175,7 @@ GIM.Map3D = function (mainContainer) {
 
         curShownFloorIds = floorIds;
 
-        var currentAvaliableNodeTypeIds = [];
-        for (var i = 0; i < curShownFloorIds.length; i++) {
-            var floor3D = floor3Ds[curShownFloorIds[i]];
-            for (var nodeId in floor3D.subUnit3Ds) {
-                var unit3D = floor3D.subUnit3Ds[nodeId];
-                var nodeTypeId = unit3D.data.nodeTypeId;
-                if(currentAvaliableNodeTypeIds.indexOf(nodeTypeId) < 0)
-                    currentAvaliableNodeTypeIds.push(nodeTypeId);
-            }
-        }
-
-        for (var i = 0;i < serviceLogos.length;i ++){
-            var serviceLogo = serviceLogos[i];
-            serviceLogo.disable = (currentAvaliableNodeTypeIds.indexOf(serviceLogo.index) < 0);
-            if(serviceLogo.index == GIM.NODE_TYPE_MACHINE){
-                var machineFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
-                serviceLogo.disable = curShownFloorIds.indexOf(machineFloorId) == -1;
-            }
-        }
+        serviceSelector.setLogos(floor3Ds, astarNodes, curShownFloorIds);
     }
 
     function showPinOnUnit3D(unit3D) {
@@ -284,13 +222,15 @@ GIM.Map3D = function (mainContainer) {
     function doPathAnimate() {
         pathAnimateIndexDelta--;
         if (pathAnimateIndexDelta < 0) pathAnimateIndexDelta = pathAnimateCircleLength;
+
         for (var i = 0; i < pathAnimatePointMeshes.length; i++) {
             var mesh = pathAnimatePointMeshes[i];
-            mesh.visible = i === pathAnimateIndexDelta;
-//            mesh.scale.x = mesh.scale.y = (1 - (i + pathAnimateIndexDelta) % pathAnimateCircleLength / pathAnimateCircleLength);
-//            if (mesh.scale.x < 0.1)
-//                mesh.scale.x = mesh.scale.y = 1;
-//            mesh.scale.x = mesh.scale.y = i === pathAnimateIndexDelta ? 1 : 0.1;
+            if (true) {
+                mesh.visible = i === pathAnimateIndexDelta;
+            } else {
+                if (!mesh.visible) mesh.visible = true;
+                mesh.scale.x = mesh.scale.y = (1 - (i + pathAnimateCircleLength - pathAnimateIndexDelta) % pathAnimateCircleLength / pathAnimateCircleLength);
+            }
         }
     }
 
@@ -311,8 +251,8 @@ GIM.Map3D = function (mainContainer) {
         }
     }
 
-    function setSize(width,height){
-        console.log("- [GimMap]Map3D.setSize:",width,height);
+    function setSize(width, height) {
+        console.log("- [GimMap]Map3D.setSize:", width, height);
 
         containerWidth = width;
         containerHeight = height;
@@ -320,10 +260,10 @@ GIM.Map3D = function (mainContainer) {
         containerHalfWidth = containerWidth * 0.5;
         containerHalfHeight = containerHeight * 0.5;
 
-        camera.aspect = containerWidth / containerHeight;
-        camera.updateProjectionMatrix();
+        cameraController.camera.aspect = containerWidth / containerHeight;
+        cameraController.camera.updateProjectionMatrix();
 
-        renderer.setSize(containerWidth , containerHeight);
+        renderer.setSize(containerWidth, containerHeight);
     }
 
     //ASSIST FUNCTIONS//////////////////////////////////////////
@@ -371,8 +311,8 @@ GIM.Map3D = function (mainContainer) {
         mouseX = 2 * mouseX / containerWidth - 1;
         mouseY = 1 - 2 * mouseY / containerHeight;
         var vec = new THREE.Vector3(mouseX, mouseY, 0);
-        projector.unprojectVector(vec, camera);
-        var rayCaster = new THREE.Raycaster(camera.position, vec.sub(camera.position).normalize());
+        projector.unprojectVector(vec, cameraController.camera);
+        var rayCaster = new THREE.Raycaster(cameraController.camera.position, vec.sub(cameraController.camera.position).normalize());
         var intersects = rayCaster.intersectObjects(meshes);
         if (intersects.length > 0) {
             var mesh = intersects[0].object;
@@ -400,7 +340,7 @@ GIM.Map3D = function (mainContainer) {
     function clearSelectedUnit3D() {
         for (var i = 0; i < serviceLogoMeshes.length; i++) {
             var mesh = serviceLogoMeshes[i];
-            if(mesh.position.z != mesh.displayUnit3D.data.origZ)
+            if (mesh.position.z != mesh.displayUnit3D.data.origZ)
                 new TWEEN.Tween(mesh.position).to({z: mesh.displayUnit3D.data.origZ}, 500).easing(TWEEN.Easing.Elastic.Out).start();
         }
 
@@ -419,7 +359,7 @@ GIM.Map3D = function (mainContainer) {
     function toScreenCoordinate(worldX, worldY, worldZ) {
         var projector = new THREE.Projector();
         var worldVector = new THREE.Vector3(worldX + container3D.position.x, worldY, worldZ);
-        var vector = projector.projectVector(worldVector, camera);
+        var vector = projector.projectVector(worldVector, cameraController.camera);
         return {
             x: Math.round(vector.x * containerHalfWidth + containerHalfWidth),
             y: Math.round(-vector.y * containerHalfHeight + containerHalfHeight)
@@ -464,7 +404,7 @@ GIM.Map3D = function (mainContainer) {
             GIM.goDetail(curSelectedUnit3D.data.bindShopId);
         } else {
             selectUnit3DByPosition(event.offsetX, event.offsetY);
-            if(curSelectedUnit3D){
+            if (curSelectedUnit3D) {
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     showPinOnUnit3D(curSelectedUnit3D);
                 } else {
@@ -517,13 +457,67 @@ GIM.Map3D = function (mainContainer) {
             setInterval(doPathAnimate, pathAnimateTime);
 
             mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
-            mainContainer.addEventListener("DOMNodeInserted",reset,false);
+            mainContainer.addEventListener("DOMNodeInserted", reset, false);
 
-            setSize(parseFloat(mainContainer.style.width),parseFloat(mainContainer.style.height));
+            setSize(parseFloat(mainContainer.style.width), parseFloat(mainContainer.style.height));
         });
     }
 
-    function initData(){
+    function init3d() {
+
+        isHideShadow = GIM.SHADOW_MAP_SIZE === 0;
+
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        mainContainer.appendChild(renderer.domElement);
+        renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
+        renderer.setSize(64, 64);
+        renderer.shadowMapEnabled = true;
+        renderer.shadowMapType = THREE.PCFShadowMap;
+
+        scene = new THREE.Scene();
+        cameraController = new GIM.CameraController();
+        container3D = new THREE.Object3D();
+        scene.add(container3D);
+
+        if (!isHideShadow) {
+            var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
+            scene.add(shadowLight);
+            shadowLight.position.set(1400, -2200, 2200);
+            shadowLight.target.position.set(500, -300, 0);
+            shadowLight.castShadow = true;
+            shadowLight.shadowCameraNear = 1800;
+            shadowLight.shadowCameraFar = 4500;
+            shadowLight.shadowBias = 0.0001;
+            shadowLight.shadowDarkness = 0.6;
+            shadowLight.shadowMapWidth = shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
+            if (isDebug) shadowLight.shadowCameraVisible = true;
+        }
+
+        var backLight = new THREE.DirectionalLight(0x333333, 0.8);
+        scene.add(backLight);
+        backLight.position.set(400, 500, 500);
+
+        if (isDebug) {
+            var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
+            container3D.add(plane);
+        }
+
+        projector = new THREE.Projector();
+    }
+
+    function initComponents() {
+        if (isDebug) {
+            stats = new Stats();
+            stats.domElement.style.cssText += 'position:absolute;top:0px';
+            mainContainer.appendChild(stats.domElement);
+        }
+        floorSelector = new GIM.FloorSelector(mainContainer);
+        serviceSelector = new GIM.ServiceSelector(mainContainer, showNodeTypes);
+        zoomBar = new GIM.ZoomBar(mainContainer);
+        mapPin = new GIM.MapPin(mainContainer);
+    }
+
+    function initData() {
         GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
 //            var json = JSON.parse(sourceString);
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
@@ -543,10 +537,10 @@ GIM.Map3D = function (mainContainer) {
                         meshes.push(pushMesh);
                         if (pushMesh.isServiceLogo)
                             serviceLogoMeshes.push(pushMesh);
-                        if(pushMesh.displayUnit3D.data.nodeTypeId === GIM.NODE_TYPE_MACHINE){
-                            if(pushMesh.displayUnit3D.data.bindShopId === GIM.MACHINE_CODE){
+                        if (pushMesh.displayUnit3D.data.nodeTypeId === GIM.NODE_TYPE_MACHINE) {
+                            if (pushMesh.displayUnit3D.data.bindShopId === GIM.MACHINE_CODE) {
                                 GIM.MACHINE_NODE_ID = pushMesh.displayUnit3D.data.nodeId;
-                                console.log("- [GimMap].initData:MACHINE_NODE_ID FOUND:",GIM.MACHINE_NODE_ID);
+                                console.log("- [GimMap].initData:MACHINE_NODE_ID FOUND:", GIM.MACHINE_NODE_ID);
                                 isCurFloor = true;
                             } else {
                                 pushMesh.position.x = -20000;
@@ -561,7 +555,7 @@ GIM.Map3D = function (mainContainer) {
                     astarNodes[unitData.nodeId] = unitData.astarNode;
                 }
 
-                addFloorLogo(floor3D.data.floorId, "assets/img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor);
+                floorSelector.addLogo(floor3D.data.floorId, "assets/img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
             }
 
             for (var nodeId in astarNodes) {
@@ -578,90 +572,11 @@ GIM.Map3D = function (mainContainer) {
 
             showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
 
-            cameraPosition.setCamera(Math.PI * 0.25, 1800, 0);
-            cameraPosition.posX = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
+            cameraController.lookAtVector.x = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
+            cameraController.distance = 1800;
 
             isMapReady = true;
         });
-    }
-
-    function init3d() {
-        var near = 1;
-        var far = 10000;
-
-        isHideShadow = GIM.SHADOW_MAP_SIZE === 0;
-
-        renderer = new THREE.WebGLRenderer({antialias: true});
-        mainContainer.appendChild(renderer.domElement);
-        renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
-        renderer.setSize(64 , 64);
-        renderer.shadowMapEnabled = true;
-        renderer.shadowMapType = THREE.PCFShadowMap;
-
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(60, 1, near, far);
-        container3D = new THREE.Object3D();
-        scene.add(container3D);
-
-        if(!false) {
-            var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
-            scene.add(shadowLight);
-            shadowLight.position.set(1400, -2200, 2200);
-            shadowLight.target.position.set(500, -300, 0);
-            shadowLight.castShadow = true;
-            shadowLight.shadowCameraNear = 1800;
-            shadowLight.shadowCameraFar = 4500;
-            shadowLight.shadowBias = 0.0001;
-            shadowLight.shadowDarkness = 0.6;
-            shadowLight.shadowMapWidth = shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-            if(isDebug) shadowLight.shadowCameraVisible = true;
-        }
-
-        var backLight = new THREE.DirectionalLight(0x333333, 0.8);
-        scene.add(backLight);
-        backLight.position.set(400, 500, 500);
-
-        if (isDebug) {
-            var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
-            container3D.add(plane);
-        }
-
-        projector = new THREE.Projector();
-    }
-
-    function initComponents() {
-        if (isDebug) addStats();
-
-        floorSelector = document.createElement("div");
-        mainContainer.appendChild(floorSelector);
-        floorSelector.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;";
-
-        var upImage = new Image();
-        var downImage = new Image();
-        floorSelector.appendChild(upImage);
-        floorSelector.appendChild(downImage);
-        upImage.src = "assets/img/up.png";
-        downImage.src = "assets/img/down.png";
-        upImage.style.cssText = downImage.style.cssText = "left: 60px;position: relative;";
-
-        serviceSelector = document.createElement("div");
-        mainContainer.appendChild(serviceSelector);
-        serviceSelector.style.cssText = "position:absolute;top:30px;left:230px";
-
-        var imgNodeTypeIds = [GIM.NODE_TYPE_MACHINE, GIM.NODE_TYPE_SERVICE, GIM.NODE_TYPE_ATM, GIM.NODE_TYPE_TOILET, GIM.NODE_TYPE_ESCALATOR, GIM.NODE_TYPE_LIFT];   //"assets/img/servicelogo/1.png"
-        var imgNodeTypeTexts = ["我的位置", "服务中心", "ATM", "洗手间", "扶梯", "升降梯"];
-        for (var i = 0; i < imgNodeTypeIds.length; i++) {
-            var index = imgNodeTypeIds[i];
-            var text = imgNodeTypeTexts[i];
-            var serviceLogo = new GIM.ServiceLogo(serviceSelector,index,text);
-            serviceLogos.push(serviceLogo);
-
-            serviceLogo.onClickHandler = showNodeTypes;
-        }
-
-        zoomBar = new GIM.ZoomBar(mainContainer);
-
-        mapPin = new GIM.MapPin(mainContainer);
     }
 
     function showNodeTypes(nodeTypeId) {
@@ -674,74 +589,9 @@ GIM.Map3D = function (mainContainer) {
                     unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
                     new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
                     new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
-                } else {
-
                 }
             }
         }
-    }
-
-    function addFloorLogo(floorId, logoURL, isCurFloor) {
-        var floorLabelAndLogo = {
-            id: floorId,
-            width: 170,
-            height: 112,
-            container: document.createElement("div"),
-            floorLabel: document.createElement("p"),
-            floorCurLabel: document.createElement("p"),
-            floorLogoImage: new Image(),
-            _selected: false,
-            set selected(value) {
-                this._selected = value;
-                this.container.style.opacity = value ? 1 : 0.4;
-//                this.container.style.border = value ? "1px dashed #FF0033" : "1px dashed #AAAAAA";
-                this.container.style.color = value ? "#FF0033" : "#222222";
-                this.floorCurLabel.style.display = value ? "block" : "none";
-                TWEEN.remove(this);
-                new TWEEN.Tween(this).to({scale: value ? 1.2 : 1}, 300).easing(TWEEN.Easing.Exponential.Out).start();
-            },
-            get selected() {
-                return this._selected
-            },
-            _scale: 1,
-            set scale(value) {
-                this._scale = value;
-                this.container.style.height = (this.height * value) + "px";
-                this.container.style.width = (this.width * value) + "px";
-            },
-            get scale() {
-                return this._scale;
-            }
-        };
-
-        floorSelector.insertBefore(floorLabelAndLogo.container,floorSelector.lastChild);
-
-        floorSelecterLogos.push(floorLabelAndLogo);
-
-        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLogoImage);
-        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorLabel);
-        floorLabelAndLogo.container.appendChild(floorLabelAndLogo.floorCurLabel);
-
-        floorLabelAndLogo.container.style.cssText = "position:relative;height:" + floorLabelAndLogo.height + "px;width:" + floorLabelAndLogo.width + "px;opacity:0.3;margin-bottom:8px;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
-        floorLabelAndLogo.floorLabel.style.cssText = "margin:0;position:absolute;left:2px;top:2px;line-height:22px";
-        floorLabelAndLogo.floorCurLabel.style.cssText = "font-size: 16px;font-weight: normal;position:absolute;bottom:2px;left:2px;margin:0;";
-        floorLabelAndLogo.floorLogoImage.style.cssText = "width:100%;position:absolute;top:22px;left:2px;";
-
-        floorLabelAndLogo.floorLabel.innerHTML = floorId.substr(5, 1) + "F";
-        floorLabelAndLogo.floorCurLabel.innerHTML = isCurFloor ? "当前楼层" : "目标楼层";
-        floorLabelAndLogo.floorLogoImage.src = logoURL;
-
-        floorLabelAndLogo.container.name = floorId;
-        floorLabelAndLogo.container.addEventListener('mousedown', function (event) {
-            var targetfloorId = event.currentTarget.name;
-            showFloors([targetfloorId]);
-        });
-    }
-
-    function addStats() {
-        stats = new Stats();
-        stats.domElement.style.cssText += 'position:absolute;top:0px';
-        mainContainer.appendChild(stats.domElement);
     }
 
     function doAnimate() {
@@ -759,7 +609,7 @@ GIM.Map3D = function (mainContainer) {
 //            mesh.lookAt(camera.position);
         }
 
-        renderer.render(scene, camera);
+        renderer.render(scene, cameraController.camera);
         TWEEN.update();
     }
 
