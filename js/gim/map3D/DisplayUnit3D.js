@@ -83,8 +83,8 @@ GIM.DisplayUnit3D = function (unitData) {
             addMesh();
             if (unitData.bindShopId) {
 //                addLogo("assets/img/shoplogo/0.png");
-                addText(unitData.shopName);
-                addText(unitData.bindShopId,18,14);
+//                addText(unitData.shopName);
+//                addText(unitData.bindShopId,18,14);
             }
             break;
         case GIM.NODE_TYPE_MACHINE:

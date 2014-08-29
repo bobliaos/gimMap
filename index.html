@@ -24,19 +24,11 @@
 
     <script type="text/javascript">
         function init() {
-            var config = {
-                server: "http://192.168.1.208:3000",
-                machineCode : "53be552d21232fcadb000002",
-                shadowRank: "4",
-                sourceSVGURL: "assets/data.json",
-                sourceShopListURL: "assets/shoplist.json"
-            };
-
-            GIM.SERVER          = config.server;
-            GIM.MACHINE_CODE    = config.machineCode;
-            GIM.SHADOW_MAP_SIZE = parseFloat(config.shadowRank) * 512;
-            GIM.DATA_SOURCE_URL = config.sourceSVGURL;
-            GIM.SHOP_LIST_URL   = config.sourceShopListURL;
+            GIM.SERVER          = "http://192.168.1.208:3000";
+            GIM.MACHINE_CODE    = "53be552d21232fcadb000002";
+            GIM.SHADOW_MAP_SIZE = 4 * 512;
+            GIM.DATA_SOURCE_URL = "assets/data.json";
+            GIM.SHOP_LIST_URL   = "assets/shoplist.json";
         }
 
         var container;

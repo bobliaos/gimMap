@@ -37,7 +37,6 @@ GIM.NODE_TYPE_ATM   		= "9";
 
 GIM.MACHINE_CODE            = "53be527121232fb859000001";
 GIM.SERVER                  = "http://192.168.1.208:3000";
-GIM.MACHINE_NODE_ID         = "";
 
 GIM.FLOOR_GAP               = 700;
 GIM.PATH_POINT_GAP          = 8;
@@ -45,8 +44,8 @@ GIM.PATH_COLOR              = 0xFF0000;
 GIM.MAP_OFFSET_Y            = 200;
 GIM.MAP_BACKGROUND_COLOR    = 0xDDDDDD;
 GIM.SELECTED_COLOR          = 0xFFBB00;
-GIM.FONT_NAME               = "Microsoft Yahei";
-//GIM.FONT_NAME             = "造字工房悦黑演示版常规体";
+//GIM.FONT_NAME               = "Microsoft Yahei";
+GIM.FONT_NAME               = "造字工房悦黑演示版常规体";
 GIM.SHADOW_MAP_SIZE         = 2 * 1024;
 
 GIM.CONFIG_URL              = "map.conf";

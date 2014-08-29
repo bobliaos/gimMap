@@ -6,14 +6,14 @@
  * @author bob / http://bobliaos.diandian.com
  * */
 
-GIM.ZoomBar = function (parentContainer) {
+GIM.ZoomBar = function (parentContainer,cameraController) {
     var bar = {
         width: 80,
         height: 400,
         imageSize: 80,
         minThumbY: 80,
         maxThumbY: 280,
-        containerId : "zoomBarContainer",
+        cameraController: cameraController,
         container: document.createElement("div"),
         plus: document.createElement("canvas"),
         minus: document.createElement("canvas"),
@@ -26,8 +26,6 @@ GIM.ZoomBar = function (parentContainer) {
             this.container.appendChild(this.minus);
 
             parentContainer.appendChild(this.container);
-
-            this.container.id = this.containerId;
 
             this.container.width = this.rail.width = this.width;
             this.container.height = this.rail.height = this.height;
@@ -121,6 +119,7 @@ GIM.ZoomBar = function (parentContainer) {
             this._percent = value;
             if(this._percent > 100) this._percent = 100;
             else if(this._percent < 0) this._percent = 0;
+            this.cameraController.percent = this._percent;
             this.updateDisplay();
         },
         get percent(){
@@ -129,10 +128,12 @@ GIM.ZoomBar = function (parentContainer) {
     }
 
     bar.plus.addEventListener("click",function(e){
-        bar.percent += 20;
+        TWEEN.remove(bar);
+        new TWEEN.Tween(bar).to({percent: bar.percent + 20}, 800).easing(TWEEN.Easing.Exponential.Out).start();
     });
     bar.minus.addEventListener("click",function(e){
-        bar.percent -= 20;
+        TWEEN.remove(bar);
+        new TWEEN.Tween(bar).to({percent: bar.percent - 20}, 800).easing(TWEEN.Easing.Exponential.Out).start();
     });
 
     var origTopY;
@@ -145,11 +146,9 @@ GIM.ZoomBar = function (parentContainer) {
     });
     function onAnimate(e){
         var deltaY = e.clientY - origTopY;
-
         var deltaPercent = deltaY / (bar.maxThumbY - bar.minThumbY) * 100;
         bar.percent -= deltaPercent;
         origTopY = e.clientY;
-        console.log(bar.percent);
     };
     function onAnimateOver(e){
         document.removeEventListener("mousemove",onAnimate);

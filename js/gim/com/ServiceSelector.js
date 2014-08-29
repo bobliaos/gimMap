@@ -25,7 +25,7 @@ GIM.ServiceSelector = function(parentContainer,showNodeTypes){
                 serviceLogo.onClickHandler = showNodeTypes;
             }
         },
-        setLogos: function(floor3Ds,astarNodes,curShownFloorIds){
+        setLogos: function(floor3Ds,astarNodes,curShownFloorIds,machineNodeId){
             var currentAvaliableNodeTypeIds = [];
             for (var i = 0; i < curShownFloorIds.length; i++) {
                 var floor3D = floor3Ds[curShownFloorIds[i]];
@@ -41,7 +41,7 @@ GIM.ServiceSelector = function(parentContainer,showNodeTypes){
                 var serviceLogo = this.serviceLogos[i];
                 serviceLogo.disable = (currentAvaliableNodeTypeIds.indexOf(serviceLogo.index) < 0);
                 if(serviceLogo.index == GIM.NODE_TYPE_MACHINE){
-                    var machineFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
+                    var machineFloorId = astarNodes[machineNodeId].data.floorId;
                     serviceLogo.disable = curShownFloorIds.indexOf(machineFloorId) == -1;
                 }
             }

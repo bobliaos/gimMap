@@ -6,11 +6,6 @@ GIM.Map3D = function (mainContainer) {
     var isDebug = false;
     var isHideShadow = false;
 
-    var targetRotation = 0;
-    var targetRotationOnMouseDown = 0;
-    var mouseX = 0;
-    var mouseXOnMouseDown = 0;
-
     var containerWidth, containerHeight, containerHalfWidth, containerHalfHeight;
 
     var renderer, stats, scene, cameraController, container3D, projector;
@@ -39,96 +34,26 @@ GIM.Map3D = function (mainContainer) {
     var serviceSelector;
 
     var preSelectedUnit3DMaterial = null;
+    var machineNodeId = null;
+
+    //MAIN FUNCTIONS///////////////////////////////////////////
 
     function reset() {
         if (isMapReady) {
             clearPath();
-            showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
+            showFloors([astarNodes[machineNodeId].data.floorId]);
         }
     }
-
-    //MAIN FUNCTIONS///////////////////////////////////////////
 
     function navigateTo(shopId) {
         selectUint3DByShopId(shopId);
-
-        if (curSelectedUnit3D) {
-            console.log("- [GimMap]Map3D.navigateTo Shop", curSelectedUnit3D.data.bindShopId);
-
-            var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
-            var endFloorId = curSelectedUnit3D.data.floorId;
-            showFloors(startFloorId === endFloorId ? [startFloorId] : [startFloorId, endFloorId]);
-
-            var vector3Ds = [];
-            var pathNodes = searchPath(GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
-            if (pathNodes.length === 0) {
-                showFloors([startFloorId]);
-            } else {
-                for (var i = 0; i < pathNodes.length; i++) {
-                    var pathNode = pathNodes[i];
-                    var floor3D = floor3Ds[pathNode.data.floorId];
-                    var vector3 = new THREE.Vector3(pathNode.x, pathNode.y, floor3D.mesh.position.z + 5);
-                    vector3Ds.push(vector3);
-                }
-                drawPath(vector3Ds);
-                showPinOnUnit3D(curSelectedUnit3D);
-            }
-        }
-    }
-
-    function searchPath(startNodeId, endNodeId) {
-        var startNode = astarNodes[startNodeId].data;
-        var endNode = astarNodes[endNodeId].data;
-
-        var startFloorId = startNode.floorId;
-        var endFloorId = endNode.floorId;
-
-        var startFloorAStarNodes = {};
-        var endFloorAStarNodes = {};
-
-        for (var key in astarNodes) {
-            var astarNode = astarNodes[key];
-            if (astarNode.data.floorId == startFloorId)
-                startFloorAStarNodes[key] = astarNode;
-            else if (astarNode.data.floorId == endFloorId)
-                endFloorAStarNodes[key] = astarNode;
-        }
-
-        var pathNodes = [];
-        if (startFloorId === endFloorId) {
-            pathNodes = GIM.AStar.search(startFloorAStarNodes, GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
-        } else {
-            var startFloorEndAStarNode = null;
-            var endFloorStartAStarNode = null;
-
-            for (var key in startFloorAStarNodes) {
-                var astarNode = startFloorAStarNodes[key];
-                if (astarNode.data.nodeTypeId === GIM.NODE_TYPE_LIFT || astarNode.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR) {
-                    for (var i = 0; i < astarNode.bindNodes.length; i++) {
-                        var bindAStarNode = astarNode.bindNodes[i];
-                        if (bindAStarNode.data.floorId === endFloorId) {
-                            startFloorEndAStarNode = astarNode;
-                            endFloorStartAStarNode = bindAStarNode;
-                            break;
-                        }
-                    }
-                    if (startFloorEndAStarNode !== null && endFloorStartAStarNode !== null) {
-                        var startFloorPathNodes = GIM.AStar.search(startFloorAStarNodes, GIM.MACHINE_NODE_ID, startFloorEndAStarNode.data.nodeId);
-                        var endFloorPathNodes = GIM.AStar.search(endFloorAStarNodes, endFloorStartAStarNode.data.nodeId, curSelectedUnit3D.data.nodeId);
-
-                        pathNodes = pathNodes.concat(endFloorPathNodes);
-                        pathNodes = pathNodes.concat(startFloorPathNodes);
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        return pathNodes;
+        drawPathToCurrentSelectedUnit();
+        showPinOnUnit3D(curSelectedUnit3D);
     }
 
     function showFloors(floorIds) {
+        zoomBar.percent = 0;
+
         if (curShownFloorIds === null) curShownFloorIds = floorIds;
 
         if (mapPin._isOpenning) mapPin.close();
@@ -175,7 +100,22 @@ GIM.Map3D = function (mainContainer) {
 
         curShownFloorIds = floorIds;
 
-        serviceSelector.setLogos(floor3Ds, astarNodes, curShownFloorIds);
+        serviceSelector.setLogos(floor3Ds, astarNodes, curShownFloorIds, machineNodeId);
+    }
+
+    function showNodeTypes(nodeTypeId) {
+        for (var i = 0; i < curShownFloorIds.length; i++) {
+            var floor3D = floor3Ds[curShownFloorIds[i]];
+            for (var nodeId in floor3D.subUnit3Ds) {
+                var unit3D = floor3D.subUnit3Ds[nodeId];
+                if (unit3D.data.nodeTypeId === nodeTypeId) {
+                    unit3D.mesh.material.opacity = 0;
+                    unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
+                    new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
+                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
+                }
+            }
+        }
     }
 
     function showPinOnUnit3D(unit3D) {
@@ -183,6 +123,82 @@ GIM.Map3D = function (mainContainer) {
 
         var wordCoordinate = toScreenCoordinate(unit3D.data.nodePosition.x, -unit3D.data.nodePosition.y, unit3D.mesh.parent.position.z + parseInt(unit3D.data.deep) + 20);
         mapPin.open(wordCoordinate.x, wordCoordinate.y, getShopLogoURL(unit3D.data.bindShopId));
+    }
+
+    function searchPath(startNodeId, endNodeId) {
+        var startNode = astarNodes[startNodeId].data;
+        var endNode = astarNodes[endNodeId].data;
+
+        var startFloorId = startNode.floorId;
+        var endFloorId = endNode.floorId;
+
+        var startFloorAStarNodes = {};
+        var endFloorAStarNodes = {};
+
+        for (var key in astarNodes) {
+            var astarNode = astarNodes[key];
+            if (astarNode.data.floorId == startFloorId)
+                startFloorAStarNodes[key] = astarNode;
+            else if (astarNode.data.floorId == endFloorId)
+                endFloorAStarNodes[key] = astarNode;
+        }
+
+        var pathNodes = [];
+        if (startFloorId === endFloorId) {
+            pathNodes = GIM.AStar.search(startFloorAStarNodes, machineNodeId, curSelectedUnit3D.data.nodeId);
+        } else {
+            var startFloorEndAStarNode = null;
+            var endFloorStartAStarNode = null;
+
+            for (var key in startFloorAStarNodes) {
+                var astarNode = startFloorAStarNodes[key];
+                if (astarNode.data.nodeTypeId === GIM.NODE_TYPE_LIFT || astarNode.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR) {
+                    for (var i = 0; i < astarNode.bindNodes.length; i++) {
+                        var bindAStarNode = astarNode.bindNodes[i];
+                        if (bindAStarNode.data.floorId === endFloorId) {
+                            startFloorEndAStarNode = astarNode;
+                            endFloorStartAStarNode = bindAStarNode;
+                            break;
+                        }
+                    }
+                    if (startFloorEndAStarNode !== null && endFloorStartAStarNode !== null) {
+                        var startFloorPathNodes = GIM.AStar.search(startFloorAStarNodes, machineNodeId, startFloorEndAStarNode.data.nodeId);
+                        var endFloorPathNodes = GIM.AStar.search(endFloorAStarNodes, endFloorStartAStarNode.data.nodeId, curSelectedUnit3D.data.nodeId);
+
+                        pathNodes = pathNodes.concat(endFloorPathNodes);
+                        pathNodes = pathNodes.concat(startFloorPathNodes);
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return pathNodes;
+    }
+
+    function drawPathToCurrentSelectedUnit(){
+        if (curSelectedUnit3D) {
+            console.log("- [GimMap]Map3D.navigateTo Node", curSelectedUnit3D.data.nodeId);
+
+            var startFloorId = astarNodes[machineNodeId].data.floorId;
+            var endFloorId = curSelectedUnit3D.data.floorId;
+            showFloors(startFloorId === endFloorId ? [startFloorId] : [startFloorId, endFloorId]);
+
+            var vector3Ds = [];
+            var pathNodes = searchPath(machineNodeId, curSelectedUnit3D.data.nodeId);
+            if (pathNodes.length === 0) {
+                showFloors([startFloorId]);
+            } else {
+                for (var i = 0; i < pathNodes.length; i++) {
+                    var pathNode = pathNodes[i];
+                    var floor3D = floor3Ds[pathNode.data.floorId];
+                    var vector3 = new THREE.Vector3(pathNode.x, pathNode.y, floor3D.mesh.position.z + 5);
+                    vector3Ds.push(vector3);
+                }
+                drawPath(vector3Ds);
+            }
+        }
     }
 
     function drawPath(vector3Ds) {
@@ -268,29 +284,6 @@ GIM.Map3D = function (mainContainer) {
 
     //ASSIST FUNCTIONS//////////////////////////////////////////
 
-    function averageVectors(vector3Ds) {
-        var resultVector3Ds = [];
-
-        var preVector = null;
-        for (var i = 0; i < vector3Ds.length; i++) {
-            var vector = vector3Ds[i];
-            if (preVector) {
-                resultVector3Ds.push(preVector);
-                var tmpVector = vector.clone().sub(preVector);
-                var length = tmpVector.length();
-                if (length > GIM.PATH_POINT_GAP) {
-                    var times = parseInt(length / GIM.PATH_POINT_GAP);
-                    for (var t = 1; t < times; t++) {
-                        resultVector3Ds.push(tmpVector.clone().multiplyScalar(t / times).add(preVector));
-                    }
-                }
-            }
-            preVector = vector;
-        }
-
-        return resultVector3Ds;
-    }
-
     function selectUint3DByShopId(shopId) {
         clearSelectedUnit3D();
         for (var key in floor3Ds) {
@@ -366,6 +359,29 @@ GIM.Map3D = function (mainContainer) {
         };
     }
 
+    function averageVectors(vector3Ds) {
+        var resultVector3Ds = [];
+
+        var preVector = null;
+        for (var i = 0; i < vector3Ds.length; i++) {
+            var vector = vector3Ds[i];
+            if (preVector) {
+                resultVector3Ds.push(preVector);
+                var tmpVector = vector.clone().sub(preVector);
+                var length = tmpVector.length();
+                if (length > GIM.PATH_POINT_GAP) {
+                    var times = parseInt(length / GIM.PATH_POINT_GAP);
+                    for (var t = 1; t < times; t++) {
+                        resultVector3Ds.push(tmpVector.clone().multiplyScalar(t / times).add(preVector));
+                    }
+                }
+            }
+            preVector = vector;
+        }
+
+        return resultVector3Ds;
+    }
+
     function getShopLogoURL(shopId) {
         var shopLogoURL = "";
         if (GIM.shopList) {
@@ -384,10 +400,6 @@ GIM.Map3D = function (mainContainer) {
 
     function onContainerMouseDown(event) {
         event.preventDefault();
-
-        mainContainer.addEventListener('mousemove', onContainerMouseMove, false);
-        mainContainer.addEventListener('mouseup', onContainerMouseOut, false);
-        mainContainer.addEventListener('mouseout', onContainerMouseOut, false);
 
         clearPath();
         mapPin.close();
@@ -408,36 +420,10 @@ GIM.Map3D = function (mainContainer) {
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     showPinOnUnit3D(curSelectedUnit3D);
                 } else {
-                    console.log("- [GimMap]Map3D.navigateTo Shop", curSelectedUnit3D.data.bindShopId);
-
-                    var startFloorId = astarNodes[GIM.MACHINE_NODE_ID].data.floorId;
-                    var endFloorId = curSelectedUnit3D.data.floorId;
-                    showFloors(startFloorId === endFloorId ? [startFloorId] : [startFloorId, endFloorId]);
-
-                    var vector3Ds = [];
-                    var pathNodes = searchPath(GIM.MACHINE_NODE_ID, curSelectedUnit3D.data.nodeId);
-                    for (var i = 0; i < pathNodes.length; i++) {
-                        var pathNode = pathNodes[i];
-                        var floorId = pathNode.data.floorId;
-                        var floor3D = floor3Ds[floorId];
-                        var vector3 = new THREE.Vector3(pathNode.x, pathNode.y, floor3D.mesh.position.z + 5);
-                        vector3Ds.push(vector3);
-                    }
-                    drawPath(vector3Ds);
+                    drawPathToCurrentSelectedUnit();
                 }
             }
         }
-    }
-
-    function onContainerMouseMove(event) {
-        mouseX = event.clientX - containerHalfWidth;
-        targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
-    }
-
-    function onContainerMouseOut(event) {
-        mainContainer.removeEventListener('mousemove', onContainerMouseMove, false);
-        mainContainer.removeEventListener('mouseup', onContainerMouseOut, false);
-        mainContainer.removeEventListener('mouseout', onContainerMouseOut, false);
     }
 
     //INITIALIZE FUNCTIONS///////////////////////////////////////
@@ -475,9 +461,11 @@ GIM.Map3D = function (mainContainer) {
         renderer.shadowMapType = THREE.PCFShadowMap;
 
         scene = new THREE.Scene();
-        cameraController = new GIM.CameraController();
+
         container3D = new THREE.Object3D();
         scene.add(container3D);
+
+        cameraController = new GIM.CameraController(mainContainer,container3D);
 
         if (!isHideShadow) {
             var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
@@ -497,7 +485,7 @@ GIM.Map3D = function (mainContainer) {
         scene.add(backLight);
         backLight.position.set(400, 500, 500);
 
-        if (isDebug) {
+        if (true) {
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
             container3D.add(plane);
         }
@@ -513,7 +501,7 @@ GIM.Map3D = function (mainContainer) {
         }
         floorSelector = new GIM.FloorSelector(mainContainer);
         serviceSelector = new GIM.ServiceSelector(mainContainer, showNodeTypes);
-        zoomBar = new GIM.ZoomBar(mainContainer);
+        zoomBar = new GIM.ZoomBar(mainContainer,cameraController);
         mapPin = new GIM.MapPin(mainContainer);
     }
 
@@ -539,8 +527,8 @@ GIM.Map3D = function (mainContainer) {
                             serviceLogoMeshes.push(pushMesh);
                         if (pushMesh.displayUnit3D.data.nodeTypeId === GIM.NODE_TYPE_MACHINE) {
                             if (pushMesh.displayUnit3D.data.bindShopId === GIM.MACHINE_CODE) {
-                                GIM.MACHINE_NODE_ID = pushMesh.displayUnit3D.data.nodeId;
-                                console.log("- [GimMap].initData:MACHINE_NODE_ID FOUND:", GIM.MACHINE_NODE_ID);
+                                machineNodeId = pushMesh.displayUnit3D.data.nodeId;
+                                console.log("- [GimMap].initData:MACHINE_NODE_ID FOUND:", machineNodeId);
                                 isCurFloor = true;
                             } else {
                                 pushMesh.position.x = -20000;
@@ -570,7 +558,7 @@ GIM.Map3D = function (mainContainer) {
                 }
             }
 
-            showFloors([astarNodes[GIM.MACHINE_NODE_ID].data.floorId]);
+            showFloors([astarNodes[machineNodeId].data.floorId]);
 
             cameraController.lookAtVector.x = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
             cameraController.distance = 1800;
@@ -579,27 +567,12 @@ GIM.Map3D = function (mainContainer) {
         });
     }
 
-    function showNodeTypes(nodeTypeId) {
-        for (var i = 0; i < curShownFloorIds.length; i++) {
-            var floor3D = floor3Ds[curShownFloorIds[i]];
-            for (var nodeId in floor3D.subUnit3Ds) {
-                var unit3D = floor3D.subUnit3Ds[nodeId];
-                if (unit3D.data.nodeTypeId === nodeTypeId) {
-                    unit3D.mesh.material.opacity = 0;
-                    unit3D.mesh.scale.x = unit3D.mesh.scale.y = 1.2;
-                    new TWEEN.Tween(unit3D.mesh.material).to({opacity: 1}, 600).easing(TWEEN.Easing.Back.InOut).repeat(2).start();
-                    new TWEEN.Tween(unit3D.mesh.scale).to({x: 1, y: 1}, 600).easing(TWEEN.Easing.Elastic.InOut).repeat(2).start();
-                }
-            }
-        }
-    }
-
     function doAnimate() {
         requestAnimationFrame(doAnimate);
 
         if (isDebug) {
 //            camera.rotation.x += (targetRotation - camera.rotation.x) * 0.05;
-            container3D.rotation.z += (targetRotation - container3D.rotation.z) * 0.05;
+//            container3D.rotation.z += (targetRotation - container3D.rotation.z) * 0.05;
 //            cameraPosition.distance += (targetRotation) * 10;
             stats.update();
         }
