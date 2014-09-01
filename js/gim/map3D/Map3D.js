@@ -451,8 +451,6 @@ GIM.Map3D = function (mainContainer) {
 
     function init3d() {
 
-        isHideShadow = GIM.SHADOW_MAP_SIZE === 0;
-
         renderer = new THREE.WebGLRenderer({antialias: true});
         mainContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
@@ -467,25 +465,11 @@ GIM.Map3D = function (mainContainer) {
 
         cameraController = new GIM.CameraController(mainContainer,container3D);
 
-        if (!isHideShadow) {
-            var shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
-            scene.add(shadowLight);
-            shadowLight.position.set(1400, -2200, 2200);
-            shadowLight.target.position.set(500, -300, 0);
-            shadowLight.castShadow = true;
-            shadowLight.shadowCameraNear = 1800;
-            shadowLight.shadowCameraFar = 4500;
-            shadowLight.shadowBias = 0.0001;
-            shadowLight.shadowDarkness = 0.6;
-            shadowLight.shadowMapWidth = shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-            if (isDebug) shadowLight.shadowCameraVisible = true;
-        }
-
-        var backLight = new THREE.DirectionalLight(0x333333, 0.8);
+        var backLight = new THREE.DirectionalLight(0xFFFFFF * 0.5, 0.5);
         scene.add(backLight);
         backLight.position.set(400, 500, 500);
 
-        if (true) {
+        if (isDebug) {
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
             container3D.add(plane);
         }

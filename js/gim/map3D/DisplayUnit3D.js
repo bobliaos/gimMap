@@ -81,6 +81,10 @@ GIM.DisplayUnit3D = function (unitData) {
             break;
         case GIM.NODE_TYPE_SHOP:
             addMesh();
+            if(unitData.isMapping){
+                addLogo("assets/img/shoplogo/0.png");
+                addText("你好",18,14);
+            }
             if (unitData.bindShopId) {
 //                addLogo("assets/img/shoplogo/0.png");
 //                addText(unitData.shopName);

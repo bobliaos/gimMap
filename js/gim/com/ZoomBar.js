@@ -138,6 +138,8 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
 
     var origTopY;
     bar.thumb.addEventListener("mousedown",function(e){
+        e.preventDefault();
+
         origTopY = e.clientY;
 
         document.addEventListener("mousemove",onAnimate);
