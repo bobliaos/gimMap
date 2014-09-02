@@ -9,13 +9,13 @@ GIM.CameraController = function (mainContainer,container3D) {
         far: 10000,
         minDistance: 200,
         maxDistance: 1800,
-        minX: 0,
-        maxX: 1000,
-        minY: -200,
-        maxY: 0,
+        minX: -900,
+        maxX: 2000,
+        minY: -100,
+        maxY: 300,
         cameraContainerZ: new THREE.Object3D(),
+        cameraContainerZPosition: new THREE.Vector3(0,0,0),
         camera: new THREE.PerspectiveCamera(),
-        lookAtVector: new THREE.Vector3(0,0,0),
         positionVector: new THREE.Vector3(0,0,0),
         shadowLight: new THREE.DirectionalLight(0xffffff, 0.2),
         init: function () {
@@ -26,21 +26,22 @@ GIM.CameraController = function (mainContainer,container3D) {
             container3D.add(this.cameraContainerZ);
             this.cameraContainerZ.add(this.camera);
 
-            GIM.SHADOW_MAP_SIZE = 0;
+            GIM.SHADOW_MAP_SIZE = 1024 * 2;
             if(GIM.SHADOW_MAP_SIZE !== 0){
                 this.cameraContainerZ.add(this.shadowLight);
                 this.shadowLight.castShadow = true;
 //            this.shadowLight.shadowCameraNear = 1800;
 //            this.shadowLight.shadowCameraFar = 4500;
                 this.shadowLight.shadowCameraNear = this.near;
-                this.shadowLight.shadowCameraFar = this.far;
+                this.shadowLight.shadowCameraFar = 1500;
+                this.shadowLight.shadowCameraLeft = -1000;
+                this.shadowLight.shadowCameraRight = 1000;
                 this.shadowLight.shadowBias = 0.0001;
                 this.shadowLight.shadowDarkness = 0.6;
                 this.shadowLight.shadowMapWidth = this.shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-//            this.shadowLight.shadowCameraVisible = true;
+                if(GIM.DEBUG_MODE) this.shadowLight.shadowCameraVisible = true;
             }
         },
-//        _radian: Math.PI * 0.5,
         _radian: Math.PI * 0.25,
         _percent: 0,
         get percent(){
@@ -70,18 +71,15 @@ GIM.CameraController = function (mainContainer,container3D) {
             return this.camera.position;
         },
         update: function (){
-            this.positionVector.x = this.lookAtVector.x;
             this.positionVector.z = Math.cos(this._radian) * this._distance;
             this.positionVector.y = Math.sin(this._radian) * this._distance + GIM.MAP_OFFSET_Y;
             this.camera.position.set(this.positionVector.x,-this.positionVector.y,this.positionVector.z);
-//            this.camera.lookAt(this.lookAtVector);
             this.camera.rotation.x = this._radian;
 
-            this.shadowLight.position.set(this.positionVector.x,-this.positionVector.y,this.positionVector.z);
-            this.shadowLight.target.position.set(this.lookAtVector.x * 1.5,this.lookAtVector.y,this.lookAtVector.z);
+            this.cameraContainerZ.position.set(this.cameraContainerZPosition.x,-this.cameraContainerZPosition.y,this.cameraContainerZPosition.z);
 
-//            this.shadowLight.shadowCameraNear = this.near;
-//            this.shadowLight.shadowCameraFar = this.distance;
+            this.shadowLight.position.set(100,-600,500);
+            this.shadowLight.target.position.set(this.cameraContainerZPosition.x,-this.cameraContainerZPosition.y,0);
         }
     }
     controller.init();
@@ -94,31 +92,21 @@ GIM.CameraController = function (mainContainer,container3D) {
         mainContainer.addEventListener('mousemove', onContainerMouseMove, false);
         mainContainer.addEventListener('mouseup', onContainerMouseOut, false);
         mainContainer.addEventListener('mouseout', onContainerMouseOut, false);
-        mainContainer.addEventListener('mousewheel', onContainerMouseWheel, false);
-    }
-
-    function onContainerMouseWheel(e){
-        e.preventDefault();
-        controller.distance += e.deltaY;
     }
 
     function onContainerMouseMove(e) {
         var deltaX = e.offsetX - mouseOrigPoint.x;
         var deltaY = e.offsetY - mouseOrigPoint.y;
-        controller.lookAtVector.x -= deltaX;
+//        controller.lookAtVector.x -= deltaX;
         mouseOrigPoint.x = e.offsetX;
         mouseOrigPoint.y = e.offsetY;
 
-//        controller.cameraContainerZ.rotation.z += deltaX * 0.01;
-//        controller.cameraContainerZ.position.z += deltaX * 0.1;
-
-        var aimX = controller.cameraContainerZ.position.x - deltaX * 1;
-        var aimY = controller.cameraContainerZ.position.y + deltaY * 1;
+        var aimX = controller.cameraContainerZPosition.x - deltaX * 1;
+        var aimY = controller.cameraContainerZPosition.y - deltaY * 1;
         aimX = aimX > controller.maxX ? controller.maxX : (aimX < controller.minX ? controller.minX : aimX);
         aimY = aimY > controller.maxY ? controller.maxY : (aimY < controller.minY ? controller.minY : aimY);
-
-//        controller.cameraContainerZ.position.x = aimX;
-//        controller.cameraContainerZ.position.y = aimY;
+        controller.cameraContainerZPosition.x = aimX;
+        controller.cameraContainerZPosition.y = aimY;
 
         controller.update();
     }

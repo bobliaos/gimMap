@@ -14,7 +14,7 @@ var GIM = {
         if(this._mapInstance === null){
             console.log("- [GimMap]GIM.VERSION:",this.VERSION,this.INFO);
             this._mapInstance = document.createElement("div");
-            this._mapInstance.style.cssText = "width: 1040px;height: 1440px;overflow: hidden;position: absolute;background:#888888";
+            this._mapInstance.style.cssText = "width: 1040px;height: 1440px;overflow: hidden;position: absolute;background:" + GIM.MAP_BACKGROUND_COLOR + ";text-align:right";
             this._map = new GIM.Map3D(this._mapInstance);
         }
         return this._mapInstance;
@@ -23,6 +23,8 @@ var GIM = {
     navitateTo : function(shopId){},
     setSize : function(width,height){this._map.setSize(width,height);}
 };
+
+GIM.DEBUG_MODE              = false;
 
 GIM.NODE_TYPE_ASTAR 		= "0";
 GIM.NODE_TYPE_GROUND 		= "1";
@@ -42,8 +44,7 @@ GIM.FLOOR_GAP               = 700;
 GIM.PATH_POINT_GAP          = 8;
 GIM.PATH_COLOR              = 0xFF0000;
 GIM.MAP_OFFSET_Y            = 200;
-GIM.MAP_BACKGROUND_COLOR    = 0xDDDDDD;
-GIM.SELECTED_COLOR          = 0xFFBB00;
+GIM.MAP_BACKGROUND_COLOR    = "#DDDDDD";
 //GIM.FONT_NAME               = "Microsoft Yahei";
 GIM.FONT_NAME               = "造字工房悦黑演示版常规体";
 GIM.SHADOW_MAP_SIZE         = 2 * 1024;

@@ -3,20 +3,32 @@
  * */
 
 GIM.DisplayFloor3D = function (gElement) {
-    this.data = new GIM.FloorData(gElement);
-    this.subUnit3Ds = {};
-    this.mesh = new THREE.Object3D();
-    this.mesh.displayUnit3D = this;
+    var floor = {
+        data: new GIM.FloorData(gElement),
+        subUnit3Ds : {},
+        mesh: new THREE.Object3D()
+    }
+    floor.mesh.displayUnit3D = floor;
 
-    console.log("- [GimMap]DisplayFloor3D.constructor:",this.data.floorId, "CONSTRUCTING...");
+    console.log("- [GimMap]DisplayFloor3D.constructor:",floor.data.floorId, "CONSTRUCTING...");
 
-    for (var key in this.data.unitsData) {
-        var unitData = this.data.unitsData[key];
+    var tmpSize = null;
+    for (var key in floor.data.unitsData) {
+        var unitData = floor.data.unitsData[key];
         var displayUnit3D = new GIM.DisplayUnit3D(unitData);
         if(displayUnit3D.mesh) {
-            this.mesh.add(displayUnit3D.mesh);
+            floor.mesh.add(displayUnit3D.mesh);
+
+            displayUnit3D.mesh.geometry.computeBoundingBox();
+            var size = displayUnit3D.mesh.geometry.boundingBox.size();
+            if(!tmpSize || tmpSize.length() < size.length()){
+                tmpSize = size;
+                floor.center = displayUnit3D.mesh.geometry.boundingBox.center();
+            }
+            tmpSize = !tmpSize ? size : (tmpSize.length() > size.length() ? tmpSize : size);
         }
-        this.subUnit3Ds[unitData.nodeId] = displayUnit3D;
+        floor.subUnit3Ds[unitData.nodeId] = displayUnit3D;
     }
-    return this;
+
+    return floor;
 }

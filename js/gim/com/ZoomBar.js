@@ -146,6 +146,11 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
         bar.thumb.addEventListener("mouseup",onAnimateOver);
         bar.thumb.addEventListener("mouseout",onAnimateOver);
     });
+    parentContainer.addEventListener('mousewheel', function(e){
+        e.preventDefault();
+        bar.percent += e.deltaY * 0.01;
+//        bar.cameraController.distance += e.deltaY;
+    }, false);
     function onAnimate(e){
         var deltaY = e.clientY - origTopY;
         var deltaPercent = deltaY / (bar.maxThumbY - bar.minThumbY) * 100;

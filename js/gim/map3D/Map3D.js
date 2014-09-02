@@ -3,9 +3,6 @@
  * */
 
 GIM.Map3D = function (mainContainer) {
-    var isDebug = false;
-    var isHideShadow = false;
-
     var containerWidth, containerHeight, containerHalfWidth, containerHalfHeight;
 
     var renderer, stats, scene, cameraController, container3D, projector;
@@ -20,7 +17,7 @@ GIM.Map3D = function (mainContainer) {
     var pathMesh;
     var astarNodes = {};
     var minFloorPositionZ = -4200;
-    var maxFloorPositionZ = 1200;
+    var maxFloorPositionZ = 1600;
     var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
@@ -212,7 +209,7 @@ GIM.Map3D = function (mainContainer) {
             pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z + 15);
         }
         pathMesh = new THREE.Line(pathGeometry, new THREE.LineBasicMaterial({color: GIM.PATH_COLOR}));
-//        pathMesh.visible = isDebug;
+//        pathMesh.visible = GIM.DEBUG_MODE;
 
         for (var i = 0; i < pathGeometry.vertices.length; i++) {
             var vector3DofPath = pathGeometry.vertices[i];
@@ -321,6 +318,7 @@ GIM.Map3D = function (mainContainer) {
         if (unit3D.mesh.isServiceLogo) {
             new TWEEN.Tween(unit3D.mesh.position).to({z: unit3D.data.origZ + 20}, 500).easing(TWEEN.Easing.Elastic.Out).start();
         } else {
+//            curSelectedUnit3D.mesh.material.color.setHSL(1,0,0.6);
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
             var color = new THREE.Color(curSelectedUnit3D.data.fill);
             var i = color.getHSL();
@@ -443,14 +441,13 @@ GIM.Map3D = function (mainContainer) {
             setInterval(doPathAnimate, pathAnimateTime);
 
             mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
-            mainContainer.addEventListener("DOMNodeInserted", reset, false);
+//            mainContainer.addEventListener("DOMNodeInserted", reset, true);
 
             setSize(parseFloat(mainContainer.style.width), parseFloat(mainContainer.style.height));
         });
     }
 
     function init3d() {
-
         renderer = new THREE.WebGLRenderer({antialias: true});
         mainContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
@@ -467,10 +464,10 @@ GIM.Map3D = function (mainContainer) {
 
         var backLight = new THREE.DirectionalLight(0xFFFFFF * 0.5, 0.5);
         scene.add(backLight);
-        backLight.position.set(400, 500, 500);
+        backLight.position.set(500, 500, 500);
 
-        if (isDebug) {
-            var plane = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 50, 50), new THREE.MeshBasicMaterial({color: 0xEEEEEE, wireframe: true}));
+        if (GIM.DEBUG_MODE) {
+            var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 2, 2), new THREE.MeshBasicMaterial({color: 0xFF0033, wireframe: true}));
             container3D.add(plane);
         }
 
@@ -478,7 +475,7 @@ GIM.Map3D = function (mainContainer) {
     }
 
     function initComponents() {
-        if (isDebug) {
+        if (GIM.DEBUG_MODE) {
             stats = new Stats();
             stats.domElement.style.cssText += 'position:absolute;top:0px';
             mainContainer.appendChild(stats.domElement);
@@ -544,7 +541,8 @@ GIM.Map3D = function (mainContainer) {
 
             showFloors([astarNodes[machineNodeId].data.floorId]);
 
-            cameraController.lookAtVector.x = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
+            cameraController.cameraContainerZPosition.x = floor3Ds[astarNodes[machineNodeId].data.floorId].center.x;
+//            cameraController.lookAtVector.x = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
             cameraController.distance = 1800;
 
             isMapReady = true;
@@ -554,7 +552,7 @@ GIM.Map3D = function (mainContainer) {
     function doAnimate() {
         requestAnimationFrame(doAnimate);
 
-        if (isDebug) {
+        if (GIM.DEBUG_MODE) {
 //            camera.rotation.x += (targetRotation - camera.rotation.x) * 0.05;
 //            container3D.rotation.z += (targetRotation - container3D.rotation.z) * 0.05;
 //            cameraPosition.distance += (targetRotation) * 10;

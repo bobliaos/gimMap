@@ -4,6 +4,7 @@
 
 GIM.FloorSelector = function(parentContainer){
 	var selector = {
+        width: 170,
         container: document.createElement("div"),
         upImage: new Image(),
         downImage: new Image(),
@@ -13,14 +14,14 @@ GIM.FloorSelector = function(parentContainer){
             this.container.appendChild(this.downImage);
             parentContainer.appendChild(this.container);
 
-            this.container.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;";
+            this.container.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;width:" + this.width + "px;";
             this.upImage.style.cssText = this.downImage.style.cssText = "left: 60px;position: relative;";
 
             this.upImage.src = "assets/img/up.png";
             this.downImage.src = "assets/img/down.png";
         },
         addLogo: function(floorId,logoURL,isCurFloor,clickHandler){
-            var floorLabelAndLogo = new GIM.FloorLogo(floorId,logoURL,isCurFloor,clickHandler);
+            var floorLabelAndLogo = new GIM.FloorLogo(floorId,logoURL,isCurFloor,clickHandler,this.width);
             this.container.insertBefore(floorLabelAndLogo.container,this.container.lastChild);
             this.floorSelecterLogos.push(floorLabelAndLogo);
         },
@@ -38,10 +39,10 @@ GIM.FloorSelector = function(parentContainer){
 	return selector;
 }
 
-GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler){
+GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler,parentWidth){
     var floorLabelAndLogo = {
         id: floorId,
-        width: 170,
+        width: parentWidth,
         height: 112,
         container: document.createElement("div"),
         floorLabel: document.createElement("p"),
