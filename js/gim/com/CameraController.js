@@ -6,9 +6,9 @@ GIM.CameraController = function (mainContainer,container3D) {
     var controller = {
         fov: 60,
         near: 1,
-        far: 10000,
+        far: 8000,
         minDistance: 200,
-        maxDistance: 1800,
+        maxDistance: 4800,
         minX: -900,
         maxX: 2000,
         minY: -100,
@@ -17,7 +17,7 @@ GIM.CameraController = function (mainContainer,container3D) {
         cameraContainerZPosition: new THREE.Vector3(0,0,0),
         camera: new THREE.PerspectiveCamera(),
         positionVector: new THREE.Vector3(0,0,0),
-        shadowLight: new THREE.DirectionalLight(0xffffff, 0.2),
+        shadowLight: new THREE.DirectionalLight(0xffffff, 0.1),
         init: function () {
             this.camera.fov = this.fov;
             this.camera.near = this.near;
@@ -26,7 +26,6 @@ GIM.CameraController = function (mainContainer,container3D) {
             container3D.add(this.cameraContainerZ);
             this.cameraContainerZ.add(this.camera);
 
-            GIM.SHADOW_MAP_SIZE = 1024 * 2;
             if(GIM.SHADOW_MAP_SIZE !== 0){
                 this.cameraContainerZ.add(this.shadowLight);
                 this.shadowLight.castShadow = true;
@@ -42,7 +41,7 @@ GIM.CameraController = function (mainContainer,container3D) {
                 if(GIM.DEBUG_MODE) this.shadowLight.shadowCameraVisible = true;
             }
         },
-        _radian: Math.PI * 0.25,
+        _radian: Math.PI * 0.15,
         _percent: 0,
         get percent(){
             return this._percent;
@@ -78,7 +77,7 @@ GIM.CameraController = function (mainContainer,container3D) {
 
             this.cameraContainerZ.position.set(this.cameraContainerZPosition.x,-this.cameraContainerZPosition.y,this.cameraContainerZPosition.z);
 
-            this.shadowLight.position.set(100,-600,500);
+            this.shadowLight.position.set(200,-200,600);
             this.shadowLight.target.position.set(this.cameraContainerZPosition.x,-this.cameraContainerZPosition.y,0);
         }
     }
@@ -118,6 +117,11 @@ GIM.CameraController = function (mainContainer,container3D) {
     }
 
     mainContainer.addEventListener("mousedown",onContainerMouseDown);
+    mainContainer.addEventListener('mousewheel', function(e){
+        e.preventDefault();
+        if(controller.bar) controller.bar.percent -= e.deltaY * 0.01;
+//        bar.cameraController.distance += e.deltaY;
+    }, false);
 
     return controller;
 }

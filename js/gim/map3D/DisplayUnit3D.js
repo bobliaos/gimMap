@@ -6,12 +6,14 @@ GIM.DisplayUnit3D = function (unitData) {
     var tmpMesh = null;
     function addMesh(){
         var path = GIM.SVGParser.parse(unitData.d);
-        var shape3d = path.toShapes(true)[0].extrude({amount: unitData.deep * 1, bevelEnabled: false});
-
-        var color = new THREE.Color(unitData.fill);
-        var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color});
-
-        tmpMesh = new THREE.Mesh(shape3d, material);
+        try{
+            var shape3d = path.toShapes(true)[0].extrude({amount: unitData.deep * GIM.UNIT_HEIGHT_SCALE, bevelEnabled: false});
+            var color = new THREE.Color(unitData.fill);
+            var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color});
+            tmpMesh = new THREE.Mesh(shape3d, material);
+        }catch (e){
+            console.log("CATCH ERROR:",e);
+        }
     }
 
     var positionOffsetZ = 10;
@@ -77,12 +79,12 @@ GIM.DisplayUnit3D = function (unitData) {
         case GIM.NODE_TYPE_GROUND:
             addMesh();
             unitData.selectable = false;
-            tmpMesh.position.z = - (unitData.deep * 1 + 1);
+            tmpMesh.position.z = - (unitData.deep * GIM.UNIT_HEIGHT_SCALE + 1);
             break;
         case GIM.NODE_TYPE_SHOP:
             addMesh();
             if(unitData.isMapping){
-                addLogo("assets/img/shoplogo/0.png");
+                addLogo(GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL);
                 addText("你好",18,14);
             }
             if (unitData.bindShopId) {
@@ -92,7 +94,7 @@ GIM.DisplayUnit3D = function (unitData) {
             }
             break;
         case GIM.NODE_TYPE_MACHINE:
-            addLogo("assets/img/nodetypelogo/machine_.png",true,120);
+            addLogo(GIM.SERVER + "img/nodetypelogo/machine_.png",true,120);
             var tween = new TWEEN.Tween(tmpMesh.material);
 
             function doAnimate(){
@@ -103,19 +105,19 @@ GIM.DisplayUnit3D = function (unitData) {
             doAnimate();
             break;
         case GIM.NODE_TYPE_ESCALATOR:
-            addLogo("assets/img/nodetypelogo/escalator.png",true);
+            addLogo(GIM.SERVER + "img/nodetypelogo/escalator.png",true);
             break;
         case GIM.NODE_TYPE_LIFT:
-            addLogo("assets/img/nodetypelogo/lift.png",true);
+            addLogo(GIM.SERVER + "img/nodetypelogo/lift.png",true);
             break;
         case GIM.NODE_TYPE_TOILET:
-            addLogo("assets/img/nodetypelogo/toilet.png",true);
+            addLogo(GIM.SERVER + "img/nodetypelogo/toilet.png",true);
             break;
         case GIM.NODE_TYPE_SERVICE:
-            addLogo("assets/img/nodetypelogo/service.png",true);
+            addLogo(GIM.SERVER + "img/nodetypelogo/service.png",true);
             break;
         case GIM.NODE_TYPE_ATM:
-            addLogo("assets/img/nodetypelogo/atm.png",true);
+            addLogo(GIM.SERVER + "img/nodetypelogo/atm.png",true);
             break;
         default :
             break;

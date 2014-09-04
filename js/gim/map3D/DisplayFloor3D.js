@@ -7,7 +7,7 @@ GIM.DisplayFloor3D = function (gElement) {
         data: new GIM.FloorData(gElement),
         subUnit3Ds : {},
         mesh: new THREE.Object3D()
-    }
+    };
     floor.mesh.displayUnit3D = floor;
 
     console.log("- [GimMap]DisplayFloor3D.constructor:",floor.data.floorId, "CONSTRUCTING...");

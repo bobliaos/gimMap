@@ -17,8 +17,8 @@ GIM.FloorSelector = function(parentContainer){
             this.container.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;width:" + this.width + "px;";
             this.upImage.style.cssText = this.downImage.style.cssText = "left: 60px;position: relative;";
 
-            this.upImage.src = "assets/img/up.png";
-            this.downImage.src = "assets/img/down.png";
+            this.upImage.src = GIM.SERVER + "img/up.png";
+            this.downImage.src = GIM.SERVER + "img/down.png";
         },
         addLogo: function(floorId,logoURL,isCurFloor,clickHandler){
             var floorLabelAndLogo = new GIM.FloorLogo(floorId,logoURL,isCurFloor,clickHandler,this.width);
@@ -43,7 +43,7 @@ GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler,parentWidth){
     var floorLabelAndLogo = {
         id: floorId,
         width: parentWidth,
-        height: 112,
+        height: 80,
         container: document.createElement("div"),
         floorLabel: document.createElement("p"),
         floorCurLabel: document.createElement("p"),

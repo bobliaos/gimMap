@@ -55,7 +55,7 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
     var serviceLogo = {
         onTime : 1000,
         index : -1,
-        path : "assets/img/servicelogo/",
+        path : GIM.SERVER + "img/servicelogo/",
         logoOnURL : "",
         logoOffURL : "",
         logoDisableURL : "",

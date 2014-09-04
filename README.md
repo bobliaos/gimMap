@@ -9,6 +9,8 @@
 地图缩放按钮条
 地图旋转,图标向镜头
 
+http://personalbrandinstitute.com/
+
 <path nodeId="node_2014_8_29_10:39:27_4316" nodeTypeId="2" bindNodeIds="" nodePosition="-261.78,166.68" textureData="" bindShopId="31_A074" fill="#95C793" deep="20" d="M-523.557,155.072 L-487.709,155.072 L-488.359,178.29 L-514.92,178.29 L-514.92,172.345 L-523.557,172.345Z"/>
 
 textureData="[isTexture:true/flase],[textureType:text/image/both],[textureSize:20*20],[textureRotation:Math.PI]"

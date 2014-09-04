@@ -38,18 +38,19 @@ GIM.NODE_TYPE_SERVICE		= "8";
 GIM.NODE_TYPE_ATM   		= "9";
 
 GIM.MACHINE_CODE            = "53be527121232fb859000001";
-GIM.SERVER                  = "http://192.168.1.208:3000";
+GIM.SERVER                  = "http://192.168.1.208:3000/";
 
+GIM.UNIT_HEIGHT_SCALE       = 1;
 GIM.FLOOR_GAP               = 700;
 GIM.PATH_POINT_GAP          = 8;
 GIM.PATH_COLOR              = 0xFF0000;
 GIM.MAP_OFFSET_Y            = 200;
-GIM.MAP_BACKGROUND_COLOR    = "#DDDDDD";
+GIM.MAP_BACKGROUND_COLOR    = "#FFFFFF";
 //GIM.FONT_NAME               = "Microsoft Yahei";
 GIM.FONT_NAME               = "造字工房悦黑演示版常规体";
 GIM.SHADOW_MAP_SIZE         = 2 * 1024;
 
 GIM.CONFIG_URL              = "map.conf";
-GIM.DATA_SOURCE_URL         = "assets/data.json";
-GIM.SHOP_LIST_URL           = "assets/shoplist.json";
-GIM.DEFAULT_SHOP_LOGO_URL   = "assets/img/shoplogo/0.png";
+GIM.DATA_SOURCE_URL         = "data.json";
+GIM.SHOP_LIST_URL           = "shoplist.json";
+GIM.DEFAULT_SHOP_LOGO_URL   = "img/shoplogo/0.png";

@@ -56,9 +56,9 @@ GIM.MapPin = function (parentContainer) {
                 this.bindPin.updateDisplay();
             }
 
-            this.gotoImage.src = "assets/img/mappin/goto.png";
+            this.gotoImage.src = GIM.SERVER + "img/mappin/goto.png";
             this.gotoImage.style.cssText = "top: 20px;position: absolute;left: 96px;";
-            this.searchImage.src = "assets/img/mappin/search.png";
+            this.searchImage.src = GIM.SERVER + "img/mappin/search.png";
             this.searchImage.style.cssText = "top: 56px;position: absolute;left: 132px;";
         },
         _isOpenning: false,

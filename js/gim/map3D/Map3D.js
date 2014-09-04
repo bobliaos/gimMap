@@ -16,8 +16,8 @@ GIM.Map3D = function (mainContainer) {
 
     var pathMesh;
     var astarNodes = {};
-    var minFloorPositionZ = -4200;
-    var maxFloorPositionZ = 1600;
+    var minFloorPositionZ = -8000;
+    var maxFloorPositionZ = 4000;
     var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
@@ -80,7 +80,11 @@ GIM.Map3D = function (mainContainer) {
                     var isUp = parseInt(preFloorId.substr(5, 1)) > parseInt(curFloorId.substr(5, 1));
                     preVisibleFloor3D.mesh.position.z = 0;
                     curVisibleFloor3D.mesh.position.z = isUp ? minFloorPositionZ : maxFloorPositionZ;
-                    new TWEEN.Tween(preVisibleFloor3D.mesh.position).to({z: isUp ? maxFloorPositionZ : minFloorPositionZ}, 800).easing(TWEEN.Easing.Exponential.Out).start();
+                    TWEEN.remove(preVisibleFloor3D);
+                    new TWEEN.Tween(preVisibleFloor3D.mesh.position).to({z: isUp ? maxFloorPositionZ : minFloorPositionZ}, 800).easing(TWEEN.Easing.Exponential.Out).onComplete(function(){
+//                        preVisibleFloor3D.mesh.position.x = - 10000;
+                    }).start();
+                    TWEEN.remove(curVisibleFloor3D);
                     new TWEEN.Tween(curVisibleFloor3D.mesh.position).to({z: 0}, 800).easing(TWEEN.Easing.Exponential.Out).start();
                 } else {
                     preVisibleFloor3D.mesh.position.z = 0;
@@ -427,7 +431,7 @@ GIM.Map3D = function (mainContainer) {
     //INITIALIZE FUNCTIONS///////////////////////////////////////
 
     function init() {
-        GIM.SVGParser.loadURL(GIM.SHOP_LIST_URL, function (json) {
+        GIM.SVGParser.loadURL(GIM.SERVER + GIM.SHOP_LIST_URL, function (json) {
 //            GIM.shopList = JSON.parse(jsonString);
             GIM.shopList = json;
             GIM.navitateTo = navigateTo;
@@ -441,7 +445,7 @@ GIM.Map3D = function (mainContainer) {
             setInterval(doPathAnimate, pathAnimateTime);
 
             mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
-//            mainContainer.addEventListener("DOMNodeInserted", reset, true);
+            mainContainer.addEventListener("DOMNodeInserted", reset, true);
 
             setSize(parseFloat(mainContainer.style.width), parseFloat(mainContainer.style.height));
         });
@@ -451,7 +455,7 @@ GIM.Map3D = function (mainContainer) {
         renderer = new THREE.WebGLRenderer({antialias: true});
         mainContainer.appendChild(renderer.domElement);
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
-        renderer.setSize(64, 64);
+        renderer.setSize(2, 2);
         renderer.shadowMapEnabled = true;
         renderer.shadowMapType = THREE.PCFShadowMap;
 
@@ -462,9 +466,10 @@ GIM.Map3D = function (mainContainer) {
 
         cameraController = new GIM.CameraController(mainContainer,container3D);
 
-        var backLight = new THREE.DirectionalLight(0xFFFFFF * 0.5, 0.5);
+        var backLight = new THREE.DirectionalLight(0xFFFFFF * 1, 0.4);
         scene.add(backLight);
-        backLight.position.set(500, 500, 500);
+        backLight.position.set(0, 1, 1);
+        backLight.target.position.set(0,0,0);
 
         if (GIM.DEBUG_MODE) {
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 2, 2), new THREE.MeshBasicMaterial({color: 0xFF0033, wireframe: true}));
@@ -487,7 +492,7 @@ GIM.Map3D = function (mainContainer) {
     }
 
     function initData() {
-        GIM.SVGParser.loadURL(GIM.DATA_SOURCE_URL, function (sourceString) {
+        GIM.SVGParser.loadURL(GIM.SERVER + GIM.DATA_SOURCE_URL, function (sourceString) {
 //            var json = JSON.parse(sourceString);
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
 
@@ -524,7 +529,7 @@ GIM.Map3D = function (mainContainer) {
                     astarNodes[unitData.nodeId] = unitData.astarNode;
                 }
 
-                floorSelector.addLogo(floor3D.data.floorId, "assets/img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
+                floorSelector.addLogo(floor3D.data.floorId, GIM.SERVER + "img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
             }
 
             for (var nodeId in astarNodes) {
@@ -542,8 +547,7 @@ GIM.Map3D = function (mainContainer) {
             showFloors([astarNodes[machineNodeId].data.floorId]);
 
             cameraController.cameraContainerZPosition.x = floor3Ds[astarNodes[machineNodeId].data.floorId].center.x;
-//            cameraController.lookAtVector.x = parseFloat(sourceSVG.getElementsByTagName('svg')[0].getAttribute("width")) * 0.5 - 100;
-            cameraController.distance = 1800;
+            cameraController.distance = cameraController.maxDistance;
 
             isMapReady = true;
         });

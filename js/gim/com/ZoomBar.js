@@ -8,11 +8,12 @@
 
 GIM.ZoomBar = function (parentContainer,cameraController) {
     var bar = {
-        width: 80,
+        width: 60,
         height: 400,
-        imageSize: 80,
-        minThumbY: 80,
-        maxThumbY: 280,
+        imageSize: 60,
+        thumbSize: 30,
+        minThumbY: 60,
+        maxThumbY: 310,
         cameraController: cameraController,
         container: document.createElement("div"),
         plus: document.createElement("canvas"),
@@ -26,12 +27,13 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
             this.container.appendChild(this.minus);
 
             parentContainer.appendChild(this.container);
+            cameraController.bar = this;
 
             this.container.width = this.rail.width = this.width;
             this.container.height = this.rail.height = this.height;
             this.plus.width = this.plus.height = this.minus.width = this.minus.height = this.imageSize;
-            this.thumb.width = 40;
-            this.thumb.height = 40;
+            this.thumb.width = this.thumbSize;
+            this.thumb.height = this.thumbSize;
 
             this.container.style.cssText = "width: "+this.width+"px;height: "+this.height+"px;position: absolute;top: 460px;right: 20px;";
             this.rail.style.cssText = "width: "+this.width+"px;height:"+this.height+"px;position: absolute;left: 0px;top: 0px";
@@ -43,12 +45,12 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
 
             var ctx;
 
-            //draw rail
+            //draw slider
             ctx = this.rail.getContext("2d");
             ctx.clearRect(0,0,this.imageSize,this.imageSize);
             ctx.beginPath();
-            ctx.strokeStyle = "#888888";
-            ctx.lineWidth = 16;
+            ctx.strokeStyle = "#444444";
+            ctx.lineWidth = 8;
             ctx.moveTo(this.imageSize * 0.5,this.imageSize * 0.5);
             ctx.lineTo(this.imageSize * 0.5,this.height - this.imageSize * 0.5);
             ctx.stroke();
@@ -59,7 +61,7 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
             ctx.clearRect(0,0,this.thumb.width,this.thumb.height);
             ctx.beginPath();
             ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 12;
+            ctx.lineWidth = 6;
             ctx.fillStyle = "#888888";
             ctx.arc(this.thumb.width * 0.5,this.thumb.height * 0.5,(this.thumb.width - ctx.lineWidth) * 0.5,0,Math.PI * 2);
             ctx.stroke();
@@ -71,7 +73,7 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
             ctx.clearRect(0,0,this.imageSize,this.imageSize);
             ctx.beginPath();
             ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 6;
             ctx.fillStyle = "#888888";
             ctx.arc(this.imageSize * 0.5,this.imageSize * 0.5,(this.imageSize - ctx.lineWidth) * 0.5,0,Math.PI * 2);
             ctx.stroke();
@@ -80,7 +82,7 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
 
             ctx.beginPath();
             ctx.lineCap = "round";
-            ctx.lineWidth = 12;
+            ctx.lineWidth = 8;
             ctx.moveTo(logoPadding,this.imageSize * 0.5);
             ctx.lineTo(this.imageSize - logoPadding,this.imageSize * 0.5);
             ctx.moveTo(this.imageSize * 0.5,logoPadding);
@@ -93,7 +95,7 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
             ctx.clearRect(0,0,this.imageSize,this.imageSize);
             ctx.beginPath();
             ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 6;
             ctx.fillStyle = "#888888";
             ctx.arc(this.imageSize * 0.5,this.imageSize * 0.5,(this.imageSize - ctx.lineWidth - 6) * 0.5,0,Math.PI * 2);
             ctx.stroke();
@@ -102,7 +104,7 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
 
             ctx.beginPath();
             ctx.lineCap = "round";
-            ctx.lineWidth = 12;
+            ctx.lineWidth = 8;
             ctx.moveTo(logoPadding,this.imageSize * 0.5);
             ctx.lineTo(this.imageSize - logoPadding,this.imageSize * 0.5);
             ctx.stroke();
@@ -146,11 +148,6 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
         bar.thumb.addEventListener("mouseup",onAnimateOver);
         bar.thumb.addEventListener("mouseout",onAnimateOver);
     });
-    parentContainer.addEventListener('mousewheel', function(e){
-        e.preventDefault();
-        bar.percent += e.deltaY * 0.01;
-//        bar.cameraController.distance += e.deltaY;
-    }, false);
     function onAnimate(e){
         var deltaY = e.clientY - origTopY;
         var deltaPercent = deltaY / (bar.maxThumbY - bar.minThumbY) * 100;
