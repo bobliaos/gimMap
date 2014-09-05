@@ -8,18 +8,18 @@
 
 GIM.ZoomBar = function (parentContainer,cameraController) {
     var bar = {
-        width: 60,
-        height: 400,
-        imageSize: 60,
-        thumbSize: 30,
-        minThumbY: 60,
-        maxThumbY: 310,
+        width: 34,
+        height: 332,
+        thumbSize: 34,
+        minThumbY: 36,
+        maxThumbY: 262,
+        backgroundURL: GIM.SERVER + "img/slider.png",
         cameraController: cameraController,
         container: document.createElement("div"),
-        plus: document.createElement("canvas"),
-        minus: document.createElement("canvas"),
-        rail: document.createElement("canvas"),
-        thumb: document.createElement("canvas"),
+        plus: document.createElement("div"),
+        minus: document.createElement("div"),
+        rail: document.createElement("div"),
+        thumb: document.createElement("div"),
         init: function () {
             this.container.appendChild(this.rail);
             this.container.appendChild(this.thumb);
@@ -29,86 +29,11 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
             parentContainer.appendChild(this.container);
             cameraController.bar = this;
 
-            this.container.width = this.rail.width = this.width;
-            this.container.height = this.rail.height = this.height;
-            this.plus.width = this.plus.height = this.minus.width = this.minus.height = this.imageSize;
-            this.thumb.width = this.thumbSize;
-            this.thumb.height = this.thumbSize;
-
-            this.container.style.cssText = "width: "+this.width+"px;height: "+this.height+"px;position: absolute;top: 460px;right: 20px;";
-            this.rail.style.cssText = "width: "+this.width+"px;height:"+this.height+"px;position: absolute;left: 0px;top: 0px";
-            this.thumb.style.cssText = "width: "+this.thumb.width+"px;height: "+this.thumb.height+"px;position: absolute;top: 70px;left: "+ (this.width - this.thumb.width) * 0.5+"px;";
-            this.plus.style.cssText = "width: " + this.imageSize + "px;height: " + this.imageSize + "px;position: absolute;top: 0px;left: 0px;";
-            this.minus.style.cssText = "width: " + this.imageSize + "px;height: " + this.imageSize + "px;position: absolute;bottom: 0px;left: 0px;";
-
-            var logoPadding = 20;
-
-            var ctx;
-
-            //draw slider
-            ctx = this.rail.getContext("2d");
-            ctx.clearRect(0,0,this.imageSize,this.imageSize);
-            ctx.beginPath();
-            ctx.strokeStyle = "#444444";
-            ctx.lineWidth = 8;
-            ctx.moveTo(this.imageSize * 0.5,this.imageSize * 0.5);
-            ctx.lineTo(this.imageSize * 0.5,this.height - this.imageSize * 0.5);
-            ctx.stroke();
-            ctx.closePath();
-
-            //draw thumb
-            ctx = this.thumb.getContext("2d");
-            ctx.clearRect(0,0,this.thumb.width,this.thumb.height);
-            ctx.beginPath();
-            ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 6;
-            ctx.fillStyle = "#888888";
-            ctx.arc(this.thumb.width * 0.5,this.thumb.height * 0.5,(this.thumb.width - ctx.lineWidth) * 0.5,0,Math.PI * 2);
-            ctx.stroke();
-            ctx.fill();
-            ctx.closePath();
-
-            //draw plus
-            ctx = this.plus.getContext("2d");
-            ctx.clearRect(0,0,this.imageSize,this.imageSize);
-            ctx.beginPath();
-            ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 6;
-            ctx.fillStyle = "#888888";
-            ctx.arc(this.imageSize * 0.5,this.imageSize * 0.5,(this.imageSize - ctx.lineWidth) * 0.5,0,Math.PI * 2);
-            ctx.stroke();
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.lineCap = "round";
-            ctx.lineWidth = 8;
-            ctx.moveTo(logoPadding,this.imageSize * 0.5);
-            ctx.lineTo(this.imageSize - logoPadding,this.imageSize * 0.5);
-            ctx.moveTo(this.imageSize * 0.5,logoPadding);
-            ctx.lineTo(this.imageSize * 0.5,this.imageSize - logoPadding);
-            ctx.stroke();
-            ctx.closePath();
-
-            //draw minus
-            ctx = this.minus.getContext("2d");
-            ctx.clearRect(0,0,this.imageSize,this.imageSize);
-            ctx.beginPath();
-            ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 6;
-            ctx.fillStyle = "#888888";
-            ctx.arc(this.imageSize * 0.5,this.imageSize * 0.5,(this.imageSize - ctx.lineWidth - 6) * 0.5,0,Math.PI * 2);
-            ctx.stroke();
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.lineCap = "round";
-            ctx.lineWidth = 8;
-            ctx.moveTo(logoPadding,this.imageSize * 0.5);
-            ctx.lineTo(this.imageSize - logoPadding,this.imageSize * 0.5);
-            ctx.stroke();
-            ctx.closePath();
+            this.container.style.cssText = "width: "+this.width+"px;height: "+this.height+"px;position: absolute;top: 220px;right: 20px;";
+            this.rail.style.cssText = "width: "+this.width+"px;height:"+this.height+"px;position: absolute;left: 0px;top: 0px;background:url(" + this.backgroundURL+") no-repeat 0px 0px;";
+            this.thumb.style.cssText = "width: "+this.thumbSize+"px;height: "+this.thumbSize+"px;position: absolute;top: 70px;left: "+ (this.width - this.thumbSize) * 0.5+"px;;background:url(" + this.backgroundURL+") no-repeat 0px -341px;";
+            this.plus.style.cssText = "width: " + this.width + "px;height: " + this.width + "px;position: absolute;top: 0px;left: 0px;background:url("+this.backgroundURL+") no-repeat 0px 0px;";
+            this.minus.style.cssText = "width: " + this.width + "px;height: " + this.width + "px;position: absolute;bottom: 0px;left: 0px;background:url("+this.backgroundURL+") no-repeat 0px -299px;";
 
             this.updateDisplay();
         },
@@ -130,34 +55,71 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
     }
 
     bar.plus.addEventListener("click",function(e){
+        e.preventDefault();
         TWEEN.remove(bar);
         new TWEEN.Tween(bar).to({percent: bar.percent + 20}, 800).easing(TWEEN.Easing.Exponential.Out).start();
-    });
+    },false);
     bar.minus.addEventListener("click",function(e){
+        e.preventDefault();
         TWEEN.remove(bar);
         new TWEEN.Tween(bar).to({percent: bar.percent - 20}, 800).easing(TWEEN.Easing.Exponential.Out).start();
-    });
+    },false);
+    bar.plus.addEventListener("touchstart",function(e){
+        e.preventDefault();
+        TWEEN.remove(bar);
+        new TWEEN.Tween(bar).to({percent: bar.percent + 20}, 800).easing(TWEEN.Easing.Exponential.Out).start();
+    },false);
+    bar.minus.addEventListener("touchstart",function(e){
+        e.preventDefault();
+        TWEEN.remove(bar);
+        new TWEEN.Tween(bar).to({percent: bar.percent - 20}, 800).easing(TWEEN.Easing.Exponential.Out).start();
+    },false);
 
-    var origTopY;
-    bar.thumb.addEventListener("mousedown",function(e){
+    function onMouseMove(e){
         e.preventDefault();
 
-        origTopY = e.clientY;
+        var touch;
+        if(e instanceof MouseEvent){
+            touch = e;
+        }else{
+            touch = e.targetTouches[0];
+        }
 
-        document.addEventListener("mousemove",onAnimate);
-        bar.thumb.addEventListener("mouseup",onAnimateOver);
-        bar.thumb.addEventListener("mouseout",onAnimateOver);
-    });
+        origTopY = touch.clientY;
+
+        document.addEventListener("mousemove",onAnimate,false);
+        bar.thumb.addEventListener("mouseup",onAnimateOver,false);
+        bar.thumb.addEventListener("mouseout",onAnimateOver,false);
+
+        document.addEventListener("touchmove",onAnimate,false);
+        document.addEventListener("touchend",onAnimateOver,false);
+    }
+
+    var origTopY;
+    bar.thumb.addEventListener("mousedown",onMouseMove,false);
+    bar.thumb.addEventListener("touchstart",onMouseMove,false);
     function onAnimate(e){
-        var deltaY = e.clientY - origTopY;
+        e.preventDefault();
+
+        var touch;
+        if(e instanceof MouseEvent){
+            touch = e;
+        }else{
+            touch = e.targetTouches[0];
+        }
+
+        var deltaY = touch.clientY - origTopY;
         var deltaPercent = deltaY / (bar.maxThumbY - bar.minThumbY) * 100;
         bar.percent -= deltaPercent;
-        origTopY = e.clientY;
+        origTopY = touch.clientY;
     };
     function onAnimateOver(e){
-        document.removeEventListener("mousemove",onAnimate);
-        bar.thumb.removeEventListener("mouseup",onAnimateOver);
-        bar.thumb.removeEventListener("mouseout",onAnimateOver);
+        document.removeEventListener("mousemove",onAnimate,false);
+        bar.thumb.removeEventListener("mouseup",onAnimateOver,false);
+        bar.thumb.removeEventListener("mouseout",onAnimateOver,false);
+
+        document.removeEventListener("touchmove",onAnimate,false);
+        document.removeEventListener("touchend",onAnimateOver,false);
     };
 
     bar.init();

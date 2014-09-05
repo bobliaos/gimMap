@@ -16,8 +16,8 @@ GIM.Map3D = function (mainContainer) {
 
     var pathMesh;
     var astarNodes = {};
-    var minFloorPositionZ = -8000;
-    var maxFloorPositionZ = 4000;
+    var minFloorPositionZ = -18000;
+    var maxFloorPositionZ = 8000;
     var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
@@ -45,11 +45,13 @@ GIM.Map3D = function (mainContainer) {
     function navigateTo(shopId) {
         selectUint3DByShopId(shopId);
         drawPathToCurrentSelectedUnit();
-        showPinOnUnit3D(curSelectedUnit3D);
+        setTimeout(function(){showPinOnUnit3D(curSelectedUnit3D);},200);
     }
 
     function showFloors(floorIds) {
         zoomBar.percent = 0;
+        floorContainer.position.x = 0;
+        floorContainer.position.y = 0;
 
         if (curShownFloorIds === null) curShownFloorIds = floorIds;
 
@@ -151,15 +153,17 @@ GIM.Map3D = function (mainContainer) {
             var startFloorEndAStarNode = null;
             var endFloorStartAStarNode = null;
 
+
             for (var key in startFloorAStarNodes) {
                 var astarNode = startFloorAStarNodes[key];
                 if (astarNode.data.nodeTypeId === GIM.NODE_TYPE_LIFT || astarNode.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR) {
                     for (var i = 0; i < astarNode.bindNodes.length; i++) {
                         var bindAStarNode = astarNode.bindNodes[i];
                         if (bindAStarNode.data.floorId === endFloorId) {
-                            startFloorEndAStarNode = astarNode;
-                            endFloorStartAStarNode = bindAStarNode;
-                            break;
+                            if(!startFloorEndAStarNode){
+                                startFloorEndAStarNode = astarNode;
+                                endFloorStartAStarNode = bindAStarNode;
+                            }
                         }
                     }
                     if (startFloorEndAStarNode !== null && endFloorStartAStarNode !== null) {
@@ -176,6 +180,12 @@ GIM.Map3D = function (mainContainer) {
         }
 
         return pathNodes;
+    }
+
+    function calculateDistance(nodeA,nodeB){
+        var dx = nodeA.x - nodeB.x;
+        var dy = nodeA.y - nodeB.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     function drawPathToCurrentSelectedUnit(){
@@ -218,10 +228,10 @@ GIM.Map3D = function (mainContainer) {
         for (var i = 0; i < pathGeometry.vertices.length; i++) {
             var vector3DofPath = pathGeometry.vertices[i];
             if (!(pathGeometry.vertices[i + 1] && pathGeometry.vertices[i].z !== pathGeometry.vertices[i + 1].z && i % 2 != 0)) {
-                var pointGeometry = new THREE.CircleGeometry(6, 8);
+                var pointGeometry = new THREE.CircleGeometry(12, 8);
                 var pointMaterial = new THREE.MeshBasicMaterial({color: GIM.PATH_COLOR});
                 var pointMesh = new THREE.Mesh(pointGeometry, pointMaterial);
-                container3D.add(pointMesh);
+                floorContainer.add(pointMesh);
                 pointMesh.visible = false;
                 pathAnimatePointMeshes.push(pointMesh);
                 pointMesh.position.x = vector3DofPath.x;
@@ -233,7 +243,7 @@ GIM.Map3D = function (mainContainer) {
         pathAnimateCircleLength = pathAnimatePointMeshes.length;
         pathAnimateIndexDelta = pathAnimatePointMeshes.length;
 
-        container3D.add(pathMesh);
+        floorContainer.add(pathMesh);
     }
 
     function doPathAnimate() {
@@ -287,6 +297,7 @@ GIM.Map3D = function (mainContainer) {
 
     function selectUint3DByShopId(shopId) {
         clearSelectedUnit3D();
+        if(!shopId || shopId == "" || shopId == undefined) return;
         for (var key in floor3Ds) {
             var floor3D = floor3Ds[key];
             for (var nodeId in floor3D.subUnit3Ds) {
@@ -302,11 +313,17 @@ GIM.Map3D = function (mainContainer) {
 
     function selectUnit3DByPosition(mouseX, mouseY) {
         clearSelectedUnit3D();
+
+        console.log("++++++++++",mouseX, mouseY);
+
         mouseX = 2 * mouseX / containerWidth - 1;
         mouseY = 1 - 2 * mouseY / containerHeight;
         var vec = new THREE.Vector3(mouseX, mouseY, 0);
+
         projector.unprojectVector(vec, cameraController.camera);
-        var rayCaster = new THREE.Raycaster(cameraController.camera.position, vec.sub(cameraController.camera.position).normalize());
+//        var posCamera = new THREE.Vector3(cameraController.camera.position.x,cameraController.camera.position.y,cameraController.camera.position.z);
+        var posCamera = new THREE.Vector3(cameraController.cameraContainerZPosition.x,cameraController.camera.position.y,cameraController.camera.position.z);
+        var rayCaster = new THREE.Raycaster(posCamera, vec.sub(posCamera).normalize());
         var intersects = rayCaster.intersectObjects(meshes);
         if (intersects.length > 0) {
             var mesh = intersects[0].object;
@@ -353,7 +370,7 @@ GIM.Map3D = function (mainContainer) {
 
     function toScreenCoordinate(worldX, worldY, worldZ) {
         var projector = new THREE.Projector();
-        var worldVector = new THREE.Vector3(worldX + container3D.position.x, worldY, worldZ);
+        var worldVector = new THREE.Vector3(worldX + floorContainer.position.x, worldY + floorContainer.position.y, worldZ);
         var vector = projector.projectVector(worldVector, cameraController.camera);
         return {
             x: Math.round(vector.x * containerHalfWidth + containerHalfWidth),
@@ -400,24 +417,77 @@ GIM.Map3D = function (mainContainer) {
 
     //EVENT HANDLERS/////////////////////////////////////////////
 
-    function onContainerMouseDown(event) {
-        event.preventDefault();
+    var mouseOrigPoint = {x:0,y:0};
+    function onContainerMouseMove(e) {
+        e.preventDefault();
 
+        var touch;
+        if(e instanceof MouseEvent){
+            touch = e;
+        }else{
+            touch = e.targetTouches[0];
+        }
+
+        var deltaX = touch.clientX - mouseOrigPoint.x;
+        var deltaY = touch.clientY - mouseOrigPoint.y;
+        mouseOrigPoint.x = touch.clientX;
+        mouseOrigPoint.y = touch.clientY;
+
+        console.log("---------- touchmove",container3D.position.x);
+        var aimX = floorContainer.position.x + deltaX * 1;
+        var aimY = floorContainer.position.y - deltaY * 1;
+        aimX = aimX > cameraController.maxX ? cameraController.maxX : (aimX < cameraController.minX ? cameraController.minX : aimX);
+        aimY = aimY > cameraController.maxY ? cameraController.maxY : (aimY < cameraController.minY ? cameraController.minY : aimY);
+        floorContainer.position.x = aimX;
+        floorContainer.position.y = aimY;
+//
+//        cameraController.update();
+    }
+
+    function onContainerMouseUp(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("----------touchend");
+
+        mainContainer.removeEventListener("mousemove",onContainerMouseMove, false);
+        mainContainer.removeEventListener("mouseup",onContainerMouseUp, false);
+
+        mainContainer.removeEventListener("touchmove",onContainerMouseMove, false);
+        mainContainer.removeEventListener("touchend",onContainerMouseUp, false);
+    }
+
+    function onContainerMouseDown(e) {
+        e.preventDefault();
         clearPath();
         mapPin.close();
 
-        if (event.target.id === "gotoImage" && event.offsetY < mapPin.width) {
+        console.log(Object.prototype.toString.apply(e.target));
+        if(e.target.id !== "gotoImage" && e.target.id !== "searchImage" && Object.prototype.toString.apply(e.target) !== "[object HTMLCanvasElement]") return;
+
+        var touch;
+        if(e instanceof MouseEvent){
+            touch = e;
+        }else{
+            touch = e.targetTouches[0];
+        }
+        mouseOrigPoint.x = touch.clientX;
+        mouseOrigPoint.y = touch.clientY;
+
+        console.log("---------- onContainerMouseDown",touch.clientX,touch.clientY);
+
+        if (e.target.id === "gotoImage") {
             if (curSelectedUnit3D) {
                 console.log("- [GimMap]Map3D.onContainerMouseDown ShopId:", curSelectedUnit3D.data.bindShopId);
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     navigateTo(curSelectedUnit3D.data.bindShopId);
                 }
             }
-        } else if (event.target.id === "searchImage") {
+        } else if (e.target.id === "searchImage") {
             console.log("- [GimMap]Map3D.goDetail:", curSelectedUnit3D.data.bindShopId);
             GIM.goDetail(curSelectedUnit3D.data.bindShopId);
         } else {
-            selectUnit3DByPosition(event.offsetX, event.offsetY);
+            selectUnit3DByPosition(touch.clientX, touch.clientY - 360);
             if (curSelectedUnit3D) {
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     showPinOnUnit3D(curSelectedUnit3D);
@@ -426,6 +496,15 @@ GIM.Map3D = function (mainContainer) {
                 }
             }
         }
+
+        if(!curSelectedUnit3D){
+            mainContainer.addEventListener("mousemove",onContainerMouseMove, false);
+            mainContainer.addEventListener("mouseup",onContainerMouseUp, false);
+
+            mainContainer.addEventListener("touchmove",onContainerMouseMove, false);
+            mainContainer.addEventListener("touchend",onContainerMouseUp, false);
+        }
+
     }
 
     //INITIALIZE FUNCTIONS///////////////////////////////////////
@@ -444,7 +523,8 @@ GIM.Map3D = function (mainContainer) {
             doAnimate();
             setInterval(doPathAnimate, pathAnimateTime);
 
-            mainContainer.addEventListener('mousedown', onContainerMouseDown, false);
+            mainContainer.addEventListener('touchstart', onContainerMouseDown,false);
+            mainContainer.addEventListener('mousedown', onContainerMouseDown,false);
             mainContainer.addEventListener("DOMNodeInserted", reset, true);
 
             setSize(parseFloat(mainContainer.style.width), parseFloat(mainContainer.style.height));
@@ -491,6 +571,7 @@ GIM.Map3D = function (mainContainer) {
         mapPin = new GIM.MapPin(mainContainer);
     }
 
+    var floorContainer = new THREE.Object3D();
     function initData() {
         GIM.SVGParser.loadURL(GIM.SERVER + GIM.DATA_SOURCE_URL, function (sourceString) {
 //            var json = JSON.parse(sourceString);
@@ -502,7 +583,7 @@ GIM.Map3D = function (mainContainer) {
                 var floor3D = new GIM.DisplayFloor3D(floorElement);
 
                 floor3Ds[floor3D.data.floorId] = floor3D;
-                container3D.add(floor3D.mesh);
+                floorContainer.add(floor3D.mesh);
 
                 var isCurFloor = false;
                 for (var key in floor3D.subUnit3Ds) {
@@ -531,6 +612,7 @@ GIM.Map3D = function (mainContainer) {
 
                 floorSelector.addLogo(floor3D.data.floorId, GIM.SERVER + "img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
             }
+            container3D.add(floorContainer);
 
             for (var nodeId in astarNodes) {
                 var astarNode = astarNodes[nodeId];

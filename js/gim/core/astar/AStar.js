@@ -56,6 +56,8 @@ GIM.AStar = {
             closeNode = closeNode.parent;
         }
 
+        if(pathNodes[0] !== endNode) pathNodes = [];
+
         return pathNodes;
     }
 }

@@ -65,7 +65,7 @@ GIM.MapPin = function (parentContainer) {
         open: function (x, y, shopLogoURL) {
             this._isOpenning = true;
 
-            if(shopLogoURL === "") shopLogoURL = GIM.DEFAULT_SHOP_LOGO_URL;
+            if(shopLogoURL === "") shopLogoURL = GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL;
             this.logoImage.src = shopLogoURL;
             console.log("- [GimMap]MapPin.open:",shopLogoURL,this.logoImage.src);
 
@@ -195,7 +195,7 @@ GIM.MapPin = function (parentContainer) {
                 logoCanvasCTX.closePath();
             }catch (e){
                 console.log("- [GimMap]MapPin Load Image Error!");
-                this.logoImage.src = GIM.DEFAULT_SHOP_LOGO_URL;
+                this.logoImage.src = GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL;
             }
         }
     }

@@ -4,11 +4,11 @@
 
 GIM.CameraController = function (mainContainer,container3D) {
     var controller = {
-        fov: 60,
+        fov: 25,
         near: 1,
-        far: 8000,
-        minDistance: 200,
-        maxDistance: 4800,
+        far: 28000,
+        minDistance: 1500,
+        maxDistance: 10000,
         minX: -900,
         maxX: 2000,
         minY: -100,
@@ -83,45 +83,79 @@ GIM.CameraController = function (mainContainer,container3D) {
     }
     controller.init();
 
-    var mouseOrigPoint = {x:0,y:0};
-    function onContainerMouseDown(e){
-        mouseOrigPoint.x = e.offsetX;
-        mouseOrigPoint.y = e.offsetY;
+//    var mouseOrigPoint = {x:0,y:0};
+//    function onContainerTouchStart(e){
+//        e.preventDefault();
+//        e.stopPropagation();
+//
+//        var touch;
+//        if(e instanceof MouseEvent){
+//            touch = e;
+//        }else{
+//            touch = e.targetTouches[0];
+//        }
+//
+//
+//        mouseOrigPoint.x = touch.clientX;
+//        mouseOrigPoint.y = touch.clientY;
+//
+//        console.log("----------touchstart");
+//
+//        mainContainer.addEventListener('touchmove', onContainerTouchMove, false);
+//        mainContainer.addEventListener('touchend', onContainerTouchEnd, false);
+//
+//        mainContainer.addEventListener("mousemove",onContainerTouchMove, false);
+//        mainContainer.addEventListener("mouseup",onContainerTouchEnd, false);
+//    }
+//
+//    function onContainerTouchMove(e) {
+//        e.preventDefault();
+//        e.stopPropagation();
+//
+//        console.log("---------- touchmove");
+//
+//        var touch;
+//        if(e instanceof MouseEvent){
+//            touch = e;
+//        }else{
+//            touch = e.targetTouches[0];
+//        }
+//
+//        var deltaX = touch.clientX - mouseOrigPoint.x;
+//        var deltaY = touch.clientY - mouseOrigPoint.y;
+//        mouseOrigPoint.x = touch.clientX;
+//        mouseOrigPoint.y = touch.clientY;
+//
+//        var aimX = controller.cameraContainerZPosition.x - deltaX * 1;
+//        var aimY = controller.cameraContainerZPosition.y - deltaY * 1;
+//        aimX = aimX > controller.maxX ? controller.maxX : (aimX < controller.minX ? controller.minX : aimX);
+//        aimY = aimY > controller.maxY ? controller.maxY : (aimY < controller.minY ? controller.minY : aimY);
+//        controller.cameraContainerZPosition.x = aimX;
+//        controller.cameraContainerZPosition.y = aimY;
+//
+//        controller.update();
+//    }
+//
+//    function onContainerTouchEnd(e) {
+//        e.preventDefault();
+//        e.stopPropagation();
+//        console.log("----------touchend");
+//
+//        mainContainer.removeEventListener('touchmove', onContainerTouchMove, false);
+//        mainContainer.removeEventListener('touchend', onContainerTouchEnd, false);
+//
+//        mainContainer.removeEventListener("mousemove",onContainerTouchMove, false);
+//        mainContainer.removeEventListener("mouseup",onContainerTouchEnd, false);
+//    }
+//
+//    function onCOntainerMouseWheel(e){
+//        e.preventDefault();
+//        if(controller.bar) controller.bar.percent -= e.deltaY * 0.01;
+//    }
 
-        mainContainer.addEventListener('mousemove', onContainerMouseMove, false);
-        mainContainer.addEventListener('mouseup', onContainerMouseOut, false);
-        mainContainer.addEventListener('mouseout', onContainerMouseOut, false);
-    }
-
-    function onContainerMouseMove(e) {
-        var deltaX = e.offsetX - mouseOrigPoint.x;
-        var deltaY = e.offsetY - mouseOrigPoint.y;
-//        controller.lookAtVector.x -= deltaX;
-        mouseOrigPoint.x = e.offsetX;
-        mouseOrigPoint.y = e.offsetY;
-
-        var aimX = controller.cameraContainerZPosition.x - deltaX * 1;
-        var aimY = controller.cameraContainerZPosition.y - deltaY * 1;
-        aimX = aimX > controller.maxX ? controller.maxX : (aimX < controller.minX ? controller.minX : aimX);
-        aimY = aimY > controller.maxY ? controller.maxY : (aimY < controller.minY ? controller.minY : aimY);
-        controller.cameraContainerZPosition.x = aimX;
-        controller.cameraContainerZPosition.y = aimY;
-
-        controller.update();
-    }
-
-    function onContainerMouseOut(e) {
-        mainContainer.removeEventListener('mousemove', onContainerMouseMove, false);
-        mainContainer.removeEventListener('mouseup', onContainerMouseOut, false);
-        mainContainer.removeEventListener('mouseout', onContainerMouseOut, false);
-    }
-
-    mainContainer.addEventListener("mousedown",onContainerMouseDown);
-    mainContainer.addEventListener('mousewheel', function(e){
-        e.preventDefault();
-        if(controller.bar) controller.bar.percent -= e.deltaY * 0.01;
-//        bar.cameraController.distance += e.deltaY;
-    }, false);
+//    mainContainer.addEventListener("touchstart",onContainerTouchStart, false);
+//    mainContainer.addEventListener("mousedown",onContainerTouchStart, false);
+//    mainContainer.addEventListener('mousewheel', onCOntainerMouseWheel, false);
 
     return controller;
 }

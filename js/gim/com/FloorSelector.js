@@ -84,10 +84,18 @@ GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler,parentWidth){
             this.floorLogoImage.src = logoURL;
 
             this.container.name = floorId;
-            this.container.addEventListener('mousedown', function (event) {
+            this.container.addEventListener('click', function (event) {
+                console.log("FLOORSELECTOR CLICK");
+                event.preventDefault();
                 var targetfloorId = event.currentTarget.name;
                 clickHandler([targetfloorId]);
-            });
+            },false);
+            this.container.addEventListener('touchstart', function (event) {
+                console.log("FLOORSELECTOR TOUCH");
+                event.preventDefault();
+                var targetfloorId = event.currentTarget.name;
+                clickHandler([targetfloorId]);
+            },false);
         }
     };
     floorLabelAndLogo.init();
