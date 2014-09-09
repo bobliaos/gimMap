@@ -121,6 +121,15 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
             serviceLogo.logoOn = false;
         },serviceLogo.onTime);
     });
+    serviceLogo.container.addEventListener("touchstart",function(){
+        if(!serviceLogo._disable)
+            serviceLogo.onClickHandler(serviceLogo.index.toString());
+
+        serviceLogo.logoOn = true;
+        setTimeout(function(){
+            serviceLogo.logoOn = false;
+        },serviceLogo.onTime);
+    });
 
     return serviceLogo;
 }

@@ -17,7 +17,7 @@ GIM.CameraController = function (mainContainer,container3D) {
         cameraContainerZPosition: new THREE.Vector3(0,0,0),
         camera: new THREE.PerspectiveCamera(),
         positionVector: new THREE.Vector3(0,0,0),
-        shadowLight: new THREE.DirectionalLight(0xffffff, 0.1),
+        shadowLight: new THREE.DirectionalLight(0xAAAAAA,0.01),
         init: function () {
             this.camera.fov = this.fov;
             this.camera.near = this.near;
@@ -29,16 +29,20 @@ GIM.CameraController = function (mainContainer,container3D) {
             if(GIM.SHADOW_MAP_SIZE !== 0){
                 this.cameraContainerZ.add(this.shadowLight);
                 this.shadowLight.castShadow = true;
+                this.shadowLight.shadowCameraFov = this.fov;
 //            this.shadowLight.shadowCameraNear = 1800;
 //            this.shadowLight.shadowCameraFar = 4500;
                 this.shadowLight.shadowCameraNear = this.near;
                 this.shadowLight.shadowCameraFar = 1500;
-                this.shadowLight.shadowCameraLeft = -1000;
-                this.shadowLight.shadowCameraRight = 1000;
-                this.shadowLight.shadowBias = 0.0001;
-                this.shadowLight.shadowDarkness = 0.6;
+                this.shadowLight.shadowCameraLeft = -1600;
+                this.shadowLight.shadowCameraRight = 1600;
+                this.shadowLight.shadowCameraTop = 400;
+                this.shadowLight.shadowCameraBottom = -800;
+                this.shadowLight.shadowBias = 0.00001;
+                this.shadowLight.shadowDarkness = 0.3;
                 this.shadowLight.shadowMapWidth = this.shadowLight.shadowMapHeight = GIM.SHADOW_MAP_SIZE;
-                if(GIM.DEBUG_MODE) this.shadowLight.shadowCameraVisible = true;
+                if(GIM.DEBUG_MODE)
+                    this.shadowLight.shadowCameraVisible = true;
             }
         },
         _radian: Math.PI * 0.15,

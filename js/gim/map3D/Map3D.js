@@ -402,13 +402,16 @@ GIM.Map3D = function (mainContainer) {
     }
 
     function getShopLogoURL(shopId) {
+        console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
         var shopLogoURL = "";
         if (GIM.shopList) {
             for (var i = 0; i < GIM.shopList.length; i++) {
                 var shop = GIM.shopList[i];
-                if (shop.shop_room.toString() === shopId) {
+                var shopRooms = shop.shop_room.toString().split(",");
+//                if (shop.shop_room.toString() === shopId) {
+                if (shopRooms.indexOf(shopId) > -1) {
                     console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
-                    shopLogoURL = GIM.SERVER + "/system" + shop.shop_logo;
+                    shopLogoURL = GIM.REMOTE_SERVER + "system" + shop.shop_logo;
                 }
             }
         }
@@ -487,7 +490,7 @@ GIM.Map3D = function (mainContainer) {
             console.log("- [GimMap]Map3D.goDetail:", curSelectedUnit3D.data.bindShopId);
             GIM.goDetail(curSelectedUnit3D.data.bindShopId);
         } else {
-            selectUnit3DByPosition(touch.clientX, touch.clientY - 360);
+            selectUnit3DByPosition(touch.clientX + GIM.CONTAINER_POSITON.x, touch.clientY - GIM.CONTAINER_POSITON.y);
             if (curSelectedUnit3D) {
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     showPinOnUnit3D(curSelectedUnit3D);
@@ -537,7 +540,7 @@ GIM.Map3D = function (mainContainer) {
         renderer.setClearColor(GIM.MAP_BACKGROUND_COLOR);
         renderer.setSize(2, 2);
         renderer.shadowMapEnabled = true;
-        renderer.shadowMapType = THREE.PCFShadowMap;
+        renderer.shadowMapType = THREE.PCFSoftShadowMap;
 
         scene = new THREE.Scene();
 
@@ -546,7 +549,7 @@ GIM.Map3D = function (mainContainer) {
 
         cameraController = new GIM.CameraController(mainContainer,container3D);
 
-        var backLight = new THREE.DirectionalLight(0xFFFFFF * 1, 0.4);
+        var backLight = new THREE.DirectionalLight(0xFFFFFF * 1 , 0.2);
         scene.add(backLight);
         backLight.position.set(0, 1, 1);
         backLight.target.position.set(0,0,0);
@@ -646,7 +649,7 @@ GIM.Map3D = function (mainContainer) {
         }
 
         for (var i = 0; i < serviceLogoMeshes.length; i++) {
-            var mesh = serviceLogoMeshes[i];
+//            var mesh = serviceLogoMeshes[i];
 //            mesh.lookAt(camera.position);
         }
 

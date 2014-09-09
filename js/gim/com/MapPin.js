@@ -82,7 +82,7 @@ GIM.MapPin = function (parentContainer) {
             this.rotation = 0;
             this.gotoImage.style.display = this.searchImage.style.display = "none";
             this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
-            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 30).easing(TWEEN.Easing.Elastic.Out).onComplete(function(){
+            new TWEEN.Tween(this).to({alpha: 1, rotation: 0, radius: this.maxRadius}, 800).easing(TWEEN.Easing.Elastic.Out).onComplete(function(){
                 this.gotoImage.style.opacity = this.searchImage.style.opacity = 0;
                 this.gotoImage.style.display = this.searchImage.style.display = "block";
                 new TWEEN.Tween(this.gotoImage.style).to({opacity:1},200).start();

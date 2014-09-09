@@ -24,6 +24,7 @@ var GIM = {
     setSize : function(width,height){this._map.setSize(width,height);}
 };
 
+GIM.CONTAINER_POSITON       = {x:20,y:458};
 GIM.DEBUG_MODE              = false;
 
 GIM.NODE_TYPE_ASTAR 		= "0";
@@ -38,7 +39,8 @@ GIM.NODE_TYPE_SERVICE		= "8";
 GIM.NODE_TYPE_ATM   		= "9";
 
 GIM.MACHINE_CODE            = "53be527121232fb859000001";
-GIM.SERVER                  = "http://192.168.1.208:3000/";
+GIM.SERVER                  = "assets/polyCanalPlaza/";
+GIM.REMOTE_SERVER           = "http://192.168.1.198:3000/";
 
 GIM.UNIT_HEIGHT_SCALE       = 1;
 GIM.FLOOR_GAP               = 700;

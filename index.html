@@ -25,22 +25,12 @@
     <script type="text/javascript">
         function init() {
             GIM.MACHINE_CODE    = "53be552d21232fcadb000002";
-            GIM.SHADOW_MAP_SIZE = 1024 * 0;
+            GIM.SHADOW_MAP_SIZE = 1024 * 2;
             GIM.UNIT_HEIGHT_SCALE = 1;
-//            GIM.SERVER          = "http://192.168.1.208:3000";
             GIM.SERVER = "assets/polyCanalPlaza/";
+            GIM.REMOTE_SERVER = "http://192.168.1.198:3000/";
             GIM.MAP_BACKGROUND_COLOR = "#DDDDDD";
             GIM.FLOOR_GAP = 3000;
-
-//            banner.addEventListener('touchmove', onTouch, false);
-//            banner.addEventListener('touchend', onTouch, false);
-//            banner.addEventListener("touchstart",onTouch);
-        }
-
-        function onTouch(e){
-//            e.preventDefault();
-//            var touch = e.targetTouches[0];
-//            banner.innerHTML += touch.clientX + "," + touch.clientY + "," + e.targetTouches[0];
         }
 
         var container;
@@ -71,7 +61,7 @@
     </script>
 </head>
 <body style="margin: 0;padding: 0;" onload="init()">
-<div id="banner" style="background: #0099CC;width: 1040px;height: 360px;cursor: pointer">
+<div id="banner" style="background: #0099CC;width: 1040px;height: 458px;cursor: pointer">
     <button onclick="showMap()">显示地图</button>
     <br/>
     <button onclick="hideMap()">隐藏地图</button>

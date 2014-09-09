@@ -39,7 +39,7 @@ GIM.ZoomBar = function (parentContainer,cameraController) {
         },
         updateDisplay: function(){
 //            this.container.style.visibility = "hidden";
-            this.thumb.style.top = (this.maxThumbY - this.minThumbY) * (100 - this._percent) * 0.01 + this.minThumbY;
+            this.thumb.style.top = (this.maxThumbY - this.minThumbY) * (100 - this._percent) * 0.01 + this.minThumbY + "px";
         },
         _percent: 0,
         set percent(value){
