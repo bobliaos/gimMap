@@ -8,7 +8,8 @@ GIM.CameraController = function (mainContainer,container3D) {
         near: 1,
         far: 28000,
         minDistance: 1500,
-        maxDistance: 10000,
+//        minDistance: 1500,
+        maxDistance: 3000,
         minX: -900,
         maxX: 2000,
         minY: -100,
@@ -45,7 +46,7 @@ GIM.CameraController = function (mainContainer,container3D) {
                     this.shadowLight.shadowCameraVisible = true;
             }
         },
-        _radian: Math.PI * 0.15,
+        _radian: Math.PI * 0.2,
         _percent: 0,
         get percent(){
             return this._percent;

@@ -153,7 +153,6 @@ GIM.Map3D = function (mainContainer) {
             var startFloorEndAStarNode = null;
             var endFloorStartAStarNode = null;
 
-
             for (var key in startFloorAStarNodes) {
                 var astarNode = startFloorAStarNodes[key];
                 if (astarNode.data.nodeTypeId === GIM.NODE_TYPE_LIFT || astarNode.data.nodeTypeId === GIM.NODE_TYPE_ESCALATOR) {
@@ -163,19 +162,25 @@ GIM.Map3D = function (mainContainer) {
                             if(!startFloorEndAStarNode){
                                 startFloorEndAStarNode = astarNode;
                                 endFloorStartAStarNode = bindAStarNode;
+                            }else{
+                                var d1 = calculateDistance(startNode.astarNode,astarNode) + calculateDistance(astarNode,endNode.astarNode);
+                                var d2 = calculateDistance(startNode.astarNode,startFloorEndAStarNode) + calculateDistance(startFloorEndAStarNode,endNode.astarNode);
+                                if(d2 > d1){
+                                    startFloorEndAStarNode = astarNode;
+                                    endFloorStartAStarNode = bindAStarNode;
+                                }
                             }
                         }
                     }
-                    if (startFloorEndAStarNode !== null && endFloorStartAStarNode !== null) {
-                        var startFloorPathNodes = GIM.AStar.search(startFloorAStarNodes, machineNodeId, startFloorEndAStarNode.data.nodeId);
-                        var endFloorPathNodes = GIM.AStar.search(endFloorAStarNodes, endFloorStartAStarNode.data.nodeId, curSelectedUnit3D.data.nodeId);
-
-                        pathNodes = pathNodes.concat(endFloorPathNodes);
-                        pathNodes = pathNodes.concat(startFloorPathNodes);
-
-                        break;
-                    }
                 }
+            }
+
+            if (startFloorEndAStarNode !== null && endFloorStartAStarNode !== null) {
+                var startFloorPathNodes = GIM.AStar.search(startFloorAStarNodes, machineNodeId, startFloorEndAStarNode.data.nodeId);
+                var endFloorPathNodes = GIM.AStar.search(endFloorAStarNodes, endFloorStartAStarNode.data.nodeId, curSelectedUnit3D.data.nodeId);
+
+                pathNodes = pathNodes.concat(endFloorPathNodes);
+                pathNodes = pathNodes.concat(startFloorPathNodes);
             }
         }
 
@@ -314,8 +319,6 @@ GIM.Map3D = function (mainContainer) {
     function selectUnit3DByPosition(mouseX, mouseY) {
         clearSelectedUnit3D();
 
-        console.log("++++++++++",mouseX, mouseY);
-
         mouseX = 2 * mouseX / containerWidth - 1;
         mouseY = 1 - 2 * mouseY / containerHeight;
         var vec = new THREE.Vector3(mouseX, mouseY, 0);
@@ -343,9 +346,10 @@ GIM.Map3D = function (mainContainer) {
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
             var color = new THREE.Color(curSelectedUnit3D.data.fill);
             var i = color.getHSL();
-            color.setHSL(i.h, i.s + 0.3, i.l + 0.07);
+            color.setHSL(i.h, i.s, i.l * 1.2);
+//            color.setHSL(i.h - 0.1, i.s + 0.3, i.l + 0.07);
             curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color });
-            new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.4, x: unit3D.mesh.isServiceLogo ? 1.1 : 1, y: unit3D.mesh.isServiceLogo ? 1.1 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
+            new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.6, x: unit3D.mesh.isServiceLogo ? 1.1 : 1, y: unit3D.mesh.isServiceLogo ? 1.1 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
         }
     }
 
@@ -404,7 +408,7 @@ GIM.Map3D = function (mainContainer) {
     function getShopLogoURL(shopId) {
         console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
         var shopLogoURL = "";
-        if (GIM.shopList) {
+        if (GIM.shopList && shopId != "") {
             for (var i = 0; i < GIM.shopList.length; i++) {
                 var shop = GIM.shopList[i];
                 var shopRooms = shop.shop_room.toString().split(",");
@@ -467,23 +471,26 @@ GIM.Map3D = function (mainContainer) {
 
         console.log(Object.prototype.toString.apply(e.target));
         if(e.target.id !== "gotoImage" && e.target.id !== "searchImage" && Object.prototype.toString.apply(e.target) !== "[object HTMLCanvasElement]") return;
+//        if(e.target.id !== "gotoImage" && e.target.id !== "searchImage" && Object.prototype.toString.apply(e.target) !== "[object HTMLCanvasElement]") return;
 
         var touch;
         if(e instanceof MouseEvent){
             touch = e;
+            console.log("- [GimMap]Map3D.onContainerMouseDown",touch.clientX,touch.clientY);
         }else{
             touch = e.targetTouches[0];
+            console.log("- [GimMap]Map3D.onContainerTouchDown",touch.clientX,touch.clientY);
         }
         mouseOrigPoint.x = touch.clientX;
         mouseOrigPoint.y = touch.clientY;
-
-        console.log("---------- onContainerMouseDown",touch.clientX,touch.clientY);
 
         if (e.target.id === "gotoImage") {
             if (curSelectedUnit3D) {
                 console.log("- [GimMap]Map3D.onContainerMouseDown ShopId:", curSelectedUnit3D.data.bindShopId);
                 if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
                     navigateTo(curSelectedUnit3D.data.bindShopId);
+                }else{
+                    drawPathToCurrentSelectedUnit();
                 }
             }
         } else if (e.target.id === "searchImage") {
@@ -492,11 +499,12 @@ GIM.Map3D = function (mainContainer) {
         } else {
             selectUnit3DByPosition(touch.clientX + GIM.CONTAINER_POSITON.x, touch.clientY - GIM.CONTAINER_POSITON.y);
             if (curSelectedUnit3D) {
-                if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
-                    showPinOnUnit3D(curSelectedUnit3D);
-                } else {
-                    drawPathToCurrentSelectedUnit();
-                }
+                showPinOnUnit3D(curSelectedUnit3D);
+//                if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
+//                    showPinOnUnit3D(curSelectedUnit3D);
+//                } else {
+//                    drawPathToCurrentSelectedUnit();
+//                }
             }
         }
 
@@ -526,8 +534,8 @@ GIM.Map3D = function (mainContainer) {
             doAnimate();
             setInterval(doPathAnimate, pathAnimateTime);
 
-            mainContainer.addEventListener('touchstart', onContainerMouseDown,false);
             mainContainer.addEventListener('mousedown', onContainerMouseDown,false);
+            mainContainer.addEventListener('touchstart', onContainerMouseDown,false);
             mainContainer.addEventListener("DOMNodeInserted", reset, true);
 
             setSize(parseFloat(mainContainer.style.width), parseFloat(mainContainer.style.height));
