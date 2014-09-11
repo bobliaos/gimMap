@@ -9,7 +9,8 @@ GIM.CameraController = function (mainContainer,container3D) {
         far: 28000,
         minDistance: 1500,
 //        minDistance: 1500,
-        maxDistance: 3000,
+//        maxDistance: 3000,
+        maxDistance: 10000,
         minX: -900,
         maxX: 2000,
         minY: -100,
@@ -153,14 +154,14 @@ GIM.CameraController = function (mainContainer,container3D) {
 //        mainContainer.removeEventListener("mouseup",onContainerTouchEnd, false);
 //    }
 //
-//    function onCOntainerMouseWheel(e){
-//        e.preventDefault();
-//        if(controller.bar) controller.bar.percent -= e.deltaY * 0.01;
-//    }
+    function onCOntainerMouseWheel(e){
+        e.preventDefault();
+        if(controller.bar) controller.bar.percent -= e.deltaY * 0.01;
+    }
 
 //    mainContainer.addEventListener("touchstart",onContainerTouchStart, false);
 //    mainContainer.addEventListener("mousedown",onContainerTouchStart, false);
-//    mainContainer.addEventListener('mousewheel', onCOntainerMouseWheel, false);
+    mainContainer.addEventListener('mousewheel', onCOntainerMouseWheel, false);
 
     return controller;
 }

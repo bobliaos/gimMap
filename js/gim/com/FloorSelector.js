@@ -4,6 +4,7 @@
 
 GIM.FloorSelector = function(parentContainer){
 	var selector = {
+        horizontalMode:true,
         width: 170,
         container: document.createElement("div"),
         upImage: new Image(),
@@ -14,14 +15,19 @@ GIM.FloorSelector = function(parentContainer){
             this.container.appendChild(this.downImage);
             parentContainer.appendChild(this.container);
 
-            this.container.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;width:" + this.width + "px;";
-            this.upImage.style.cssText = this.downImage.style.cssText = "left: 60px;position: relative;";
+            if(this.horizontalMode){
+                this.container.style.cssText = "position:absolute;top:140px;left:120px;text-align:left;";
+                this.upImage.style.cssText = this.downImage.style.cssText = "left: 60px;position: relative;float:left;-webkit-transform: rotate(-90deg);margin-right: 60px;margin-top: 20px;margin-left: -60px;";
+            }else{
+                this.container.style.cssText = "position:absolute;top:240px;left:0px;text-align:left;width:" + this.width + "px;";
+                this.upImage.style.cssText = this.downImage.style.cssText = "left: 60px;position: relative;";
+            }
 
             this.upImage.src = GIM.SERVER + "img/up.png";
             this.downImage.src = GIM.SERVER + "img/down.png";
         },
         addLogo: function(floorId,logoURL,isCurFloor,clickHandler){
-            var floorLabelAndLogo = new GIM.FloorLogo(floorId,logoURL,isCurFloor,clickHandler,this.width);
+            var floorLabelAndLogo = new GIM.FloorLogo(floorId,logoURL,isCurFloor,clickHandler,this.width,this.horizontalMode);
             this.container.insertBefore(floorLabelAndLogo.container,this.container.lastChild);
             this.floorSelecterLogos.push(floorLabelAndLogo);
         },
@@ -39,7 +45,7 @@ GIM.FloorSelector = function(parentContainer){
 	return selector;
 }
 
-GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler,parentWidth){
+GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler,parentWidth,horizontalMode){
     var floorLabelAndLogo = {
         id: floorId,
         width: parentWidth,
@@ -74,7 +80,12 @@ GIM.FloorLogo = function(floorId,logoURL,isCurFloor,clickHandler,parentWidth){
             this.container.appendChild(this.floorLabel);
             this.container.appendChild(this.floorCurLabel);
 
-            this.container.style.cssText = "position:relative;height:" + this.height + "px;width:" + this.width + "px;opacity:0.3;margin-bottom:8px;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
+            if(horizontalMode){
+                this.container.style.cssText = "position:relative;float:left;height:" + this.height + "px;width:" + this.width + "px;opacity:0.3;margin-bottom:8px;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
+            }else{
+                this.container.style.cssText = "position:relative;height:" + this.height + "px;width:" + this.width + "px;opacity:0.3;margin-bottom:8px;font-size: 26px;font-weight: bold;font-family:" + GIM.FONT_NAME;
+            }
+
             this.floorLabel.style.cssText = "margin:0;position:absolute;left:2px;top:2px;line-height:22px";
             this.floorCurLabel.style.cssText = "font-size: 16px;font-weight: normal;position:absolute;bottom:2px;left:2px;margin:0;";
             this.floorLogoImage.style.cssText = "width:100%;position:absolute;top:22px;left:2px;";

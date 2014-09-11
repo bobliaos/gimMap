@@ -32,6 +32,8 @@ GIM.Map3D = function (mainContainer) {
 
     var preSelectedUnit3DMaterial = null;
     var machineNodeId = null;
+    var mouseOrigPoint = {x:0,y:0};
+    var floorContainer = new THREE.Object3D();
 
     //MAIN FUNCTIONS///////////////////////////////////////////
 
@@ -346,7 +348,7 @@ GIM.Map3D = function (mainContainer) {
             preSelectedUnit3DMaterial = curSelectedUnit3D.mesh.material;
             var color = new THREE.Color(curSelectedUnit3D.data.fill);
             var i = color.getHSL();
-            color.setHSL(i.h, i.s, i.l * 1.2);
+            color.setHSL(i.h, i.s, i.l * 0.8);
 //            color.setHSL(i.h - 0.1, i.s + 0.3, i.l + 0.07);
             curSelectedUnit3D.mesh.material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color });
             new TWEEN.Tween(unit3D.mesh.scale).to({z: 1.6, x: unit3D.mesh.isServiceLogo ? 1.1 : 1, y: unit3D.mesh.isServiceLogo ? 1.1 : 1}, 500).easing(TWEEN.Easing.Elastic.Out).start();
@@ -424,7 +426,6 @@ GIM.Map3D = function (mainContainer) {
 
     //EVENT HANDLERS/////////////////////////////////////////////
 
-    var mouseOrigPoint = {x:0,y:0};
     function onContainerMouseMove(e) {
         e.preventDefault();
 
@@ -440,7 +441,6 @@ GIM.Map3D = function (mainContainer) {
         mouseOrigPoint.x = touch.clientX;
         mouseOrigPoint.y = touch.clientY;
 
-        console.log("---------- touchmove",container3D.position.x);
         var aimX = floorContainer.position.x + deltaX * 1;
         var aimY = floorContainer.position.y - deltaY * 1;
         aimX = aimX > cameraController.maxX ? cameraController.maxX : (aimX < cameraController.minX ? cameraController.minX : aimX);
@@ -455,8 +455,6 @@ GIM.Map3D = function (mainContainer) {
         e.preventDefault();
         e.stopPropagation();
 
-        console.log("----------touchend");
-
         mainContainer.removeEventListener("mousemove",onContainerMouseMove, false);
         mainContainer.removeEventListener("mouseup",onContainerMouseUp, false);
 
@@ -469,7 +467,6 @@ GIM.Map3D = function (mainContainer) {
         clearPath();
         mapPin.close();
 
-        console.log(Object.prototype.toString.apply(e.target));
         if(e.target.id !== "gotoImage" && e.target.id !== "searchImage" && Object.prototype.toString.apply(e.target) !== "[object HTMLCanvasElement]") return;
 //        if(e.target.id !== "gotoImage" && e.target.id !== "searchImage" && Object.prototype.toString.apply(e.target) !== "[object HTMLCanvasElement]") return;
 
@@ -578,11 +575,10 @@ GIM.Map3D = function (mainContainer) {
         }
         floorSelector = new GIM.FloorSelector(mainContainer);
         serviceSelector = new GIM.ServiceSelector(mainContainer, showNodeTypes);
-        zoomBar = new GIM.ZoomBar(mainContainer,cameraController);
+        zoomBar = new GIM.ZoomBar(mainContainer,cameraController,floorContainer);
         mapPin = new GIM.MapPin(mainContainer);
     }
 
-    var floorContainer = new THREE.Object3D();
     function initData() {
         GIM.SVGParser.loadURL(GIM.SERVER + GIM.DATA_SOURCE_URL, function (sourceString) {
 //            var json = JSON.parse(sourceString);
@@ -624,6 +620,8 @@ GIM.Map3D = function (mainContainer) {
                 floorSelector.addLogo(floor3D.data.floorId, GIM.SERVER + "img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
             }
             container3D.add(floorContainer);
+
+//            floorContainer.rotation.z = 10 * Math.PI / 180;
 
             for (var nodeId in astarNodes) {
                 var astarNode = astarNodes[nodeId];

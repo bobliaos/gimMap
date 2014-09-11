@@ -61,6 +61,7 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
         logoDisableURL : "",
         width: 180,
         height: 160,
+        title: text,
         container: document.createElement("div"),
         logoImage: new Image(),
         logoText: document.createElement("div"),
@@ -112,7 +113,7 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
 
     serviceLogo.init();
 
-    serviceLogo.container.addEventListener("click",function(){
+    function onClick(e){
         if(!serviceLogo._disable)
             serviceLogo.onClickHandler(serviceLogo.index.toString());
 
@@ -120,16 +121,13 @@ GIM.ServiceLogo = function (parentContainer,index,text) {
         setTimeout(function(){
             serviceLogo.logoOn = false;
         },serviceLogo.onTime);
-    });
-    serviceLogo.container.addEventListener("touchstart",function(){
-        if(!serviceLogo._disable)
-            serviceLogo.onClickHandler(serviceLogo.index.toString());
 
-        serviceLogo.logoOn = true;
-        setTimeout(function(){
-            serviceLogo.logoOn = false;
-        },serviceLogo.onTime);
-    });
+        console.log(serviceLogo.index,serviceLogo.title);
+        GIM.onServiceLogoClick(serviceLogo.index);
+    }
+
+    serviceLogo.container.addEventListener("click",onClick);
+    serviceLogo.container.addEventListener("touchstart",onClick);
 
     return serviceLogo;
 }

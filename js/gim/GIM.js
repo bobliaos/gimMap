@@ -56,3 +56,15 @@ GIM.CONFIG_URL              = "map.conf";
 GIM.DATA_SOURCE_URL         = "data.json";
 GIM.SHOP_LIST_URL           = "shoplist.json";
 GIM.DEFAULT_SHOP_LOGO_URL   = "img/shoplogo/0.png";
+
+GIM.onServiceLogoClick = function(typeId){
+    /**
+     * typeId 对应表:
+     * 3 我的位置
+     * 8 服务中心
+     * 9 ATM
+     * 7 洗手间
+     * 4 扶梯
+     * 5 升降梯
+     */
+}
