@@ -14,7 +14,7 @@ GIM.UnitData = function(pathElement){
         mappingType : 'b',
         mappingSize : null, //THREE.Vector2()
         mappingRotation : 0,
-        isMapping : false,
+        shopLogo : "",
         d : pathElement.getAttribute("d"),
         fill : pathElement.getAttribute("fill"),
         deep : pathElement.getAttribute("deep"),
@@ -38,8 +38,9 @@ GIM.UnitData = function(pathElement){
 
     for(var i = 0;i < GIM.shopList.length;i ++){
         var shopData = GIM.shopList[i];
-        if(shopData.shop_room === data.bindShopId){
+        if(shopData.shop_room != "" && shopData.shop_room === data.bindShopId){
             data.shopName = shopData.name;
+            data.shopLogo = GIM.REMOTE_SERVER + "system" + shopData.shop_logo;
             break;
         }
     }

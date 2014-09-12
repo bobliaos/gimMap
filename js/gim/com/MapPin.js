@@ -67,7 +67,7 @@ GIM.MapPin = function (parentContainer) {
 
             if(shopLogoURL === "") shopLogoURL = GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL;
             this.logoImage.src = shopLogoURL;
-            console.log("- [GimMap]MapPin.open:",shopLogoURL,this.logoImage.src);
+            console.log("- [GimMap]MapPin.open:",this.logoImage.src);
 
             this.container.style.display = "block";
             this.container.style.left = (x - this.width * 0.5) + "px";

@@ -12,16 +12,18 @@ GIM.DisplayUnit3D = function (unitData) {
             var material = new THREE.MeshLambertMaterial({color: color, ambient: color, emissive: color});
             tmpMesh = new THREE.Mesh(shape3d, material);
         }catch (e){
-            console.log("CATCH ERROR:",e);
+            console.log("- [GimMap].addMesh: ERROR:",e);
         }
     }
 
     var positionOffsetZ = 10;
 
     function addLogo(logoURL,isServiceLogo,logoSize){
-        var logoSize = logoSize === undefined ? (isServiceLogo ? 60 : 80) : logoSize;
+//        var logoSize = logoSize === undefined ? (isServiceLogo ? 60 : 80) : logoSize;
+        var logoSize = logoSize === undefined ? (isServiceLogo ? 30 : 40) : logoSize;
 
         var logoGeometry = new THREE.PlaneGeometry(logoSize, logoSize, 1, 1);
+        THREE.ImageUtils.crossOrigin = 'anonymous';
         var logoTexture = THREE.ImageUtils.loadTexture(logoURL);
         var logoMaterial = new THREE.MeshBasicMaterial({map: logoTexture, transparent: true});
         var logoMesh = new THREE.Mesh(logoGeometry, logoMaterial);
@@ -33,8 +35,8 @@ GIM.DisplayUnit3D = function (unitData) {
         logoMesh.position.x = unitData.nodePosition.x;
         logoMesh.position.y = - unitData.nodePosition.y + (isServiceLogo ? 0 : logoSize * 0.5) + (logoSize > 100 ? 20 : 0);
         logoMesh.position.z = parseInt(unitData.deep) + positionOffsetZ;
-        logoMesh.rotation.x = Math.PI * 0.25;
         if(isServiceLogo) {
+            logoMesh.rotation.x = Math.PI * 0.25;
             unitData.origZ = logoSize * 0.5 + 20;
             logoMesh.position.z = unitData.origZ;
         }
@@ -43,10 +45,10 @@ GIM.DisplayUnit3D = function (unitData) {
     function addText(text,offsetY,fontSize){
         if(text == "") return;
         if(offsetY === undefined) offsetY = 0;
-        if(fontSize === undefined) fontSize = 18;
+        if(fontSize === undefined) fontSize = 12;
 
 //        var fontStyle = "Bold " + fontSize + "px " + GIM.FONT_NAME;
-        var fontStyle = fontSize + "px " + GIM.FONT_NAME;
+        var fontStyle = fontSize + "pt " + GIM.FONT_NAME;
 
         var textCanvas = document.createElement("canvas");
 //        document.body.appendChild(textCanvas);
@@ -84,17 +86,17 @@ GIM.DisplayUnit3D = function (unitData) {
         case GIM.NODE_TYPE_SHOP:
             addMesh();
             if(unitData.isMapping){
-                addLogo(GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL);
-                addText("你好",18,14);
-            }
-            if (unitData.bindShopId) {
-//                addLogo("assets/img/shoplogo/0.png");
-//                addText(unitData.shopName);
-//                addText(unitData.bindShopId,18,14);
+                if (unitData.bindShopId){
+                    if(unitData.mappingType === 't' || unitData.mappingType === 'b')
+                        addText(unitData.shopName,2,2);
+                    if(unitData.mappingType === 'i' || unitData.mappingType === 'b')
+//                        addLogo("http://g.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=07a0ef5680025aafc73f76999a84c001/0df431adcbef76099d8530092cdda3cc7dd99e9e.jpg",false,unitData.mappingSize.x);
+                        addLogo(unitData.shopLogo,false,unitData.mappingSize.x);
+                }
             }
             break;
         case GIM.NODE_TYPE_MACHINE:
-            addLogo(GIM.SERVER + "img/nodetypelogo/machine_.png",true,120);
+            addLogo(GIM.SERVER + "img/nodetypelogo/machine_.png",true,80);
             var tween = new TWEEN.Tween(tmpMesh.material);
 
             function doAnimate(){

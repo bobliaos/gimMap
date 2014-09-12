@@ -43,8 +43,8 @@ GIM.SERVER                  = "assets/polyCanalPlaza/";
 GIM.REMOTE_SERVER           = "http://192.168.1.198:3000/";
 
 GIM.UNIT_HEIGHT_SCALE       = 1.5;
-GIM.FLOOR_GAP               = 700;
-GIM.PATH_POINT_GAP          = 16;
+GIM.FLOOR_GAP               = 800;
+GIM.PATH_POINT_GAP          = 8;
 GIM.PATH_COLOR              = 0xFF0000;
 GIM.MAP_OFFSET_Y            = 200;
 GIM.MAP_BACKGROUND_COLOR    = "#FFFFFF";
@@ -66,5 +66,6 @@ GIM.onServiceLogoClick = function(typeId){
      * 7 洗手间
      * 4 扶梯
      * 5 升降梯
+     * 100 点击楼层
      */
 }

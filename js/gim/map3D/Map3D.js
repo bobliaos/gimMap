@@ -16,8 +16,8 @@ GIM.Map3D = function (mainContainer) {
 
     var pathMesh;
     var astarNodes = {};
-    var minFloorPositionZ = -18000;
-    var maxFloorPositionZ = 8000;
+    var minFloorPositionZ = -2400;
+    var maxFloorPositionZ = 1500;
     var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
@@ -45,7 +45,7 @@ GIM.Map3D = function (mainContainer) {
     }
 
     function navigateTo(shopId) {
-        selectUint3DByShopId(shopId);
+        if(shopId != "") selectUint3DByShopId(shopId);
         drawPathToCurrentSelectedUnit();
         setTimeout(function(){showPinOnUnit3D(curSelectedUnit3D);},200);
     }
@@ -59,7 +59,7 @@ GIM.Map3D = function (mainContainer) {
 
         if (mapPin._isOpenning) mapPin.close();
 
-        console.log("- [GimMap]Map3D.showFloors:", floorIds.toString());
+        if(GIM.DEBUG_MODE) console.log("- [GimMap]Map3D.showFloors:", floorIds.toString());
 
         //UPDATE FLOOR LOGOS
         floorSelector.showFloors(floorIds);
@@ -227,7 +227,7 @@ GIM.Map3D = function (mainContainer) {
 
         for (var i = 0; i < vector3Ds.length; i++) {
             vector3D = vector3Ds[i];
-            pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z + 15);
+            pathGeometry.vertices[i] = new THREE.Vector3(vector3D.x, -vector3D.y, vector3D.z + 10);
         }
         pathMesh = new THREE.Line(pathGeometry, new THREE.LineBasicMaterial({color: GIM.PATH_COLOR}));
 //        pathMesh.visible = GIM.DEBUG_MODE;
@@ -235,7 +235,7 @@ GIM.Map3D = function (mainContainer) {
         for (var i = 0; i < pathGeometry.vertices.length; i++) {
             var vector3DofPath = pathGeometry.vertices[i];
             if (!(pathGeometry.vertices[i + 1] && pathGeometry.vertices[i].z !== pathGeometry.vertices[i + 1].z && i % 2 != 0)) {
-                var pointGeometry = new THREE.CircleGeometry(12, 8);
+                var pointGeometry = new THREE.CircleGeometry(6, 12);
                 var pointMaterial = new THREE.MeshBasicMaterial({color: GIM.PATH_COLOR});
                 var pointMesh = new THREE.Mesh(pointGeometry, pointMaterial);
                 floorContainer.add(pointMesh);
@@ -333,13 +333,13 @@ GIM.Map3D = function (mainContainer) {
         if (intersects.length > 0) {
             var mesh = intersects[0].object;
             if (mesh.displayUnit3D && mesh.displayUnit3D.data.selectable) {
-                console.log("- [GimMap]Map3D.selectUnit3DByPosition", mesh.displayUnit3D.data.nodeId);
                 selectUnit3D(mesh.displayUnit3D);
             }
         }
     }
 
     function selectUnit3D(unit3D) {
+        console.log("- [GimMap]Map3D.selectUnit3D:nodeId:", unit3D.data.nodeId,"shopId:",unit3D.data.bindShopId);
         curSelectedUnit3D = unit3D;
         if (unit3D.mesh.isServiceLogo) {
             new TWEEN.Tween(unit3D.mesh.position).to({z: unit3D.data.origZ + 20}, 500).easing(TWEEN.Easing.Elastic.Out).start();
@@ -408,7 +408,7 @@ GIM.Map3D = function (mainContainer) {
     }
 
     function getShopLogoURL(shopId) {
-        console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
+        if(GIM.DEBUG_MODE) console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
         var shopLogoURL = "";
         if (GIM.shopList && shopId != "") {
             for (var i = 0; i < GIM.shopList.length; i++) {
@@ -416,7 +416,6 @@ GIM.Map3D = function (mainContainer) {
                 var shopRooms = shop.shop_room.toString().split(",");
 //                if (shop.shop_room.toString() === shopId) {
                 if (shopRooms.indexOf(shopId) > -1) {
-                    console.log("- [GimMap]Map3D.getShopLogoURL:", shopId);
                     shopLogoURL = GIM.REMOTE_SERVER + "system" + shop.shop_logo;
                 }
             }
@@ -447,6 +446,8 @@ GIM.Map3D = function (mainContainer) {
         aimY = aimY > cameraController.maxY ? cameraController.maxY : (aimY < cameraController.minY ? cameraController.minY : aimY);
         floorContainer.position.x = aimX;
         floorContainer.position.y = aimY;
+
+        if(GIM.DEBUG_MODE) console.log("- [GimMap]onContainerMouseMove:x:" + aimX + "y:" + aimY);
 //
 //        cameraController.update();
     }
@@ -473,10 +474,10 @@ GIM.Map3D = function (mainContainer) {
         var touch;
         if(e instanceof MouseEvent){
             touch = e;
-            console.log("- [GimMap]Map3D.onContainerMouseDown",touch.clientX,touch.clientY);
+            if(GIM.DEBUG_MODE) console.log("- [GimMap]Map3D.onContainerMouseDown",touch.clientX,touch.clientY);
         }else{
             touch = e.targetTouches[0];
-            console.log("- [GimMap]Map3D.onContainerTouchDown",touch.clientX,touch.clientY);
+            if(GIM.DEBUG_MODE) console.log("- [GimMap]Map3D.onContainerTouchDown",touch.clientX,touch.clientY);
         }
         mouseOrigPoint.x = touch.clientX;
         mouseOrigPoint.y = touch.clientY;
@@ -495,14 +496,7 @@ GIM.Map3D = function (mainContainer) {
             GIM.goDetail(curSelectedUnit3D.data.bindShopId);
         } else {
             selectUnit3DByPosition(touch.clientX + GIM.CONTAINER_POSITON.x, touch.clientY - GIM.CONTAINER_POSITON.y);
-            if (curSelectedUnit3D) {
-                showPinOnUnit3D(curSelectedUnit3D);
-//                if (curSelectedUnit3D.data.nodeTypeId === GIM.NODE_TYPE_SHOP) {
-//                    showPinOnUnit3D(curSelectedUnit3D);
-//                } else {
-//                    drawPathToCurrentSelectedUnit();
-//                }
-            }
+            if (curSelectedUnit3D) showPinOnUnit3D(curSelectedUnit3D);
         }
 
         if(!curSelectedUnit3D){

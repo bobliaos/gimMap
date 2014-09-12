@@ -7,14 +7,14 @@ GIM.CameraController = function (mainContainer,container3D) {
         fov: 25,
         near: 1,
         far: 28000,
-        minDistance: 1500,
+        minDistance: 1200,
 //        minDistance: 1500,
 //        maxDistance: 3000,
-        maxDistance: 10000,
-        minX: -900,
-        maxX: 2000,
-        minY: -100,
-        maxY: 300,
+        maxDistance: 3500,
+        minX: -300,
+        maxX: 300,
+        minY: -50,
+        maxY: 250,
         cameraContainerZ: new THREE.Object3D(),
         cameraContainerZPosition: new THREE.Vector3(0,0,0),
         camera: new THREE.PerspectiveCamera(),
@@ -27,6 +27,7 @@ GIM.CameraController = function (mainContainer,container3D) {
 
             container3D.add(this.cameraContainerZ);
             this.cameraContainerZ.add(this.camera);
+//            this.camera.rotation.z = - Math.PI * 0.03;
 
             if(GIM.SHADOW_MAP_SIZE !== 0){
                 this.cameraContainerZ.add(this.shadowLight);
@@ -55,6 +56,7 @@ GIM.CameraController = function (mainContainer,container3D) {
         set percent(value){
             this._percent = value;
             this.distance = (this.maxDistance - this.minDistance) * (1 - this._percent / 100) + this.minDistance;
+            if(GIM.DEBUG_MODE) console.log("- [GimMap]CameraController.persent:"+value+"camera distance:"+this.distance);
             this.update();
         },
         _distance: 0,
