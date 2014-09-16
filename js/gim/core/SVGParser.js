@@ -18,6 +18,16 @@ GIM.SVGParser = {
 //        svgLoader.open("GET", sourceURL, false);
 //        svgLoader.send(null);
 
+        sourceURL = GIM.REMOTE_SERVER + sourceURL + "?callback=?";
+        console.log("- [GimMap]SVGParser.loadURL:",sourceURL);
+        $.getJSON(sourceURL,function(data){
+            if(typeof (callBackFunc) != "undefined") callBackFunc(data);
+        });
+    },
+
+    loadLocalURL : function(sourceURL,callBackFunc){
+        sourceURL = GIM.LOCAL_PATH + sourceURL;
+        console.log("- [GimMap]SVGParser.loadLocalURL:",sourceURL);
         $.getJSON(sourceURL,function(data){
             if(typeof (callBackFunc) != "undefined") callBackFunc(data);
         });
@@ -229,8 +239,9 @@ GIM.SVGParser = {
                     y = ny;
                     break;
                 default :
-                    console.log(">>>" + activeCmd + "<<<")
+//                    console.log(">>>" + activeCmd + "<<<")
 //                    throw  new Error("weird path command:" + activeCmd);
+                    break;
             }
 
             if (canRepeat && nextIsNum())

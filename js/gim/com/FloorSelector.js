@@ -4,7 +4,7 @@
 
 GIM.FloorSelector = function(parentContainer){
 	var selector = {
-        horizontalMode:false,
+        horizontalMode:true,
         width: 240,
         container: document.createElement("div"),
         upImage: new Image(),

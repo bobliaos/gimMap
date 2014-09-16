@@ -16,8 +16,8 @@ GIM.Map3D = function (mainContainer) {
 
     var pathMesh;
     var astarNodes = {};
-    var minFloorPositionZ = -2400;
-    var maxFloorPositionZ = 1500;
+    var minFloorPositionZ = GIM.MAP_CONFIG.minFloorPositionZ;
+    var maxFloorPositionZ = GIM.MAP_CONFIG.maxFloorPositionZ;
     var isMapReady = false;
 
     var pathAnimatePointMeshes = [];
@@ -340,6 +340,7 @@ GIM.Map3D = function (mainContainer) {
 
     function selectUnit3D(unit3D) {
         console.log("- [GimMap]Map3D.selectUnit3D:nodeId:", unit3D.data.nodeId,"shopId:",unit3D.data.bindShopId);
+	GIM.onServiceLogoClick(unit3D.data.bindShopId);
         curSelectedUnit3D = unit3D;
         if (unit3D.mesh.isServiceLogo) {
             new TWEEN.Tween(unit3D.mesh.position).to({z: unit3D.data.origZ + 20}, 500).easing(TWEEN.Easing.Elastic.Out).start();
@@ -413,10 +414,9 @@ GIM.Map3D = function (mainContainer) {
         if (GIM.shopList && shopId != "") {
             for (var i = 0; i < GIM.shopList.length; i++) {
                 var shop = GIM.shopList[i];
-                var shopRooms = shop.shop_room.toString().split(",");
-//                if (shop.shop_room.toString() === shopId) {
+                var shopRooms = shop.shop_room.toString();
                 if (shopRooms.indexOf(shopId) > -1) {
-                    shopLogoURL = GIM.REMOTE_SERVER + "system" + shop.shop_logo;
+                    shopLogoURL = GIM.REMOTE_SERVER + "/system" + shop.shop_logo;
                 }
             }
         }
@@ -512,7 +512,7 @@ GIM.Map3D = function (mainContainer) {
     //INITIALIZE FUNCTIONS///////////////////////////////////////
 
     function init() {
-        GIM.SVGParser.loadURL(GIM.SERVER + GIM.SHOP_LIST_URL, function (json) {
+        GIM.SVGParser.loadLocalURL(GIM.SHOP_LIST_URL, function (json) {
 //            GIM.shopList = JSON.parse(jsonString);
             GIM.shopList = json;
             GIM.navitateTo = navigateTo;
@@ -574,7 +574,7 @@ GIM.Map3D = function (mainContainer) {
     }
 
     function initData() {
-        GIM.SVGParser.loadURL(GIM.SERVER + GIM.DATA_SOURCE_URL, function (sourceString) {
+        GIM.SVGParser.loadLocalURL(GIM.DATA_SOURCE_URL, function (sourceString) {
 //            var json = JSON.parse(sourceString);
             sourceSVG = GIM.SVGParser.getSVGObject(sourceString);
 
@@ -605,13 +605,14 @@ GIM.Map3D = function (mainContainer) {
                         }
                     }
                 }
+                if(!machineNodeId) machineNodeId = pushMesh.displayUnit3D.data.nodeId;
 
                 for (var key in floor3D.data.unitsData) {
                     var unitData = floor3D.data.unitsData[key];
                     astarNodes[unitData.nodeId] = unitData.astarNode;
                 }
 
-                floorSelector.addLogo(floor3D.data.floorId, GIM.SERVER + "img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
+                floorSelector.addLogo(floor3D.data.floorId, GIM.LOCAL_PATH + "img/floorlogo/" + floor3D.data.floorId + ".png", isCurFloor, showFloors);
             }
             container3D.add(floorContainer);
 

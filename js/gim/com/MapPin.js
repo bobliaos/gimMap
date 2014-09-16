@@ -63,9 +63,10 @@ GIM.MapPin = function (parentContainer) {
         },
         _isOpenning: false,
         open: function (x, y, shopLogoURL) {
+	    if(shopLogoURL === "") return;
             this._isOpenning = true;
 
-            if(shopLogoURL === "") shopLogoURL = GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL;
+            //if(shopLogoURL === "") shopLogoURL = GIM.SERVER + GIM.DEFAULT_SHOP_LOGO_URL;
             this.logoImage.src = shopLogoURL;
             console.log("- [GimMap]MapPin.open:",this.logoImage.src);
 

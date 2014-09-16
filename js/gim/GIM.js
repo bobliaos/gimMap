@@ -39,7 +39,7 @@ GIM.NODE_TYPE_SERVICE		= "8";
 GIM.NODE_TYPE_ATM   		= "9";
 
 GIM.MACHINE_CODE            = "53be527121232fb859000001";
-GIM.SERVER                  = "assets/polyCanalPlaza/";
+GIM.LOCAL_PATH              = "./assets/polyCanalPlaza/";
 GIM.REMOTE_SERVER           = "http://192.168.1.198:3000/";
 
 GIM.UNIT_HEIGHT_SCALE       = 1.5;
@@ -52,10 +52,24 @@ GIM.MAP_BACKGROUND_COLOR    = "#FFFFFF";
 GIM.FONT_NAME               = "造字工房悦黑演示版常规体";
 GIM.SHADOW_MAP_SIZE         = 2 * 1024;
 
-GIM.CONFIG_URL              = "map.conf";
-GIM.DATA_SOURCE_URL         = "data.json";
-GIM.SHOP_LIST_URL           = "shoplist.json";
-GIM.DEFAULT_SHOP_LOGO_URL   = "img/shoplogo/0.png";
+GIM.CONFIG_URL              = "/map.conf";
+GIM.DATA_SOURCE_URL         = "/data.json";
+GIM.SHOP_LIST_URL           = "/shops/shop_list";
+GIM.DEFAULT_SHOP_LOGO_URL   = "/img/shoplogo/0.png";
+
+GIM.MAP_CONFIG = {
+    near : 1,
+    fov : 25,
+    far : 28000,
+    minDistance : 1200,
+    maxDistance : 13500,
+    minX : -1300,
+    maxX : 1300,
+    minY : -150,
+    maxY : 1250,
+    minFloorPositionZ : -12400,
+    maxFloorPositionZ : 11500
+};
 
 GIM.onServiceLogoClick = function(typeId){
     /**
@@ -67,5 +81,6 @@ GIM.onServiceLogoClick = function(typeId){
      * 4 扶梯
      * 5 升降梯
      * 100 点击楼层
+     * string 商铺位置
      */
-}
+};
