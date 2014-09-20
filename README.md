@@ -1,58 +1,44 @@
-图标和文字贴图
-缩放和旋转
-单向扶梯寻路
-优化寻路算法
-相机和阴影合并
-缩放到一定尺寸显示图标和文字
+东门茂业视频监控需求
+	后台服务连接摄像头
+	前台播放
 
-机器位置设置
-地图缩放按钮条
-地图旋转,图标向镜头
+编辑器:
+	检查连通性
+	添加当前结点跨楼层绑定数
+	* 楼层配置放入数据中
+	测试连通性,得到主网,然后看有没有孤立点,有则显示高亮
+	过滤SVG,删除命名空间,去除DISPLAY='NONE',过滤G结点(提升子结点,无G则添加父G)
+	计算坐标点为最大值的问题
+	* 若为地形,则INDEX为0
+	* 色值修改
+	图标和文字贴图功能开发
+	对齐工具,横竖
+	导入SVG图形工具,直接添加一个图形
+	移动工具:移动每个图形模块
+	重复数据的清理
+	* 图片透明度
+	结点缩放
+
+模块:
+	服务设施不能同时闪烁
+	* 寻路,先找最近的能走的,再判断长度
+	* gotoImage直接显示,以免点击不到
+	* 去掉服务设施点击直接寻路
+	* 小球移动速度更快点
+	* 彻底解决TOUCH和MOUSE事件的问题
+	地图旋转功能
+	文字和LOGO贴图
+	* 跨域调用的问题
+	整合相机设置到数据中
+	跨楼层的上下判断通过数据顺序来判断
+	重构代码
+	单向寻路
+	复杂混合寻路,下楼再上楼
+	A*优化,加权
 
 http://personalbrandinstitute.com/
-
-<path nodeId="node_2014_8_29_10:39:27_4316" nodeTypeId="2" bindNodeIds="" nodePosition="-261.78,166.68" textureData="" bindShopId="31_A074" fill="#95C793" deep="20" d="M-523.557,155.072 L-487.709,155.072 L-488.359,178.29 L-514.92,178.29 L-514.92,172.345 L-523.557,172.345Z"/>
-
 textureData="[isTexture:true/flase],[textureType:text/image/both],[textureSize:20*20],[textureRotation:Math.PI]"
-
+eg:textureData="f,t,20*20,0.2";
 
 http://terms.rongyi.com/suning_legoushi/terminals/53e09e8721232f697d000002/activities
-
-//    GIM.NODE_TYPE_ASTAR 		= "0";
-//    GIM.NODE_TYPE_GROUND 	= "1";
-//    GIM.NODE_TYPE_SHOP 		= "2";
-//    GIM.NODE_TYPE_MACHINE	= "3";
-//    GIM.NODE_TYPE_ESCALATOR 	= "4";
-//    GIM.NODE_TYPE_LIFT 		= "5";
-//    GIM.NODE_TYPE_STAIRS        	= "6";
-//    GIM.NODE_TYPE_TOILET		= "7";
-//    GIM.NODE_TYPE_SERVICE	= "8";
-//    GIM.NODE_TYPE_ATM   		= "9";
-
-3f-2f
-node_2014_8_13_12:13:22_3908
-node_2014_8_13_12:16:03_3202
-
-3f-4f
-node_2014_8_13_12:16:01_347
-node_2014_8_13_01:11:27_7888
-
-3f-1f	node_2014_8_13_12:16:13_8129
-1f	node_2014_8_13_12:02:53_1609
-5f	node_2014_8_13_01:13:43_989
-6f	node_2014_8_13_01:14:47_5850
-7f	node_2014_8_13_01:15:56_3596
-8f	node_2014_8_13_01:16:25_6391
-
-
-Size : 1040 * 1440
-
-ServiceLogos
-FindPathBetweenTwoFloors
-FloorSelector
-MapPin
-Change color when selected
-20410808_1150
-======
-
-gimMap
+ssh://hg@project.rongyi.com:155//opt/sourcecode/rongyi_term_v2/
